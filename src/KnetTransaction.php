@@ -49,7 +49,7 @@ class KnetTransaction extends Model
         return static::where('trackid', $trackId)->first();
     }
 
-    public function owner()
+    public function user()
     {
         return $this->belongsTo('App\User');
     }

@@ -36,6 +36,7 @@ class CreateKnetTransactionsTable extends Migration
 
             $table->uuid('trackid');
             $table->boolean('livemode')->default(false);
+            $table->text('url');
 
             $table->foreign('user_id')
                 ->on('users')

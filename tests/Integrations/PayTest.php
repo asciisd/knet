@@ -16,6 +16,6 @@ class PayTest extends IntegrationTestCase
         $response = $user->pay(1000);
         $this->assertInstanceOf(Payment::class, $response);
         $this->assertEquals(1000, $response->rawAmount());
-        $this->assertEquals($user->id, $response->customer->id);
+        $this->assertEquals($user->id, $response->customer()->id);
     }
 }

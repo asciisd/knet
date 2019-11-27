@@ -10,12 +10,11 @@ trait HasKnet
     public function pay($amount, array $options = [])
     {
         $options = array_merge([
-            'trackid' => Str::uuid(),
-            'currency' => 'KWD',
+            'trackid' => Str::uuid()
         ], $options);
 
         $options['livemode'] = App::environment(['production']);
-        $options['amount'] = $amount;
+        $options['amt'] = $amount;
         $options['user_id'] = $this->id;
         $options['url'] = (new Knet())
             ->setAmt($amount)
