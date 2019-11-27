@@ -2,7 +2,8 @@
 
 namespace Asciisd\Knet\Http\Middleware;
 
-use App\Asciisd\KNet\Exceptions\SignatureVerificationException;
+use Asciisd\Knet\Exceptions\SignatureVerificationException;
+use Asciisd\Knet\KnetResponseSignature;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -19,7 +20,7 @@ class VerifyKnetResponseSignature
     public function handle($request, Closure $next)
     {
         try {
-            ResponseSignature::verifyHeader(
+            KnetResponseSignature::verifyHeader(
                 $request->getContent(),
                 $request->header(),
                 $request->input('trackid')

@@ -63,4 +63,9 @@ class KnetController extends Controller
     {
         return new Response;
     }
+
+    public function charge(Request $request)
+    {
+        return $request->user()->pay($request->input('amount'));
+    }
 }
