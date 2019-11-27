@@ -12,11 +12,11 @@
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('knet')->group(function () {
-    Route::post('/response', 'KnetController@response')->name('knet.response');
+    Route::post('/response', 'Asciisd\Knet\Http\Controllers\KnetController@response')->name('knet.response');
 
     Route::middleware('auth')->group(function() {
-        Route::get('/', 'KnetController@index')->name('knet');
-        Route::post('/', 'KnetController@charge')->name('knet.charge');
-        Route::post('/error', 'KnetController@error')->name('knet.error');
+        Route::get('/', 'Asciisd\Knet\Http\Controllers\KnetController@index')->name('knet');
+        Route::post('/', 'Asciisd\Knet\Http\Controllers\KnetController@charge')->name('knet.charge');
+        Route::post('/error', 'Asciisd\Knet\Http\Controllers\KnetController@error')->name('knet.error');
     });
 });
