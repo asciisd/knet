@@ -25,7 +25,6 @@ class CreateKnetTransactionsTable extends Migration
             $table->string('ref')->nullable();
             $table->string('tranid')->nullable();
             $table->string('postdate')->nullable();
-            $table->string('trackid')->nullable();
             $table->string('udf1')->nullable();
             $table->string('udf2')->nullable();
             $table->string('udf3')->nullable();
