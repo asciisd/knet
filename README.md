@@ -27,7 +27,7 @@ $ composer require asciisd/knet
 You can publish the migration with:
 
 ``` bash
-php artisan vendor:publish --provider="Asciisd\Knet\KnetServiceProvider" --tag="migrations"
+php artisan vendor:publish --provider="Asciisd\Knet\Providers\KnetServiceProvider" --tag="knet-migrations"
 ```
 
 After the migration has been published you can create the knet_transactions table by running the migrations:
@@ -38,7 +38,7 @@ php artisan migrate
 You can publish the config-file with:
 
 ``` bash
-php artisan vendor:publish --provider="Asciisd\Knet\KnetServiceProvider" --tag="config"
+php artisan vendor:publish --provider="Asciisd\Knet\Providers\KnetServiceProvider" --tag="knet-config"
 ```
 
 This is the contents of the published config file:
