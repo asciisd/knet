@@ -1,8 +1,6 @@
 <?php
 
-
-namespace Asciisd\Knet\Tests\Integrations;
-
+namespace Asciisd\Knet\Tests\Integration;
 
 use Asciisd\Knet\Payment;
 
@@ -17,5 +15,7 @@ class PayTest extends IntegrationTestCase
         $this->assertInstanceOf(Payment::class, $response);
         $this->assertEquals(1000, $response->rawAmount());
         $this->assertEquals($user->id, $response->customer()->id);
+
+        dump($response->url);
     }
 }

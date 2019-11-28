@@ -70,7 +70,7 @@ class Payment
 
     public function customer()
     {
-        return $this->transaction->user;
+        return $this->transaction->owner;
     }
 
     /**

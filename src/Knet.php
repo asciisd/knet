@@ -64,7 +64,9 @@ class Knet extends KnetClient
      */
     private function checkForResourceKey()
     {
-        throw_if(!config('knet.resource_key'), KnetException::class);
+        if (config('knet.resource_key') == null) {
+            throw KnetException::missingResourceKey();
+        }
     }
 
     public function url()

@@ -7,9 +7,11 @@ use Asciisd\Knet\Events\KnetResponseReceived;
 use Asciisd\Knet\Http\Middleware\VerifyKnetResponseSignature;
 use Asciisd\Knet\KnetResponseHandler;
 use Asciisd\Knet\KnetTransaction;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Illuminate\Routing\Redirector;
 
 class KnetController extends Controller
 {
@@ -46,7 +48,7 @@ class KnetController extends Controller
      * Handle successful calls on the controller.
      *
      * @param array $parameters
-     * @return Response
+     * @return RedirectResponse|Redirector|Response
      */
     protected function successMethod($parameters = [])
     {
