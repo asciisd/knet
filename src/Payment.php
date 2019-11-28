@@ -9,6 +9,7 @@ class Payment
 
     const CAPTURED = 'Captured';
     const NOT_CAPTURED = 'Not Captured';
+    const PENDING = 'Pending';
 
 
     /**
@@ -63,9 +64,19 @@ class Payment
      *
      * @return bool
      */
-    public function isNonCaptured()
+    public function isFailed()
     {
         return $this->transaction->result === self::NOT_CAPTURED;
+    }
+
+    /**
+     * Determine if the payment was successful.
+     *
+     * @return bool
+     */
+    public function isPending()
+    {
+        return $this->transaction->result === self::PENDING;
     }
 
     public function customer()

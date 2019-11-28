@@ -182,3 +182,14 @@ return [
 ];
 
 ```
+
+#test cards
+    Card Number	Expiry Date	PIN	Status
+    
+    8888880000000001	09/21	1234	CAPTURED
+    8888880000000002	05/21	1234	NOT CAPTURED
+
+
+#Observer
+
+you are free to register an observer to keep watching the KnetTransaction Model and to save the invoices into your system

@@ -14,6 +14,7 @@ trait HasKnet
         ], $options);
 
         $options['livemode'] = App::environment(['production']);
+        $options['result'] = Payment::PENDING;
         $options['amt'] = $amount;
         $options['user_id'] = $this->id;
         $options['url'] = (new Knet())

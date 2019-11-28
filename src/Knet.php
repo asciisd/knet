@@ -53,8 +53,8 @@ class Knet extends KnetClient
         $this->langid = config('knet.language');
         $this->currencycode = config('knet.currency');
 
-        $this->responseURL = config('knet.response_url');
-        $this->errorURL = config('knet.error_url');
+        $this->responseURL = url(config('knet.response_url'));
+        $this->errorURL = url(config('knet.error_url'));
     }
 
     /**
