@@ -50,7 +50,7 @@ class KnetController extends Controller
      */
     protected function successMethod($parameters = [])
     {
-        return Response('knet response handled', 200);
+        return redirect(config('knet.success_url'));
     }
 
     /**
@@ -62,10 +62,5 @@ class KnetController extends Controller
     protected function missingMethod($parameters = [])
     {
         return new Response;
-    }
-
-    public function charge(Request $request)
-    {
-        return $request->user()->pay($request->input('amount'));
     }
 }

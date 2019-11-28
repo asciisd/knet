@@ -29,4 +29,9 @@ trait HasKnet
 
         return $payment;
     }
+
+    public function knetTransactions()
+    {
+        return $this->hasMany(KnetTransaction::class);
+    }
 }
