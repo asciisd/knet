@@ -45,7 +45,7 @@ return [
     | The merchant URL where Payment Gateway send the authorization response
     |
     */
-    'response_url' => env('KENT_RESPONSE_URL') ?? url('/knet/response'),
+    'response_url' => env('KENT_RESPONSE_URL') ?? '/knet/response',
 
     /*
     |--------------------------------------------------------------------------
@@ -56,7 +56,7 @@ return [
     | error while processing the transaction.
     |
     */
-    'error_url' => env('KENT_ERROR_URL') ?? url('/knet/error'),
+    'error_url' => env('KENT_ERROR_URL') ?? '/knet/error',
     'success_url' => env('KENT_SUCCESS_URL', '/'),
 
     /*

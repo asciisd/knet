@@ -52,7 +52,7 @@ class KnetController extends Controller
      */
     protected function successMethod($parameters = [])
     {
-        return redirect(config('knet.success_url'));
+        return redirect(url(config('knet.success_url')));
     }
 
     /**

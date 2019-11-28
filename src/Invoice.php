@@ -142,16 +142,6 @@ class Invoice
     }
 
     /**
-     * Get the Stripe transaction instance.
-     *
-     * @return \Stripe\Invoice
-     */
-    public function asStripeInvoice()
-    {
-        return $this->transaction;
-    }
-
-    /**
      * Dynamically get values from the Stripe transaction.
      *
      * @param string $key
