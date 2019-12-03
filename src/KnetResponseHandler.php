@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 
 class KnetResponseHandler extends KnetClient
 {
-    private $result = null;
+    private $result = [];
     private $error = null;
     private $error_code = '';
 
