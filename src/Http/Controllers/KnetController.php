@@ -70,4 +70,19 @@ class KnetController extends Controller
     {
         return new Response;
     }
+
+    public function error(Request $request)
+    {
+        KnetResponseReceived::dispatch($request->all());
+
+        $knetResponseHandler = new KnetResponseHandler();
+
+        // update transaction
+        KnetTransaction::findByTrackId($request->input('trackid'))
+            ->update($knetResponseHandler->toArray());
+
+        if ($knetResponseHandler->hasErrors()) {
+            throw new KnetException($knetResponseHandler->error());
+        }
+    }
 }

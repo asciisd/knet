@@ -12,4 +12,4 @@
 use Illuminate\Support\Facades\Route;
 
 Route::post('/response', 'KnetController@handleKnet')->name('response');
-Route::post('/error', 'KnetController@error')->name('error');
+Route::get('/error', 'KnetController@error')->name('error');

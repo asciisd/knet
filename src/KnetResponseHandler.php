@@ -24,6 +24,12 @@ class KnetResponseHandler extends KnetClient
                 }
             }
         } else {
+            $this->result['error_text'] = request('ErrorText');
+            $this->result['error'] = request('Error');
+            $this->result['paymentid'] = request('paymentid');
+            $this->result['avr'] = request('avr');
+            $this->result['result'] = 'FAILED';
+
             $this->error = request('ErrorText');
             $this->error_code = request('Error');
         }
