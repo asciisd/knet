@@ -79,7 +79,9 @@ class Knet extends KnetClient
         $url = config('knet.development_url');
 
         if (App::environment(['production'])) {
-            $url = config('knet.production_url');
+            if (!env('KNET_DEBUG')) {
+                $url = config('knet.production_url');
+            }
         }
 
         return $url . '?param=paymentInit';
