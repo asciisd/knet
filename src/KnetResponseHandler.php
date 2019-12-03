@@ -6,8 +6,8 @@ use Illuminate\Support\Str;
 
 class KnetResponseHandler extends KnetClient
 {
-    private $result = [];
-    private $error = [];
+    private $result = null;
+    private $error = null;
     private $error_code = '';
 
     public function __construct()
@@ -43,7 +43,7 @@ class KnetResponseHandler extends KnetClient
 
     public function hasErrors()
     {
-        return count($this->error);
+        return !is_null($this->error);
     }
 
     public function error()
