@@ -7,7 +7,8 @@ use Illuminate\Support\Str;
 class KnetResponseHandler extends KnetClient
 {
     private $result = [];
-    private $errors = [];
+    private $error = [];
+    private $error_code = '';
 
     public function __construct()
     {
@@ -23,7 +24,8 @@ class KnetResponseHandler extends KnetClient
                 }
             }
         } else {
-            $this->errors = explode('-', request('ErrorText'));
+            $this->error = request('ErrorText');
+            $this->error_code = request('Error');
         }
 
         return $this;
@@ -41,12 +43,12 @@ class KnetResponseHandler extends KnetClient
 
     public function hasErrors()
     {
-        return count($this->errors);
+        return count($this->error);
     }
 
-    public function errors()
+    public function error()
     {
-        return $this->hasErrors() ? $this->errors : null;
+        return $this->hasErrors() ? $this->error : null;
     }
 
     private function decrypt($tranData)

@@ -4,6 +4,7 @@ namespace Asciisd\Knet\Http\Controllers;
 
 use Asciisd\Knet\Events\KnetResponseHandled;
 use Asciisd\Knet\Events\KnetResponseReceived;
+use Asciisd\Knet\Exceptions\KnetException;
 use Asciisd\Knet\Http\Middleware\VerifyKnetResponseSignature;
 use Asciisd\Knet\KnetResponseHandler;
 use Asciisd\Knet\KnetTransaction;
@@ -39,6 +40,10 @@ class KnetController extends Controller
         //todo: send emails
 
         KnetResponseHandled::dispatch($knetResponseHandler->toArray());
+
+        if ($knetResponseHandler->hasErrors()) {
+            throw new KnetException($knetResponseHandler->error());
+        }
 
         //return success
         return $this->successMethod();
