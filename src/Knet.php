@@ -11,18 +11,18 @@ class Knet extends KnetClient
     // hidden params
     private $id = null;
     private $password = null;
-    private $action = null;
-    private $langid = null;
-    private $currencycode = null;
-    private $responseURL = null;
-    private $errorURL = null;
-    private $amt = null;
-    private $trackid = null;
-    private $udf1 = null;
-    private $udf2 = null;
-    private $udf3 = null;
-    private $udf4 = null;
-    private $udf5 = null;
+    protected $action = null;
+    protected $langid = null;
+    protected $currencycode = null;
+    protected $responseURL = null;
+    protected $errorURL = null;
+    protected $amt = null;
+    protected $trackid = null;
+    protected $udf1 = null;
+    protected $udf2 = null;
+    protected $udf3 = null;
+    protected $udf4 = null;
+    protected $udf5 = null;
 
     // url params
     private $trandata = null;
@@ -34,13 +34,22 @@ class Knet extends KnetClient
     /**
      * Request constructor.
      *
+     * @param array $options
+     * @throws KnetException
      * @throws Throwable
      */
-    public function __construct()
+    public function __construct(array $options = [])
     {
         $this->checkForResourceKey();
 
         $this->initiatePaymentConfig();
+
+        $this->fillPaymentWithOptions($options);
+    }
+
+    public static function make(array $options = [])
+    {
+        return new Knet($options);
     }
 
     private function initiatePaymentConfig()
@@ -55,6 +64,23 @@ class Knet extends KnetClient
 
         $this->responseURL = url(config('knet.response_url'));
         $this->errorURL = url(config('knet.error_url'));
+    }
+
+    private function fillPaymentWithOptions(array $options = [])
+    {
+        if (!isset($options['amt'])) {
+            throw KnetException::missingAmount();
+        }
+
+        if (!isset($options['trackid'])) {
+            throw KnetException::missingTrackId();
+        }
+
+        foreach ($options as $k => $v) {
+            if (property_exists($this, $k)) {
+                $this->{$k} = $v;
+            }
+        }
     }
 
     /**

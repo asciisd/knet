@@ -8,14 +8,49 @@ class PayTest extends IntegrationTestCase
 {
 
     /** @test */
-    public function customer_can_be_charged() {
+    public function customer_can_be_charged()
+    {
         $user = $this->createCustomer('customer_can_be_charged');
 
-        $response = $user->pay(1000);
+        $response = $user->pay(100);
         $this->assertInstanceOf(Payment::class, $response);
-        $this->assertEquals(1000, $response->rawAmount());
+        $this->assertEquals(100, $response->rawAmount());
+        $this->assertEquals($user->id, $response->customer()->id);
+    }
+
+    /** @test */
+    public function customer_can_override_trackid()
+    {
+        $user = $this->createCustomer('customer_can_override_trackid');
+        $trackid = 'teyYtsvvxbYUyw78767678';
+        $response = $user->pay(100, [
+            'trackid' => $trackid
+        ]);
+
+        $this->assertInstanceOf(Payment::class, $response);
+        $this->assertEquals($trackid, $response->trackid);
+        $this->assertEquals($user->id, $response->customer()->id);
+    }
+
+    /** @test */
+    public function client_can_set_user_defined_properties() {
+        $user = $this->createCustomer('customer_can_override_udf1');
+
+        $response = $user->pay(100, [
+            'udf1' => $user->name,
+            'udf2' => $user->email,
+            'udf3' => '+12345678910',
+            'udf4' => '0001',
+            'udf5' => 'i have some notes',
+        ]);
+
+        $this->assertInstanceOf(Payment::class, $response);
         $this->assertEquals($user->id, $response->customer()->id);
 
-        dump($response->url);
+        $this->assertEquals($user->name, $response->udf1);
+        $this->assertEquals($user->email, $response->udf2);
+        $this->assertEquals('+12345678910', $response->udf3);
+        $this->assertEquals('0001', $response->udf4);
+        $this->assertEquals('i have some notes', $response->udf5);
     }
 }

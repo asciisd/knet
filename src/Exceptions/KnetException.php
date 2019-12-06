@@ -29,4 +29,28 @@ class KnetException extends Exception
             'Sorry, you are missing resource key, you can\'t continue without it.'
         );
     }
+
+    /**
+     * Create a new PaymentFailure instance.
+     *
+     * @return self
+     */
+    public static function missingAmount()
+    {
+        return new self(
+            'Sorry, you are forget to set amount, you can\'t continue without it.'
+        );
+    }
+
+    /**
+     * Create a new PaymentFailure instance.
+     *
+     * @return self
+     */
+    public static function missingTrackId()
+    {
+        return new self(
+            'Sorry, you are forget to set Track Id, you can\'t continue without it.'
+        );
+    }
 }

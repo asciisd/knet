@@ -9,18 +9,12 @@ trait HasKnet
 {
     public function pay($amount, array $options = [])
     {
-        $options = array_merge([
-            'trackid' => Str::uuid()
-        ], $options);
-
+        $options['trackid'] = $options['trackid'] ?? Str::uuid();
         $options['livemode'] = App::environment(['production']);
         $options['result'] = Payment::PENDING;
         $options['amt'] = $amount;
         $options['user_id'] = $this->id;
-        $options['url'] = (new Knet())
-            ->setAmt($amount)
-            ->setTrackId($options['trackid'])
-            ->url();
+        $options['url'] = Knet::make($options)->url();
 
         $payment = new Payment(
             KnetTransaction::create($options)
@@ -31,7 +25,7 @@ trait HasKnet
         return $payment;
     }
 
-    public function knetTransactions()
+    public function knet_transactions()
     {
         return $this->hasMany(KnetTransaction::class);
     }
