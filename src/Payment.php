@@ -3,14 +3,18 @@
 
 namespace Asciisd\Knet;
 
-
+/**
+ * Class Payment
+ *
+ *
+ *
+ * @package Asciisd\Knet
+ */
 class Payment
 {
-
     const CAPTURED = 'Captured';
     const NOT_CAPTURED = 'Not Captured';
     const PENDING = 'Pending';
-
 
     /**
      * The Knet PaymentIntent instance.
@@ -82,6 +86,11 @@ class Payment
     public function customer()
     {
         return $this->transaction->owner;
+    }
+
+    public function url()
+    {
+        return $this->transaction->url;
     }
 
     /**

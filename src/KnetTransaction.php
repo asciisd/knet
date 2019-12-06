@@ -2,6 +2,7 @@
 
 namespace Asciisd\Knet;
 
+use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string result
  * @property integer amt
  * @property string currency
+ * @property string url
+ * @property Authenticatable owner
  */
 class KnetTransaction extends Model
 {

@@ -5,6 +5,10 @@ namespace Asciisd\Knet;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
+/**
+ * Trait HasKnet
+ * @package Asciisd\Knet
+ */
 trait HasKnet
 {
     public function pay($amount, array $options = [])
