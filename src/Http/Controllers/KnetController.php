@@ -39,8 +39,8 @@ class KnetController extends Controller
         $knetResponseHandler = new KnetResponseHandler();
 
         // update transaction
-        $transaction = KnetTransaction::findByTrackId($request->input('trackid'))
-            ->update($knetResponseHandler->toArray());
+        $transaction = KnetTransaction::findByTrackId($request->input('trackid'));
+        $transaction->update($knetResponseHandler->toArray());
 
         KnetTransactionUpdated::dispatch($transaction);
 
