@@ -3,6 +3,8 @@
 
 namespace Asciisd\Knet;
 
+use Asciisd\Knet\Events\KnetTransactionCreated;
+
 /**
  * Class Payment
  *
@@ -42,6 +44,8 @@ class Payment
     public function __construct(KnetTransaction $transaction)
     {
         $this->transaction = $transaction;
+
+        KnetTransactionCreated::dispatch($transaction);
     }
 
     /**
