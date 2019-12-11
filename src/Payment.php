@@ -6,7 +6,18 @@ namespace Asciisd\Knet;
 /**
  * Class Payment
  *
- *
+ * @property string result
+ * @property integer amt
+ * @property string currency
+ * @property string url
+ * @property string error_text
+ * @property string paymentid
+ * @property integer user_id
+ * @property string udf1
+ * @property string udf2
+ * @property string udf3
+ * @property string udf4
+ * @property string udf5
  *
  * @package Asciisd\Knet
  */

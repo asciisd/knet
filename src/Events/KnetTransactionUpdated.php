@@ -2,11 +2,12 @@
 
 namespace Asciisd\Knet\Events;
 
+use Asciisd\Knet\KnetTransaction;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class KnetResponseHandled
+class KnetTransactionUpdated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
     /**
@@ -14,16 +15,15 @@ class KnetResponseHandled
      *
      * @var array
      */
-    public $payload;
+    public $transaction;
 
     /**
      * Create a new event instance.
      *
-     * @param array $payload
-     * @return void
+     * @param KnetTransaction $transaction
      */
-    public function __construct(array $payload)
+    public function __construct(KnetTransaction $transaction)
     {
-        $this->payload = $payload;
+        $this->transaction = $transaction;
     }
 }

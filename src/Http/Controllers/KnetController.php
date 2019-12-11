@@ -4,6 +4,7 @@ namespace Asciisd\Knet\Http\Controllers;
 
 use Asciisd\Knet\Events\KnetResponseHandled;
 use Asciisd\Knet\Events\KnetResponseReceived;
+use Asciisd\Knet\Events\KnetTransactionUpdated;
 use Asciisd\Knet\Exceptions\KnetException;
 use Asciisd\Knet\Http\Middleware\VerifyKnetResponseSignature;
 use Asciisd\Knet\KnetResponseHandler;
@@ -26,6 +27,11 @@ class KnetController extends Controller
         $this->middleware(VerifyKnetResponseSignature::class);
     }
 
+    /**
+     * @param Request $request
+     * @return RedirectResponse|Response|Redirector
+     * @throws KnetException
+     */
     public function handleKnet(Request $request)
     {
         KnetResponseReceived::dispatch($request->all());
@@ -33,11 +39,10 @@ class KnetController extends Controller
         $knetResponseHandler = new KnetResponseHandler();
 
         // update transaction
-        KnetTransaction::findByTrackId($request->input('trackid'))
+        $transaction = KnetTransaction::findByTrackId($request->input('trackid'))
             ->update($knetResponseHandler->toArray());
 
-        //todo: notify user
-        //todo: send emails
+        KnetTransactionUpdated::dispatch($transaction);
 
         KnetResponseHandled::dispatch($knetResponseHandler->toArray());
 
@@ -58,31 +63,5 @@ class KnetController extends Controller
     protected function successMethod($parameters = [])
     {
         return redirect(url(config('knet.success_url')));
-    }
-
-    /**
-     * Handle calls to missing methods on the controller.
-     *
-     * @param array $parameters
-     * @return Response
-     */
-    protected function missingMethod($parameters = [])
-    {
-        return new Response;
-    }
-
-    public function error(Request $request)
-    {
-        KnetResponseReceived::dispatch($request->all());
-
-        $knetResponseHandler = new KnetResponseHandler();
-
-        // update transaction
-        KnetTransaction::findByTrackId($request->input('trackid'))
-            ->update($knetResponseHandler->toArray());
-
-        if ($knetResponseHandler->hasErrors()) {
-            throw new KnetException($knetResponseHandler->error());
-        }
     }
 }

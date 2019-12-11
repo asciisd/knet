@@ -20,13 +20,13 @@ trait HasKnet
         $options['user_id'] = $this->id;
         $options['url'] = Knet::make($options)->url();
 
-        $payment = new Payment(
+        return new Payment(
             KnetTransaction::create($options)
         );
 
+//        //you can check for validation rules first before you return the payment
 //        $payment->validate();
-
-        return $payment;
+//        return $payment;
     }
 
     public function knet_transactions()
