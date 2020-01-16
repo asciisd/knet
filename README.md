@@ -48,14 +48,14 @@ You can publish the config-file with:
 php artisan vendor:publish --provider="Asciisd\Knet\Providers\KnetServiceProvider" --tag="knet-config"
 ```
 
-##test cards
+## test cards
     Card Number	Expiry Date	PIN	Status
     
     8888880000000001	09/21	1234	CAPTURED
     8888880000000002	05/21	1234	NOT CAPTURED
 
 
-##Events
+## Events
 
 You can add this code to EventServiceProvider
 ```
