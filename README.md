@@ -87,7 +87,7 @@ You can publish the config-file with:
 php artisan vendor:publish --provider="Asciisd\Knet\Providers\KnetServiceProvider" --tag="knet-config"
 ```
 
-## test cards
+## Test cards
     Card Number	Expiry Date	PIN	Status
     
     8888880000000001	09/21	1234	CAPTURED
