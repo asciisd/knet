@@ -3,8 +3,6 @@
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
 [![Build Status][ico-travis]][link-travis]
-[![Coverage Status][ico-scrutinizer]][link-scrutinizer]
-[![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
 
 This package used to integrate with the new Knet payment portal
@@ -12,6 +10,23 @@ This package used to integrate with the new Knet payment portal
 ## Using this package
 
 Here are a few short examples of what you can do:
+
+####First Step
+add `HasKnet` trait to the User model
+```php
+<?php
+
+namespace App;
+
+use Asciisd\Knet\HasKnet;
+
+class User extends Authenticatable {
+   use HasKnet;
+}
+```
+
+####Second Step
+user `pay()` method
 
 ```php 
 $payment = $user->pay(10);
@@ -22,6 +37,30 @@ return redirect($payment->url);
 
 After finished the payment you will redirected to [/knet/response]()
 you can change that from config file to make your own handler
+
+####Another Example:
+you can use `pay()` method inside controller like this
+```php
+public function update(Request $request, $id)
+    {
+        $payment = $request->user()->pay($request->amount, [
+            'udf1' => $request->user()->name,
+            'udf2' => $request->user()->email,
+        ]);
+    }
+``` 
+
+## Change Environment
+you can change your environment from local to production in case you want to make sure that everything is working fine, to do that change `.env` file like this
+
+```dotenv
+APP_ENV=local // or production
+
+KENT_TRANSPORT_ID=
+KENT_TRANSPORT_PASSWORD=
+KENT_RESOURCE_KEY=
+KNET_DEBUG=true //or false in production
+``` 
 
 ## Installation
 
