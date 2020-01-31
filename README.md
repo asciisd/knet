@@ -11,7 +11,7 @@ This package used to integrate with the new Knet payment portal
 
 Here are a few short examples of what you can do:
 
-####First Step
+#### First Step
 add `HasKnet` trait to the User model
 ```php
 <?php
@@ -25,7 +25,7 @@ class User extends Authenticatable {
 }
 ```
 
-####Second Step
+#### Second Step
 user `pay()` method
 
 ```php 
@@ -38,7 +38,7 @@ return redirect($payment->url);
 After finished the payment you will redirected to [/knet/response]()
 you can change that from config file to make your own handler
 
-####Another Example:
+#### Another Example:
 you can use `pay()` method inside controller like this
 ```php
 public function update(Request $request, $id)
