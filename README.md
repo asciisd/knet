@@ -87,16 +87,37 @@ You can publish the config-file with:
 php artisan vendor:publish --provider="Asciisd\Knet\Providers\KnetServiceProvider" --tag="knet-config"
 ```
 
-##test cards
+## test cards
     Card Number	Expiry Date	PIN	Status
     
     8888880000000001	09/21	1234	CAPTURED
     8888880000000002	05/21	1234	NOT CAPTURED
 
 
-##Observer
+## Events
 
-you are free to register an observer to keep watching the KnetTransaction Model and to save the invoices into your system
+You can add this code to EventServiceProvider
+```
+KnetTransactionCreated::class => [
+    // this event hold the new transaction instance
+    // you can get this transaction inside the listner by $event->transaction
+];
+
+KnetTransactionUpdated::class => [
+    // this event hold the updated transaction instance
+    // you can get this transaction inside the listner by $event->transaction
+];
+
+KnetResponseReceived::class => [
+    // this event hold the knet response array()
+    // you can get this payload inside the listner by $event->payload
+];
+
+KnetResponseHandled::class => [
+    // this event hold the knet response array()
+    // you can get this payload inside the listner by $event->payload
+];
+```
 
 [ico-version]: https://img.shields.io/packagist/v/asciisd/knet.svg?style=flat-square
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
