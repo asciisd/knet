@@ -1,5 +1,14 @@
 # Release Notes
 
+## [v1.1.16 (2020-2-11)](https://github.com/asciisd/knet/compare/v1.1.15...v1.1.16)
+### Added
+- Knet Facade
+- Knet Command to check for credentials
+- Lang file
+
+### Remove
+- Remove Invoice class
+
 ## [v1.1.15 (2019-12-11)](https://github.com/asciisd/knet/compare/v1.1.14...v1.1.15)
 ### Added
 - KnetTransactionCreated event
