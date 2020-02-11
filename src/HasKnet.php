@@ -2,8 +2,7 @@
 
 namespace Asciisd\Knet;
 
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Str;
+use Asciisd\Knet\Facades\Knet as KnetFacade;
 
 /**
  * Trait HasKnet
@@ -13,20 +12,13 @@ trait HasKnet
 {
     public function pay($amount, array $options = [])
     {
-        $options['trackid'] = $options['trackid'] ?? Str::uuid();
-        $options['livemode'] = App::environment(['production']);
-        $options['result'] = Payment::PENDING;
-        $options['amt'] = $amount;
-        $options['user_id'] = $this->id;
-        $options['url'] = Knet::make($options)->url();
+        $options['user_id'] = $options['user_id'] ?? $this->id ?? auth()->id();
+
+        $knet = KnetFacade::make($amount, $options);
 
         return new Payment(
-            KnetTransaction::create($options)
+            KnetTransaction::create($knet->toArray())
         );
-
-//        //you can check for validation rules first before you return the payment
-//        $payment->validate();
-//        return $payment;
     }
 
     public function knet_transactions()

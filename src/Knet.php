@@ -4,6 +4,7 @@ namespace Asciisd\Knet;
 
 use Asciisd\Knet\Exceptions\KnetException;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Str;
 use Throwable;
 
 class Knet extends KnetClient
@@ -24,6 +25,9 @@ class Knet extends KnetClient
     protected $udf4 = null;
     protected $udf5 = null;
 
+    protected $user_id = null;
+    protected $result = null;
+
     // url params
     private $trandata = null;
     private $tranportalId = null;
@@ -31,25 +35,10 @@ class Knet extends KnetClient
     private $paramsToEncrypt = ['id', 'password', 'action', 'langid', 'currencycode', 'amt', 'responseURL', 'errorURL', 'trackid', 'udf1', 'udf2', 'udf3', 'udf4', 'udf5'];
     protected $reqParams = ['trandata', 'tranportalId', 'responseURL', 'errorURL'];
 
-    /**
-     * Request constructor.
-     *
-     * @param array $options
-     * @throws KnetException
-     * @throws Throwable
-     */
-    public function __construct(array $options = [])
+    public function __construct()
     {
         $this->checkForResourceKey();
-
         $this->initiatePaymentConfig();
-
-        $this->fillPaymentWithOptions($options);
-    }
-
-    public static function make(array $options = [])
-    {
-        return new Knet($options);
     }
 
     private function initiatePaymentConfig()
@@ -95,11 +84,6 @@ class Knet extends KnetClient
         }
     }
 
-    public function url()
-    {
-        return $this->getEnvUrl() . '&' . $this->urlParams();
-    }
-
     private function getEnvUrl()
     {
         $url = config('knet.development_url');
@@ -118,6 +102,93 @@ class Knet extends KnetClient
         $this->trandata = $this->encryptedParams();
 
         return $this;
+    }
+
+    private function encryptedParams()
+    {
+        $params = $this->setAsKeyAndValue($this->paramsToEncrypt);
+
+        return $this->encrypt($params);
+    }
+
+    private function urlParams()
+    {
+        $this->setTranData();
+
+        return $this->setAsKeyAndValue($this->reqParams);
+    }
+
+    private function setAsKeyAndValue($arrOfKeys)
+    {
+        $params = '';
+
+        foreach ($arrOfKeys as $param) {
+            if ($this->{$param} != null)
+                $params = $this->addTo($params, $param, $this->{$param});
+        }
+
+        return $params;
+    }
+
+    private function encrypt($params)
+    {
+        return $this->encryptAES($params, config('knet.resource_key'));
+    }
+
+    /**
+     * @param $amount
+     * @param array $options
+     * @return $this
+     * @throws KnetException
+     */
+    public function make($amount, $options = [])
+    {
+        $options['amt'] = $amount;
+        $options['trackid'] = $options['trackid'] ?? Str::uuid();
+        $options['result'] = $options['result'] ?? Payment::PENDING;
+        $options['user_id'] = $options['user_id'] ?? auth()->id();
+
+        $this->fillPaymentWithOptions($options);
+
+        return $this;
+    }
+
+    public function url()
+    {
+        return $this->getEnvUrl() . '&' . $this->urlParams();
+    }
+
+    protected function addTo($param, $key, $value)
+    {
+        if ($param === '') {
+            $param .= "{$key}={$value}";
+        } else {
+            $param .= "&{$key}={$value}";
+        }
+
+        return $param;
+    }
+
+    public function toArray()
+    {
+        return [
+            'trackid' => $this->trackid,
+            'livemode' => $this->livemode(),
+            'result' => $this->result,
+            'user_id' => $this->user_id,
+            'amt' => $this->amt,
+            'url' => $this->url(),
+            'udf1' => $this->udf1,
+            'udf2' => $this->udf2,
+            'udf3' => $this->udf3,
+            'udf4' => $this->udf4,
+            'udf5' => $this->udf5,
+        ];
+    }
+
+    public function livemode()
+    {
+        return App::environment(['production']) && !env('KNET_DEBUG');
     }
 
     public function setAmt($amount)
@@ -167,47 +238,5 @@ class Knet extends KnetClient
         $this->udf5 = $param;
 
         return $this;
-    }
-
-    private function encryptedParams()
-    {
-        $params = $this->setAsKeyAndValue($this->paramsToEncrypt);
-
-        return $this->encrypt($params);
-    }
-
-    private function urlParams()
-    {
-        $this->setTranData();
-
-        return $this->setAsKeyAndValue($this->reqParams);
-    }
-
-    private function setAsKeyAndValue($arrOfKeys)
-    {
-        $params = '';
-
-        foreach ($arrOfKeys as $param) {
-            if ($this->{$param} != null)
-                $params = $this->addTo($params, $param, $this->{$param});
-        }
-
-        return $params;
-    }
-
-    public function addTo($param, $key, $value)
-    {
-        if ($param === '') {
-            $param .= "{$key}={$value}";
-        } else {
-            $param .= "&{$key}={$value}";
-        }
-
-        return $param;
-    }
-
-    private function encrypt($params)
-    {
-        return $this->encryptAES($params, config('knet.resource_key'));
     }
 }

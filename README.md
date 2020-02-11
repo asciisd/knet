@@ -7,15 +7,13 @@
 
 This package used to integrate with the new Knet payment portal
 
-## Using this package
+## Usage
 
 Here are a few short examples of what you can do:
 
 #### First Step
 add `HasKnet` trait to the User model
 ```php
-<?php
-
 namespace App;
 
 use Asciisd\Knet\HasKnet;
@@ -35,20 +33,31 @@ $payment->url; // this will return payment link
 return redirect($payment->url);
 ```
 
-After finished the payment you will redirected to [/knet/response]()
+> After finished the payment you will redirected to [/knet/response]()
 you can change that from config file to make your own handler
 
 #### Another Example:
 you can use `pay()` method inside controller like this
 ```php
-public function update(Request $request, $id)
-    {
-        $payment = $request->user()->pay($request->amount, [
-            'udf1' => $request->user()->name,
-            'udf2' => $request->user()->email,
-        ]);
-    }
-``` 
+$payment = $request->user()->pay($request->amount, [
+    'udf1' => $request->user()->name,
+    'udf2' => $request->user()->email
+]);
+```
+## FACADE
+You can also use `KNET` FACADE direct like this<br/>
+If you did't provide `user_id` it will automatically use authenticated user
+```php
+use Asciisd\Knet\Facades\Knet;
+
+$knet = Knet::make(100, [
+    'user_id' => auth()->id(),
+    'udf1'    => 'email@example.com'
+]);
+
+$url_to_redirect = $knet->url();
+$knet_array = $knet->toArray();
+```
 
 ## Change Environment
 you can change your environment from local to production in case you want to make sure that everything is working fine, to do that change `.env` file like this
@@ -76,7 +85,7 @@ You can publish the migration with:
 php artisan vendor:publish --provider="Asciisd\Knet\Providers\KnetServiceProvider" --tag="knet-migrations"
 ```
 
-After the migration has been published you can create the knet_transactions table by running the migrations:
+After the migration has been published you can create the `knet_transactions` table by running the migrations:
 ``` bash
 php artisan migrate
 ```
@@ -88,15 +97,15 @@ php artisan vendor:publish --provider="Asciisd\Knet\Providers\KnetServiceProvide
 ```
 
 ## Test cards
-    Card Number	Expiry Date	PIN	Status
-    
-    8888880000000001	09/21	1234	CAPTURED
-    8888880000000002	05/21	1234	NOT CAPTURED
+| Card Number | Expiry Date | PIN | Status |
+| ---------------- | :----- | :---- | :------------ |
+| 8888880000000001 | 09/21 | 1234 | CAPTURED |
+| 8888880000000002 | 05/21 | 1234 | NOT CAPTURED |
 
 
 ## Events
 
-You can add this code to EventServiceProvider
+You can add this code to `EventServiceProvider`
 ```
 KnetTransactionCreated::class => [
     // this event hold the new transaction instance

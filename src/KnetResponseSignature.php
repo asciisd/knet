@@ -10,7 +10,7 @@ abstract class KnetResponseSignature
     {
         if (KnetTransaction::findByTrackId($trackid) == null) {
             throw SignatureVerificationException::factory(
-                "No trackid found matching the expected",
+                __('NO_TRACK_ID_MATCH'),
                 $payload,
                 $header
             );

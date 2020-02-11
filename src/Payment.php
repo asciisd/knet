@@ -69,7 +69,7 @@ class Payment
     }
 
     /**
-     * Determine if the payment was cancelled.
+     * Determine if the payment was successful.
      *
      * @return bool
      */
@@ -79,7 +79,7 @@ class Payment
     }
 
     /**
-     * Determine if the payment was successful.
+     * Determine if the payment was failed.
      *
      * @return bool
      */
@@ -89,13 +89,23 @@ class Payment
     }
 
     /**
-     * Determine if the payment was successful.
+     * Determine if the payment was pending.
      *
      * @return bool
      */
     public function isPending()
     {
         return $this->transaction->result === self::PENDING;
+    }
+
+    /**
+     * Determine if the payment was failed.
+     *
+     * @return bool
+     */
+    public function isNotCaptured()
+    {
+        return $this->transaction->result === self::NOT_CAPTURED;
     }
 
     public function customer()

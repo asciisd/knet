@@ -2,6 +2,7 @@
 
 namespace Asciisd\Knet\Providers;
 
+use Asciisd\Knet\Knet;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,6 +30,7 @@ class KnetServiceProvider extends ServiceProvider
     public function register()
     {
         $this->configure();
+        $this->registerKnetFacade();
 //        $this->bindLogger();
     }
 
@@ -102,5 +104,11 @@ class KnetServiceProvider extends ServiceProvider
                 __DIR__.'/../../resources/views' => $this->app->resourcePath('views/vendor/knet'),
             ], 'knet-views');
         }
+    }
+
+    protected function registerKnetFacade() {
+        $this->app->bind('knet', function () {
+            return new Knet();
+        });
     }
 }

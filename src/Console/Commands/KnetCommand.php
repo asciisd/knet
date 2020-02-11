@@ -11,14 +11,14 @@ class KnetCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'knet:command';
+    protected $signature = 'knet:check';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Check if everything is ok or not';
 
     /**
      * Create a new command instance.
@@ -37,6 +37,38 @@ class KnetCommand extends Command
      */
     public function handle()
     {
-        //
+        if ($this->check_for_transport_id() && $this->check_for_resource_key() && $this->check_for_transport_password()) {
+            $this->info('Everything Is OK, you can start receive knet payments');
+        }
+    }
+
+    private function check_for_transport_id()
+    {
+        if (env('KENT_TRANSPORT_ID') == null) {
+            $this->error('Missing TRANSPORT ID');
+            return false;
+        }
+
+        return true;
+    }
+
+    private function check_for_transport_password()
+    {
+        if (env('KENT_TRANSPORT_PASSWORD') == null) {
+            $this->error('Missing TRANSPORT PASSWORD');
+            return false;
+        }
+
+        return true;
+    }
+
+    private function check_for_resource_key()
+    {
+        if (env('KENT_RESOURCE_KEY') == null) {
+            $this->error('Missing RESOURCE KEY');
+            return false;
+        }
+
+        return true;
     }
 }

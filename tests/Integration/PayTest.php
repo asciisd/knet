@@ -2,6 +2,7 @@
 
 namespace Asciisd\Knet\Tests\Integration;
 
+use Asciisd\Knet\Facades\Knet;
 use Asciisd\Knet\Payment;
 
 class PayTest extends IntegrationTestCase
@@ -33,7 +34,8 @@ class PayTest extends IntegrationTestCase
     }
 
     /** @test */
-    public function client_can_set_user_defined_properties() {
+    public function client_can_set_user_defined_properties()
+    {
         $user = $this->createCustomer('customer_can_override_udf1');
 
         $response = $user->pay(100, [
@@ -52,5 +54,17 @@ class PayTest extends IntegrationTestCase
         $this->assertEquals('+12345678910', $response->udf3);
         $this->assertEquals('0001', $response->udf4);
         $this->assertEquals('i have some notes', $response->udf5);
+    }
+
+    /** @test */
+    public function it_can_created_from_facade_direct_without_user()
+    {
+        $user = $this->createCustomer('customer_can_use_facade');
+        auth()->login($user);
+
+        $response = Knet::make(100);
+
+        $this->assertInstanceOf(\Asciisd\Knet\Knet::class, $response);
+        $this->assertEquals(auth()->id(), $response->toArray()['user_id']);
     }
 }

@@ -11,7 +11,8 @@ use Asciisd\Knet\Tests\TestCase;
 class PaymentTest extends TestCase
 {
     /** @test */
-    public function it_can_return_captured() {
+    public function it_can_return_captured()
+    {
         $transaction = new KnetTransaction();
         $transaction->result = Payment::CAPTURED;
 
@@ -21,17 +22,19 @@ class PaymentTest extends TestCase
     }
 
     /** @test */
-    public function it_can_return_not_captured() {
+    public function it_can_return_not_captured()
+    {
         $transaction = new KnetTransaction();
         $transaction->result = Payment::NOT_CAPTURED;
 
         $payment = new Payment($transaction);
 
-        $this->assertTrue($payment->isNonCaptured());
+        $this->assertTrue($payment->isNotCaptured());
     }
 
     /** @test */
-    public function it_can_return_raw_amount() {
+    public function it_can_return_raw_amount()
+    {
         $transaction = new KnetTransaction();
         $transaction->amt = 10;
 
@@ -41,7 +44,8 @@ class PaymentTest extends TestCase
     }
 
     /** @test */
-    public function it_can_return_formatted_amount() {
+    public function it_can_return_formatted_amount()
+    {
         $transaction = new KnetTransaction();
         $transaction->amt = 10;
         $transaction->currency = 'KWD';

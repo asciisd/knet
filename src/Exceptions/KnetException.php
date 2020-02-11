@@ -14,7 +14,7 @@ class KnetException extends Exception
     public static function unauthorizedReferer()
     {
         return new self(
-            'The request attempt failed because of an invalid request referer.'
+            __('UNAUTHORIZED_REFERER')
         );
     }
 
@@ -26,7 +26,7 @@ class KnetException extends Exception
     public static function missingResourceKey()
     {
         return new self(
-            'Sorry, you are missing resource key, you can\'t continue without it.'
+            __('MISSING_RESOURCE_KEY')
         );
     }
 
@@ -38,7 +38,7 @@ class KnetException extends Exception
     public static function missingAmount()
     {
         return new self(
-            'Sorry, you are forget to set amount, you can\'t continue without it.'
+            __('MISSING_AMOUNT')
         );
     }
 
@@ -50,7 +50,7 @@ class KnetException extends Exception
     public static function missingTrackId()
     {
         return new self(
-            'Sorry, you are forget to set Track Id, you can\'t continue without it.'
+            __('MISSING_TRACK_ID')
         );
     }
 }
