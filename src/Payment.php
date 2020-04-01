@@ -28,6 +28,7 @@ class Payment
     const CAPTURED = 'Captured';
     const NOT_CAPTURED = 'Not Captured';
     const PENDING = 'Pending';
+    const CURRENCY = 'KD';
 
     /**
      * The Knet PaymentIntent instance.
@@ -55,7 +56,7 @@ class Payment
      */
     public function amount()
     {
-        return $this->rawAmount() . ' ' . $this->transaction->currency;
+        return $this->rawAmount() . ' ' . self::CURRENCY;
     }
 
     /**
