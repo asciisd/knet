@@ -31,9 +31,6 @@ class InstallCommand extends Command
         $this->comment('Publishing Knet Service Provider...');
         $this->callSilent('vendor:publish', ['--tag' => 'knet-provider']);
 
-        $this->comment('Publishing Knet Assets...');
-        $this->callSilent('vendor:publish', ['--tag' => 'knet-assets']);
-
         $this->comment('Publishing Knet Views...');
         $this->callSilent('vendor:publish', ['--tag' => 'knet-views']);
 

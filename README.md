@@ -26,37 +26,33 @@ class User extends Authenticatable {
 #### Second Step
 user `pay()` method
 
-```php 
-$payment = $user->pay(10);
-$payment->url; // this will return payment link
-
-return redirect($payment->url);
+```php
+try{
+    $payment = $user->pay(10);
+    $payment->url; // this will return payment link
+} catch(\Asciisd\Knet\Exceptions\PaymentActionRequired $exception) {
+    return redirect($exception->payment->actionUrl());
+}
 ```
 
-> After finished the payment you will redirected to [/knet/response]()
+> After finished the payment you will redirect to [/knet/response]()
 you can change that from config file to make your own handler
 
 #### Another Example:
 you can use `pay()` method inside controller like this
 ```php
-$payment = $request->user()->pay($request->amount, [
-    'udf1' => $request->user()->name,
-    'udf2' => $request->user()->email
-]);
-```
-## FACADE
-You can also use `KNET` FACADE direct like this<br/>
-If you did't provide `user_id` it will automatically use authenticated user
-```php
-use Asciisd\Knet\Facades\Knet;
-
-$knet = Knet::make(100, [
-    'user_id' => auth()->id(),
-    'udf1'    => 'email@example.com'
-]);
-
-$url_to_redirect = $knet->url();
-$knet_array = $knet->toArray();
+try{
+    $payment = $request->user()->pay($request->amount, [
+        'udf1' => $request->user()->name,
+        'udf2' => $request->user()->email
+    ]);
+} catch(\Asciisd\Knet\Exceptions\PaymentActionRequired $exception) {
+    // do whatever you want with this 
+    $payment = $exception->payment
+} finally {
+    // redirect user to payment url to complete the payment
+    return $payment->actionUrl();
+}
 ```
 
 ## Change Environment
@@ -79,10 +75,17 @@ You can install the bindings via [Composer](http://getcomposer.org/). Run the fo
 $ composer require asciisd/knet
 ```
 
-You can publish the migration with:
+### Run install command:
 
+this command will install `ServiceProvider`, `Configs` and `views`
 ``` bash
-php artisan vendor:publish --provider="Asciisd\Knet\Providers\KnetServiceProvider" --tag="knet-migrations"
+php artisan knet:install
+```
+
+### Run publish command:
+this command will knet assets 
+```bash
+php artisan knet:publish
 ```
 
 After the migration has been published you can create the `knet_transactions` table by running the migrations:
@@ -90,11 +93,9 @@ After the migration has been published you can create the `knet_transactions` ta
 php artisan migrate
 ```
 
-You can publish the config-file with:
-
-``` bash
-php artisan vendor:publish --provider="Asciisd\Knet\Providers\KnetServiceProvider" --tag="knet-config"
-```
+## KnetServiceProvider
+This package provides a receipt system, but you should fill your identity details inside `KnetServiceProvider` => `$details` array 
+also you need to update your logo inside `vendor` => `knet` public assets
 
 ## Test cards
 | Card Number | Expiry Date | PIN | Status |
@@ -125,6 +126,10 @@ KnetResponseReceived::class => [
 KnetResponseHandled::class => [
     // this event hold the knet response array()
     // you can get this payload inside the listner by $event->payload
+];
+
+KnetReceiptSeen::class => [
+    // this event hold the knet Payment as $payment
 ];
 ```
 
