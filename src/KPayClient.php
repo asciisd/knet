@@ -2,7 +2,7 @@
 
 namespace Asciisd\Knet;
 
-class KnetClient
+class KPayClient
 {
     public function decryptAES($code, $key)
     {

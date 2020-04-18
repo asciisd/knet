@@ -7,8 +7,8 @@ use Asciisd\Knet\Events\KnetResponseReceived;
 use Asciisd\Knet\Events\KnetTransactionUpdated;
 use Asciisd\Knet\Exceptions\KnetException;
 use Asciisd\Knet\Http\Middleware\VerifyKnetResponseSignature;
-use Asciisd\Knet\KnetResponseHandler;
 use Asciisd\Knet\KnetTransaction;
+use Asciisd\Knet\KPayResponseHandler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -36,7 +36,7 @@ class KnetController extends Controller
     {
         KnetResponseReceived::dispatch($request->all());
 
-        $knetResponseHandler = new KnetResponseHandler();
+        $knetResponseHandler = new KPayResponseHandler();
 
         // update transaction
         $transaction = KnetTransaction::findByTrackId($request->input('trackid'));
@@ -54,6 +54,13 @@ class KnetController extends Controller
         return $this->successMethod();
     }
 
+    public function error(Request $request)
+    {
+        logger()->error('Knet error occurred with response data: ', $request->all());
+
+        return $this->successMethod();
+    }
+
     /**
      * Handle successful calls on the controller.
      *
@@ -62,6 +69,6 @@ class KnetController extends Controller
      */
     protected function successMethod($parameters = [])
     {
-        return redirect(url(config('knet.success_url')));
+        return redirect(url(config('knet.redirect_url')));
     }
 }

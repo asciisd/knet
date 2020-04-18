@@ -2,7 +2,9 @@
 
 namespace Asciisd\Knet\Providers;
 
-use Asciisd\Knet\Knet;
+use Asciisd\Knet\Console\InstallCommand;
+use Asciisd\Knet\Console\KnetCommand;
+use Asciisd\Knet\Console\PublishCommand;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,8 +32,12 @@ class KnetServiceProvider extends ServiceProvider
     public function register()
     {
         $this->configure();
-        $this->registerKnetFacade();
-//        $this->bindLogger();
+        $this->registerServices();
+        $this->registerCommands();
+
+        if (!class_exists('Knet')) {
+            class_alias('Asciisd\Knet\Knet', 'Knet');
+        }
     }
 
     /**
@@ -42,7 +48,7 @@ class KnetServiceProvider extends ServiceProvider
     protected function configure()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../../config/knet.php', 'knet'
+            __DIR__ . '/../../config/knet.php', 'knet'
         );
     }
 
@@ -51,13 +57,14 @@ class KnetServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function registerRoutes(){
+    protected function registerRoutes()
+    {
         Route::group([
             'prefix' => config('knet.path'),
             'namespace' => 'Asciisd\Knet\Http\Controllers',
             'as' => 'knet.',
         ], function () {
-            $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
+            $this->loadRoutesFrom(__DIR__ . '/../../routes/web.php');
         });
     }
 
@@ -68,8 +75,8 @@ class KnetServiceProvider extends ServiceProvider
      */
     protected function registerResources()
     {
-        $this->loadJsonTranslationsFrom(__DIR__.'/../../resources/lang');
-        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'knet');
+        $this->loadJsonTranslationsFrom(__DIR__ . '/../../resources/lang');
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'knet');
     }
 
     /**
@@ -80,7 +87,7 @@ class KnetServiceProvider extends ServiceProvider
     protected function registerMigrations()
     {
         if ($this->app->runningInConsole()) {
-            $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
+            $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
         }
     }
 
@@ -93,22 +100,45 @@ class KnetServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../../config/knet.php' => $this->app->configPath('knet.php'),
+                __DIR__ . '/../../config/knet.php' => $this->app->configPath('knet.php'),
             ], 'knet-config');
 
             $this->publishes([
-                __DIR__.'/../../database/migrations' => $this->app->databasePath('migrations'),
+                __DIR__ . '/../../database/migrations' => $this->app->databasePath('migrations'),
             ], 'knet-migrations');
 
             $this->publishes([
-                __DIR__.'/../../resources/views' => $this->app->resourcePath('views/vendor/knet'),
+                __DIR__ . '/../../resources/views' => $this->app->resourcePath('views/vendor/knet'),
             ], 'knet-views');
+
+            $this->publishes([
+                __DIR__ . '/../../public' => public_path('vendor/knet'),
+            ], 'knet-assets');
+
+            $this->publishes([
+                __DIR__ . '/../../stubs/KnetServiceProvider.stub' => app_path('Providers/KnetServiceProvider.php'),
+            ], 'knet-provider');
         }
     }
 
-    protected function registerKnetFacade() {
-        $this->app->bind('knet', function () {
-            return new Knet();
-        });
+    /**
+     * Register the Horizon Artisan commands.
+     *
+     * @return void
+     */
+    protected function registerCommands()
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                KnetCommand::class,
+                InstallCommand::class,
+                PublishCommand::class,
+            ]);
+        }
+    }
+
+    public function registerServices()
+    {
+        //
     }
 }

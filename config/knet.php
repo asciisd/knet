@@ -39,13 +39,38 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Currency
+    |--------------------------------------------------------------------------
+    |
+    | This is the default currency that will be used when generating charges
+    | from your application. Of course, you are welcome to use any of the
+    | various world currencies that are currently supported via Knet.
+    |
+    */
+    'currency' => env('KENT_CURRENCY', 414),
+    'decimals' => '3',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Knet Path
+    |--------------------------------------------------------------------------
+    |
+    | This is the base URI path where Knet's views, such as the payment
+    | verification screen, will be available from. You're free to tweak
+    | this path according to your preferences and application design.
+    |
+    */
+    'path' => env('KNET_PATH', 'knet'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Knet Response url
     |--------------------------------------------------------------------------
     |
     | The merchant URL where Payment Gateway send the authorization response
     |
     */
-    'response_url' => env('KENT_RESPONSE_URL') ?? '/knet/response',
+    'response_url' => '/knet/response',
 
     /*
     |--------------------------------------------------------------------------
@@ -56,8 +81,47 @@ return [
     | error while processing the transaction.
     |
     */
-    'error_url' => env('KENT_ERROR_URL') ?? '/knet/error',
-    'success_url' => env('KENT_SUCCESS_URL', '/'),
+    'error_url' => '/knet/error',
+    'redirect_url' => env('KENT_REDIRECT_URL', '/'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Knet Model
+    |--------------------------------------------------------------------------
+    |
+    | This is the model in your application that implements the HasKnet trait
+    | provided by Knet. It will serve as the primary model you use while
+    | interacting with Knet related methods, and so on.
+    |
+    */
+    'model' => env('KNET_MODEL', App\User::class),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Currency Locale
+    |--------------------------------------------------------------------------
+    |
+    | This is the default locale in which your money values are formatted in
+    | for display. To utilize other locales besides the default en locale
+    | verify you have the "intl" PHP extension installed on the system.
+    |
+    */
+
+    'currency_locale' => env('KNET_CURRENCY_LOCALE', 'en'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Invoice Paper Size
+    |--------------------------------------------------------------------------
+    |
+    | This option is the default paper size for all invoices generated using
+    | Knet. You are free to customize this settings based on the usual
+    | paper size used by the customers using your Laravel applications.
+    |
+    | Supported sizes: 'letter', 'legal', 'A4'
+    |
+    */
+    'paper' => env('KNET_PAPER', 'letter'),
 
     /*
     |--------------------------------------------------------------------------
@@ -83,55 +147,4 @@ return [
     |
     */
     'language' => env('KENT_LANGUAGE', 'EN'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Knet Path
-    |--------------------------------------------------------------------------
-    |
-    | This is the base URI path where Knet's views, such as the payment
-    | verification screen, will be available from. You're free to tweak
-    | this path according to your preferences and application design.
-    |
-    */
-    'path' => env('KNET_PATH', 'knet'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Knet Model
-    |--------------------------------------------------------------------------
-    |
-    | This is the model in your application that implements the HasKnet trait
-    | provided by Knet. It will serve as the primary model you use while
-    | interacting with Knet related methods, and so on.
-    |
-    */
-    'model' => env('KNET_MODEL', App\User::class),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Currency
-    |--------------------------------------------------------------------------
-    |
-    | This is the default currency that will be used when generating charges
-    | from your application. Of course, you are welcome to use any of the
-    | various world currencies that are currently supported via Knet.
-    |
-    */
-    'currency' => env('KENT_CURRENCY', 414),
-    'decimals' => '3',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Invoice Paper Size
-    |--------------------------------------------------------------------------
-    |
-    | This option is the default paper size for all invoices generated using
-    | Knet. You are free to customize this settings based on the usual
-    | paper size used by the customers using your Laravel applications.
-    |
-    | Supported sizes: 'letter', 'legal', 'A4'
-    |
-    */
-    'paper' => env('KNET_PAPER', 'letter'),
 ];

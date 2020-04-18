@@ -16,7 +16,7 @@ class PayTest extends IntegrationTestCase
         $response = $user->pay(100);
         $this->assertInstanceOf(Payment::class, $response);
         $this->assertEquals(100, $response->rawAmount());
-        $this->assertEquals($user->id, $response->customer()->id);
+        $this->assertEquals($user->id, $response->owner()->id);
     }
 
     /** @test */
@@ -30,7 +30,7 @@ class PayTest extends IntegrationTestCase
 
         $this->assertInstanceOf(Payment::class, $response);
         $this->assertEquals($trackid, $response->trackid);
-        $this->assertEquals($user->id, $response->customer()->id);
+        $this->assertEquals($user->id, $response->owner()->id);
     }
 
     /** @test */
@@ -47,7 +47,7 @@ class PayTest extends IntegrationTestCase
         ]);
 
         $this->assertInstanceOf(Payment::class, $response);
-        $this->assertEquals($user->id, $response->customer()->id);
+        $this->assertEquals($user->id, $response->owner()->id);
 
         $this->assertEquals($user->name, $response->udf1);
         $this->assertEquals($user->email, $response->udf2);

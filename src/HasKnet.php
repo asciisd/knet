@@ -2,25 +2,38 @@
 
 namespace Asciisd\Knet;
 
-use Asciisd\Knet\Facades\Knet as KnetFacade;
-
-/**
- * Trait HasKnet
- * @package Asciisd\Knet
- */
 trait HasKnet
 {
+    /**
+     * Make a "one off" charge on the customer for the given amount.
+     *
+     * @param $amount
+     * @param array $options
+     * @return Payment
+     * @throws Exceptions\KnetException
+     * @throws Exceptions\PaymentActionRequired
+     * @throws Exceptions\PaymentFailure
+     */
     public function pay($amount, array $options = [])
     {
         $options['user_id'] = $options['user_id'] ?? $this->id ?? auth()->id();
 
-        $knet = KnetFacade::make($amount, $options);
+        $knet = KPayManager::make($amount, $options);
 
-        return new Payment(
+        $payment = new Payment(
             KnetTransaction::create($knet->toArray())
         );
+
+        $payment->validate();
+
+        return $payment;
     }
 
+    /**
+     * knet transaction that belong to this payable
+     *
+     * @return mixed
+     */
     public function knet_transactions()
     {
         return $this->hasMany(KnetTransaction::class);

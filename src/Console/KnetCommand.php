@@ -1,6 +1,6 @@
 <?php
 
-namespace Asciisd\Knet\Console\Commands;
+namespace Asciisd\Knet\Console;
 
 use Illuminate\Console\Command;
 

@@ -2,6 +2,7 @@
 
 namespace Asciisd\Knet;
 
+use Carbon\Carbon;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -31,7 +32,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string live_mode
  * @property string url
  * @property integer user_id
- * @property string created_at
+ * @property Carbon created_at
  * @property string updated_at
  * @property Authenticatable owner
  */
@@ -55,6 +56,24 @@ class KnetTransaction extends Model
     public static function findByTrackId($trackId)
     {
         return static::where('trackid', $trackId)->first();
+    }
+
+    /**
+     * @param $paymentid
+     * @return KnetTransaction|Builder|Model|object
+     */
+    public static function findByPaymentId($paymentid)
+    {
+        return static::where('paymentid', $paymentid)->first();
+    }
+
+    /**
+     * @param $uuid
+     * @return KnetTransaction|Builder|Model|object
+     */
+    public static function findByUuid($uuid)
+    {
+        return static::where('uuid', $uuid)->first();
     }
 
     public function owner()

@@ -14,22 +14,22 @@ class PaymentTest extends TestCase
     public function it_can_return_captured()
     {
         $transaction = new KnetTransaction();
-        $transaction->result = Payment::CAPTURED;
+        $transaction->result = 'CAPTURED';
 
         $payment = new Payment($transaction);
 
-        $this->assertTrue($payment->isCaptured());
+        $this->assertTrue($payment->isSucceeded());
     }
 
     /** @test */
     public function it_can_return_not_captured()
     {
         $transaction = new KnetTransaction();
-        $transaction->result = Payment::NOT_CAPTURED;
+        $transaction->result = 'NOT CAPTURED';
 
         $payment = new Payment($transaction);
 
-        $this->assertTrue($payment->isNotCaptured());
+        $this->assertTrue($payment->isFailure());
     }
 
     /** @test */
@@ -40,7 +40,7 @@ class PaymentTest extends TestCase
 
         $payment = new Payment($transaction);
 
-        $this->assertEquals($payment->rawAmount(), 10);
+        $this->assertEquals(10, $payment->rawAmount());
     }
 
     /** @test */
@@ -48,10 +48,9 @@ class PaymentTest extends TestCase
     {
         $transaction = new KnetTransaction();
         $transaction->amt = 10;
-        $transaction->currency = 'KWD';
 
         $payment = new Payment($transaction);
 
-        $this->assertEquals($payment->amount(), '10 KWD');
+        $this->assertEquals('10 KD', $payment->amount());
     }
 }

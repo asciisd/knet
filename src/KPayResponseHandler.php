@@ -4,7 +4,7 @@ namespace Asciisd\Knet;
 
 use Illuminate\Support\Str;
 
-class KnetResponseHandler extends KnetClient
+class KPayResponseHandler extends KPayClient
 {
     private $result = [];
     private $error = null;

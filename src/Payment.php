@@ -4,13 +4,19 @@
 namespace Asciisd\Knet;
 
 use Asciisd\Knet\Events\KnetTransactionCreated;
+use Asciisd\Knet\Exceptions\PaymentActionRequired;
+use Asciisd\Knet\Exceptions\PaymentFailure;
+use Asciisd\Knet\Traits\Downloadable;
+use Carbon\Carbon;
+use DateTimeZone;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Support\Str;
 
 /**
  * Class Payment
  *
  * @property string result
  * @property integer amt
- * @property string currency
  * @property string url
  * @property string error_text
  * @property string paymentid
@@ -20,15 +26,16 @@ use Asciisd\Knet\Events\KnetTransactionCreated;
  * @property string udf3
  * @property string udf4
  * @property string udf5
+ * @property string trackid
  *
  * @package Asciisd\Knet
  */
 class Payment
 {
-    const CAPTURED = 'Captured';
-    const NOT_CAPTURED = 'Not Captured';
-    const PENDING = 'Pending';
-    const CURRENCY = 'KD';
+    use Downloadable;
+
+    const CURRENCY = 'KWD';
+    const PROVIDER = 'KPay';
 
     /**
      * The Knet PaymentIntent instance.
@@ -70,13 +77,38 @@ class Payment
     }
 
     /**
+     * Determine if the payment needs an extra action like 3D Secure.
+     *
+     * @return bool
+     */
+    public function requiresAction()
+    {
+        return in_array($this->transaction->result, KPayResponseStatus::NEED_MORE_ACTION);
+    }
+
+    public function actionUrl()
+    {
+        return $this->transaction->url;
+    }
+
+    /**
+     * Determine if the payment was cancelled.
+     *
+     * @return bool
+     */
+    public function isCancelled()
+    {
+        return $this->transaction->result === KPayResponseStatus::CANCELLED;
+    }
+
+    /**
      * Determine if the payment was successful.
      *
      * @return bool
      */
-    public function isCaptured()
+    public function isSucceeded()
     {
-        return $this->transaction->result === self::CAPTURED;
+        return in_array($this->transaction->result, KPayResponseStatus::SUCCESS_RESPONSES);
     }
 
     /**
@@ -84,39 +116,104 @@ class Payment
      *
      * @return bool
      */
-    public function isFailed()
+    public function isFailure()
     {
-        return $this->transaction->result === self::NOT_CAPTURED;
+        return in_array($this->transaction->result, KPayResponseStatus::FAILED_RESPONSES);
+    }
+
+    public function receiptNo()
+    {
+        return $this->transaction->paymentid;
+    }
+
+    public function referenceNo()
+    {
+        return $this->transaction->ref ?? '00000000';
+    }
+
+    public function paymentMethod()
+    {
+        return 'Knet';
+    }
+
+    public function currency()
+    {
+        return self::CURRENCY;
+    }
+
+    public function paymentMethodIcon()
+    {
+        $method = Str::lower(Str::kebab($this->paymentMethod()));
+
+        return url("vendor/cashier/img/invoice/card/{$method}-dark@2x.png");
+    }
+
+    public function paymentMethodSvg()
+    {
+        $method = Str::lower(Str::kebab($this->paymentMethod()));
+
+        return url("vendor/knet/img/invoice/card/svg/{$method}.svg");
+    }
+
+    public function status()
+    {
+        return $this->transaction->result;
+    }
+
+    public function statusIcon()
+    {
+        $status = Str::lower($this->status());
+        return url("vendor/knet/img/invoice/status/{$status}.png");
     }
 
     /**
-     * Determine if the payment was pending.
+     * Validate if the payment intent was successful and throw an exception if not.
      *
-     * @return bool
+     * @return void
+     *
+     * @throws PaymentActionRequired
+     * @throws PaymentFailure
      */
-    public function isPending()
+    public function validate()
     {
-        return $this->transaction->result === self::PENDING;
+        if ($this->isFailure()) {
+            throw PaymentFailure::invalidPaymentMethod($this);
+        } elseif ($this->requiresAction()) {
+            throw PaymentActionRequired::incomplete($this);
+        }
     }
 
     /**
-     * Determine if the payment was failed.
+     * Get a Carbon date for the invoice.
      *
-     * @return bool
+     * @param DateTimeZone|string $timezone
+     * @return Carbon
      */
-    public function isNotCaptured()
+    public function date($timezone = null)
     {
-        return $this->transaction->result === self::NOT_CAPTURED;
+        $carbon = $this->transaction->created_at;
+
+        return $timezone ? $carbon->setTimezone($timezone) : $carbon;
     }
 
-    public function customer()
+    /**
+     * The Knet model instance.
+     *
+     * @return Authenticatable
+     */
+    public function owner()
     {
         return $this->transaction->owner;
     }
 
-    public function url()
+    /**
+     * The KnetTransaction instance.
+     *
+     * @return KnetTransaction
+     */
+    public function asKnetTransaction()
     {
-        return $this->transaction->url;
+        return $this->transaction;
     }
 
     /**

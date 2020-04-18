@@ -14,7 +14,7 @@ class CreateKnetTransactionsTable extends Migration
     public function up()
     {
         Schema::create('knet_transactions', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->id('id');
             $table->unsignedBigInteger('user_id')->nullable();
             $table->string('error_text')->nullable();
             $table->string('paymentid')->nullable();
@@ -38,10 +38,7 @@ class CreateKnetTransactionsTable extends Migration
             $table->boolean('livemode')->default(false);
             $table->text('url');
 
-            $table->foreign('user_id')
-                ->on('users')
-                ->references('id')
-                ->onDelete('CASCADE');
+            $table->foreign('user_id')->on('users')->references('id')->onDelete('CASCADE');
 
             $table->timestamps();
         });
