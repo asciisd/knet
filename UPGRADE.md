@@ -1,6 +1,6 @@
 # Upgrade Guide
 
-## Upgrading To 1.* From 2.*
+## Upgrading From 1.* to 2.*
 
 ### Minimum Versions
 
