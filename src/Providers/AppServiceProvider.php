@@ -41,8 +41,6 @@ class AppServiceProvider extends ServiceProvider
         if (count($this->developers) > 0) {
             Knet::developers($this->developers);
         }
-
-        $this->booted();
     }
 
     /**

@@ -94,7 +94,7 @@ return [
     | interacting with Knet related methods, and so on.
     |
     */
-    'model' => env('KNET_MODEL', App\User::class),
+    'model' => env('KNET_MODEL', App\Models\User::class),
 
     /*
     |--------------------------------------------------------------------------
