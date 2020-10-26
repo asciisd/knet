@@ -2,7 +2,7 @@
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
-[![Build Status][ico-travis]][link-travis]
+[![Build Status][ico-status]][link-actions]
 [![Total Downloads][ico-downloads]][link-downloads]
 
 This package used to integrate with the new Knet payment portal
@@ -135,15 +135,16 @@ KnetReceiptSeen::class => [
 
 [ico-version]: https://img.shields.io/packagist/v/asciisd/knet.svg?style=flat-square
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
-[ico-travis]: https://img.shields.io/travis/asciisd/knet/master.svg?style=flat-square
+[ico-status]: https://github.com/asciisd/knet/workflows/tests/badge.svg
 [ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/asciisd/knet.svg?style=flat-square
 [ico-code-quality]: https://img.shields.io/scrutinizer/g/asciisd/knet.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/asciisd/knet.svg?style=flat-square
 
 [link-packagist]: https://packagist.org/packages/asciisd/knet
-[link-travis]: https://travis-ci.org/asciisd/knet
+[link-actions]: https://github.com/asciisd/knet/actions
 [link-scrutinizer]: https://scrutinizer-ci.com/g/asciisd/knet/code-structure
 [link-code-quality]: https://scrutinizer-ci.com/g/asciisd/knet
 [link-downloads]: https://packagist.org/packages/asciisd/knet
 [link-author]: https://github.com/asciisd
 [link-contributors]: ../../contributors
+<a href="https://github.com/laravel/cashier/actions"><img src="https://github.com/laravel/cashier/workflows/tests/badge.svg" alt="Build Status"></a>
