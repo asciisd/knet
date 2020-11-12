@@ -202,7 +202,7 @@
                             <td class="Header-icon Target"
                                 style="background-color: {{ $primary_color }};border: 0;border-collapse: collapse;margin: 0;padding: 0;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;font-size: 0;line-height: 0px;mso-line-height-rule: exactly;background-size: 100% 100%;"
                                 align="center" height="156" valign="bottom" width="96">
-                                <a href="{{ route('home') }}"
+                                <a href="{{ \App\Providers\RouteServiceProvider::HOME }}"
                                    style="-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;outline: 0;text-decoration: none;">
                                     <img alt="" height="156" width="96"
                                          src="{{ asset('/vendor/knet/img/invoice/twelve_degree_icon.png') }}"
@@ -366,7 +366,7 @@
                                                     <td class="Font Font--body Font--noWrap"
                                                         style="border: 0;border-collapse: collapse;margin: 0;padding: 0;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif;mso-line-height-rule: exactly;vertical-align: middle;color: #525f7f;font-size: 15px;line-height: 24px;white-space: nowrap;">
                               <span>
-                                <img alt="Mastercard" height="16"
+                                <img alt="Knet" height="16"
                                      src="{{ $payment->paymentMethodIcon() }}"
                                      style="border: 0; margin: 0; padding: 0; vertical-align: text-bottom;">
                               </span>
@@ -795,7 +795,7 @@
                             <td class="Content Footer-legal Font Font--caption Font--mute"
                                 style="border: 0;border-collapse: collapse;margin: 0;padding: 0;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;width: 472px;font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif;mso-line-height-rule: exactly;vertical-align: middle;color: #8898aa;font-size: 12px;line-height: 16px;">
                                 You're receiving this email because you made a payment at
-                                <a href="{{ route('home') }}"
+                                <a href="{{ \App\Providers\RouteServiceProvider::HOME }}"
                                    style="-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;outline: 0;text-decoration: none;color: #556cd6;"><span
                                         dir="ltr">{{ $vendor }}</span></a>.
                             </td>

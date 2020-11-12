@@ -4,6 +4,7 @@ namespace Asciisd\Knet;
 
 use Asciisd\Knet\Concerns\ManagesEncryption;
 use Asciisd\Knet\Exceptions\KnetException;
+use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
@@ -51,9 +52,9 @@ class KPayManager extends KPayClient
         $this->tranportalId = config('knet.transport.id');
         $this->password = config('knet.transport.password');
 
-        $this->action = config('knet.action_code');
-        $this->langid = config('knet.language');
-        $this->currencycode = config('knet.currency');
+        $this->action = config('knet.action_code', 1);
+        $this->langid = config('knet.language', 'EN');
+        $this->currencycode = config('knet.currency', 414);
 
         $this->responseURL = url(config('knet.response_url'));
         $this->errorURL = url(config('knet.error_url'));
@@ -61,6 +62,7 @@ class KPayManager extends KPayClient
 
     /**
      * @param array $options
+     * @return KPayManager
      * @throws KnetException
      */
     private function fillPaymentWithOptions(array $options = [])
@@ -147,6 +149,60 @@ class KPayManager extends KPayClient
         $options['user_id'] = $options['user_id'] ?? auth()->id();
 
         return (new self)->fillPaymentWithOptions($options);
+    }
+
+    /**
+     * @param $amount
+     * @param $trackid
+     * @return $this
+     * @throws KnetException
+     */
+    public static function inquiry($amount, $trackid)
+    {
+        throw new Exception('this method not yet supported by api');
+
+        $options['amt'] = $amount;
+        $options['trackid'] = $trackid;
+
+        $new_instance = (new self)->fillPaymentWithOptions($options);
+        $new_instance->action = 8;
+        return $new_instance;
+    }
+
+    /**
+     * @param $amount
+     * @param $trackid
+     * @return $this
+     * @throws KnetException
+     */
+    public static function refund($amount, $trackid)
+    {
+        throw new Exception('this method not yet supported by api');
+
+        $options['amt'] = $amount;
+        $options['trackid'] = $trackid;
+
+        $new_instance = (new self)->fillPaymentWithOptions($options);
+        $new_instance->action = 2;
+        return $new_instance;
+    }
+
+    /**
+     * @param $amount
+     * @param $trackid
+     * @return $this
+     * @throws KnetException
+     */
+    public static function void($amount, $trackid)
+    {
+        throw new Exception('this method not yet supported by api');
+
+        $options['amt'] = $amount;
+        $options['trackid'] = $trackid;
+
+        $new_instance = (new self)->fillPaymentWithOptions($options);
+        $new_instance->action = 3;
+        return $new_instance;
     }
 
     public function url()

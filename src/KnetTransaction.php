@@ -28,13 +28,16 @@ use Illuminate\Database\Eloquent\Model;
  * @property float amt
  * @property string error
  * @property string auth_resp_code
- * @property string track_id
- * @property string live_mode
+ * @property string trackid
+ * @property string livemode
  * @property string url
  * @property integer user_id
  * @property Carbon created_at
  * @property string updated_at
  * @property Authenticatable owner
+ * @property string card_number
+ * @property string brand_id
+ * @property string ip_address
  */
 class KnetTransaction extends Model
 {
@@ -45,7 +48,8 @@ class KnetTransaction extends Model
      */
     protected $fillable = [
         'user_id', 'error_text', 'paymentid', 'paid', 'result', 'auth', 'avr', 'ref', 'tranid', 'postdate', 'trackid',
-        'udf1', 'udf2', 'udf3', 'udf4', 'udf5', 'amt', 'error', 'auth_resp_code', 'livemode', 'trackid', 'url'
+        'udf1', 'udf2', 'udf3', 'udf4', 'udf5', 'amt', 'error', 'auth_resp_code', 'livemode', 'trackid', 'url',
+        'card_number', 'brand_id', 'ip_address',
     ];
 
     protected $dates = [
