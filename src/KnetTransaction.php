@@ -28,8 +28,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property float amt
  * @property string error
  * @property string auth_resp_code
- * @property string track_id
- * @property string live_mode
+ * @property string trackid
+ * @property string livemode
  * @property string url
  * @property integer user_id
  * @property Carbon created_at
