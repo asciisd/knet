@@ -38,12 +38,17 @@ class KnetController extends Controller
 
         $knetResponseHandler = new KPayResponseHandler();
 
-        // update transaction
+        // find transaction by track id
         $transaction = KnetTransaction::findByTrackId($request->input('trackid'));
+
+        // check if current response is duplicated and this transaction is already captured,
+        // so don't update the transaction
+        if ($knetResponseHandler->isDuplicated() && $transaction->isStatusNotEmpty()) {
+            throw new KnetException($knetResponseHandler->error());
+        }
+
         $transaction->update($knetResponseHandler->toArray());
-
         KnetTransactionUpdated::dispatch($transaction);
-
         KnetResponseHandled::dispatch($knetResponseHandler->toArray());
 
         if ($knetResponseHandler->hasErrors()) {

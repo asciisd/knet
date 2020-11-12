@@ -64,7 +64,7 @@ class KnetTransaction extends Model
 
     /**
      * @param $paymentid
-     * @return KnetTransaction|Builder|Model|object
+     * @return KnetTransaction|Model
      */
     public static function findByPaymentId($paymentid)
     {
@@ -73,7 +73,7 @@ class KnetTransaction extends Model
 
     /**
      * @param $uuid
-     * @return KnetTransaction|Builder|Model|object
+     * @return KnetTransaction|Model
      */
     public static function findByUuid($uuid)
     {
@@ -85,5 +85,15 @@ class KnetTransaction extends Model
         $model = config('knet.model');
 
         return $this->belongsTo($model, (new $model)->getForeignKey());
+    }
+
+    public function isCaptured()
+    {
+        return $this->result == 'CAPTURED';
+    }
+
+    public function isStatusNotEmpty()
+    {
+        return $this->result != '' && $this->result != null;
     }
 }

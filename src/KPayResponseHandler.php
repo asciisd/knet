@@ -57,6 +57,16 @@ class KPayResponseHandler extends KPayClient
         return $this->hasErrors() ? $this->error : null;
     }
 
+    public function errorCode()
+    {
+        return $this->hasErrors() ? $this->error_code : null;
+    }
+
+    public function isDuplicated()
+    {
+        return $this->error_code == 'IPAY0100114';
+    }
+
     private function decrypt($tranData)
     {
         return $this->decryptAES($tranData, config('knet.resource_key'));
