@@ -145,7 +145,7 @@ class Payment
     {
         $method = Str::lower(Str::kebab($this->paymentMethod()));
 
-        return url("vendor/cashier/img/invoice/card/{$method}-dark@2x.png");
+        return url("vendor/knet/img/invoice/card/{$method}-dark@2x.png");
     }
 
     public function paymentMethodSvg()

@@ -11,7 +11,7 @@ class PublishCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'knet:publish';
+    protected $signature = 'knet:publish {--force : Overwrite any existing files}';
 
     /**
      * The console command description.
@@ -29,7 +29,19 @@ class PublishCommand extends Command
     {
         $this->call('vendor:publish', [
             '--tag' => 'knet-assets',
-            '--force' => true,
+            '--force' => $this->option('force'),
         ]);
+
+        $this->call('vendor:publish', [
+            '--tag' => 'knet-views',
+            '--force' => $this->option('force'),
+        ]);
+
+        $this->call('vendor:publish', [
+            '--tag' => 'knet-config',
+            '--force' => $this->option('force'),
+        ]);
+
+        $this->call('view:clear');
     }
 }
