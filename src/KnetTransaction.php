@@ -57,6 +57,12 @@ class KnetTransaction extends Model
         'updated_at'
     ];
 
+    /**
+     * get transaction from database by it's track id
+     *
+     * @param $trackId
+     * @return KnetTransaction|Model
+     */
     public static function findByTrackId($trackId)
     {
         return static::where('trackid', $trackId)->first();
@@ -92,8 +98,8 @@ class KnetTransaction extends Model
         return $this->result == 'CAPTURED';
     }
 
-    public function isStatusNotEmpty()
+    public function hasStatus()
     {
-        return $this->result != '' && $this->result != null;
+        return !empty($this->result);
     }
 }

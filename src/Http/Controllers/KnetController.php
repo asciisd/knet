@@ -4,6 +4,7 @@ namespace Asciisd\Knet\Http\Controllers;
 
 use Asciisd\Knet\Events\KnetResponseHandled;
 use Asciisd\Knet\Events\KnetResponseReceived;
+use Asciisd\Knet\Events\KnetTransactionHasErrors;
 use Asciisd\Knet\Events\KnetTransactionUpdated;
 use Asciisd\Knet\Exceptions\KnetException;
 use Asciisd\Knet\Http\Middleware\VerifyKnetResponseSignature;
@@ -30,7 +31,6 @@ class KnetController extends Controller
     /**
      * @param Request $request
      * @return RedirectResponse|Response|Redirector
-     * @throws KnetException
      */
     public function handleKnet(Request $request)
     {
@@ -43,17 +43,23 @@ class KnetController extends Controller
 
         // check if current response is duplicated and this transaction is already captured,
         // so don't update the transaction
-        if ($knetResponseHandler->isDuplicated() && $transaction->isStatusNotEmpty()) {
-            throw new KnetException($knetResponseHandler->error());
+        if ($knetResponseHandler->isDuplicated() && $transaction->isCaptured()) {
+            $transaction->update($knetResponseHandler->errorsToArray());
+            KnetTransactionHasErrors::dispatch($transaction);
+            return $this->error($request);
+        }
+
+        // check if current response is invalid payment status and this transaction is already captured,
+        // so don't update the transaction status
+        if ($knetResponseHandler->isInvalidPaymentStatus() && $transaction->isCaptured()) {
+            $transaction->update($knetResponseHandler->errorsToArray());
+            KnetTransactionHasErrors::dispatch($transaction);
+            return $this->error($request);
         }
 
         $transaction->update($knetResponseHandler->toArray());
         KnetTransactionUpdated::dispatch($transaction);
         KnetResponseHandled::dispatch($knetResponseHandler->toArray());
-
-        if ($knetResponseHandler->hasErrors()) {
-            throw new KnetException($knetResponseHandler->error());
-        }
 
         //return success
         return $this->successMethod();
@@ -69,11 +75,12 @@ class KnetController extends Controller
     /**
      * Handle successful calls on the controller.
      *
-     * @param array $parameters
      * @return RedirectResponse|Redirector|Response
      */
-    protected function successMethod($parameters = [])
+    protected function successMethod()
     {
-        return redirect(url(config('knet.redirect_url')));
+        return redirect(
+            url(config('knet.redirect_url'))
+        );
     }
 }

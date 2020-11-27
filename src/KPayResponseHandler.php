@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 class KPayResponseHandler extends KPayClient
 {
     private $result = [];
+    private $errors = [];
     private $error = null;
     private $error_code = '';
 
@@ -25,9 +26,17 @@ class KPayResponseHandler extends KPayClient
             }
         } else {
             $this->result['error_text'] = request('ErrorText');
+            $this->errors['error_text'] = request('ErrorText');
+
             $this->result['error'] = request('Error');
+            $this->errors['error'] = request('Error');
+
             $this->result['paymentid'] = request('paymentid');
+            $this->errors['paymentid'] = request('paymentid');
+
             $this->result['avr'] = request('avr');
+            $this->errors['avr'] = request('avr');
+
             $this->result['result'] = 'FAILED';
 
             $this->error = request('ErrorText');
@@ -43,6 +52,11 @@ class KPayResponseHandler extends KPayClient
     }
 
     public function toArray()
+    {
+        return $this->result;
+    }
+
+    public function errorsToArray()
     {
         return $this->result;
     }
@@ -65,6 +79,11 @@ class KPayResponseHandler extends KPayClient
     public function isDuplicated()
     {
         return $this->error_code == 'IPAY0100114';
+    }
+
+    public function isInvalidPaymentStatus()
+    {
+        return $this->error_code == 'IPAY0100055';
     }
 
     private function decrypt($tranData)
