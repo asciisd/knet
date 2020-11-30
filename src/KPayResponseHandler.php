@@ -58,7 +58,7 @@ class KPayResponseHandler extends KPayClient
 
     public function errorsToArray()
     {
-        return $this->result;
+        return $this->errors;
     }
 
     public function hasErrors()
