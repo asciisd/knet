@@ -13,10 +13,23 @@
         <testsuite name="Package Test Suite">
             <directory suffix=".php">./tests</directory>
         </testsuite>
+        <testsuite name="Package Unit Test">
+            <directory suffix="Test.php">./tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Package Feature Test">
+            <directory suffix="Test.php">./tests/Feature</directory>
+        </testsuite>
     </testsuites>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+
         <env name="KNET_MODEL" value="Asciisd\Knet\Tests\Fixtures\User"/>
-        <env name="DB_CONNECTION" value="testing"/>
+
+        <env name="KNET_DEBUG" value="true"/>
+        <!-- <env name="KENT_TRANSPORT_ID" value=""/> -->
+        <!-- <env name="KENT_TRANSPORT_PASSWORD" value=""/> -->
+        <!-- <env name="KENT_RESOURCE_KEY" value=""/> -->
     </php>
 </phpunit>

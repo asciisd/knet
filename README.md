@@ -2,7 +2,6 @@
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
-[![Build Status][ico-status]][link-actions]
 [![Total Downloads][ico-downloads]][link-downloads]
 
 This package used to integrate with the new Knet payment portal
@@ -16,6 +15,7 @@ add `HasKnet` trait to the User model
 ```php
 namespace App;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Asciisd\Knet\HasKnet;
 
 class User extends Authenticatable {
@@ -133,12 +133,12 @@ KnetReceiptSeen::class => [
 ];
 ```
 
-[ico-version]: https://img.shields.io/packagist/v/asciisd/knet.svg?style=flat-square
-[ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
+[ico-version]: https://img.shields.io/packagist/v/asciisd/knet.svg?style=flat
+[ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat
 [ico-status]: https://github.com/asciisd/knet/workflows/tests/badge.svg
-[ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/asciisd/knet.svg?style=flat-square
-[ico-code-quality]: https://img.shields.io/scrutinizer/g/asciisd/knet.svg?style=flat-square
-[ico-downloads]: https://img.shields.io/packagist/dt/asciisd/knet.svg?style=flat-square
+[ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/asciisd/knet.svg?style=flat
+[ico-code-quality]: https://img.shields.io/scrutinizer/g/asciisd/knet.svg?style=flat
+[ico-downloads]: https://img.shields.io/packagist/dt/asciisd/knet.svg?style=flat
 
 [link-packagist]: https://packagist.org/packages/asciisd/knet
 [link-actions]: https://github.com/asciisd/knet/actions
