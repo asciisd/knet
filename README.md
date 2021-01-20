@@ -1,8 +1,8 @@
-# Knet
-
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
 [![Total Downloads][ico-downloads]][link-downloads]
+
+# Knet
 
 This package used to integrate with the new Knet payment portal
 
