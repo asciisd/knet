@@ -147,4 +147,3 @@ KnetReceiptSeen::class => [
 [link-downloads]: https://packagist.org/packages/asciisd/knet
 [link-author]: https://github.com/asciisd
 [link-contributors]: ../../contributors
-<a href="https://github.com/laravel/cashier/actions"><img src="https://github.com/laravel/cashier/workflows/tests/badge.svg" alt="Build Status"></a>
