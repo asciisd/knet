@@ -24,7 +24,7 @@
         "ext-intl": "*",
         "dompdf/dompdf": "^0.8.0",
         "illuminate/contracts": "^7.0|^8.0",
-        "illuminate/database": "^7.0|^8.0",
+        "illuminate/database": "8.24.0",
         "illuminate/http": "^7.0|^8.0",
         "illuminate/log": "^7.0|^8.0",
         "illuminate/notifications": "^7.0|^8.0",
