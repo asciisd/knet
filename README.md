@@ -28,6 +28,7 @@ user `pay()` method
 
 ```php
 try{
+    $user = User::find(1);
     $payment = $user->pay(10);
     $payment->url; // this will return payment link
 } catch(\Asciisd\Knet\Exceptions\PaymentActionRequired $exception) {
@@ -42,13 +43,13 @@ you can change that from config file to make your own handler
 you can use `pay()` method inside controller like this
 ```php
 try{
-    $payment = $request->user()->pay($request->amount, [
-        'udf1' => $request->user()->name,
-        'udf2' => $request->user()->email
+    $payment = request()->user()->pay(request()->amount, [
+        'udf1' => request()->user()->name,
+        'udf2' => request()->user()->email
     ]);
 } catch(\Asciisd\Knet\Exceptions\PaymentActionRequired $exception) {
     // do whatever you want with this 
-    $payment = $exception->payment
+    $payment = $exception->payment;
 } finally {
     // redirect user to payment url to complete the payment
     return $payment->actionUrl();
@@ -59,12 +60,12 @@ try{
 you can change your environment from local to production in case you want to make sure that everything is working fine, to do that change `.env` file like this
 
 ```dotenv
-APP_ENV=local // or production
+APP_ENV=local #or production
 
 KENT_TRANSPORT_ID=
 KENT_TRANSPORT_PASSWORD=
 KENT_RESOURCE_KEY=
-KNET_DEBUG=true //or false in production
+KNET_DEBUG=true #or false in production
 ``` 
 
 ## Installation
