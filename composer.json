@@ -22,7 +22,7 @@
         "php": "^7.2.5|^8.0",
         "ext-json": "*",
         "ext-intl": "*",
-        "dompdf/dompdf": "^0.8.6|^1.0.1",
+        "dompdf/dompdf": "^0.8.6|^1.0",
         "illuminate/contracts": "^7.0|^8.0",
         "illuminate/database": "8.40.0",
         "illuminate/http": "^7.0|^8.0",
