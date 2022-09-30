@@ -19,10 +19,10 @@
         }
     ],
     "require": {
-        "php": "^7.0|^8.0",
+        "php": "^7.1|^8.0",
         "ext-json": "*",
         "ext-intl": "*",
-        "dompdf/dompdf": "^1.2.1",
+        "dompdf/dompdf": "^2.0.1",
         "illuminate/contracts": "^8.37|^9.0",
         "illuminate/database": "^8.37|^9.0",
         "illuminate/http": "^8.37|^9.0",
