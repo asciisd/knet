@@ -99,10 +99,10 @@ This package provides a receipt system, but you should fill your identity detail
 also you need to update your logo inside `vendor` => `knet` public assets
 
 ## Test cards
-| Card Number | Expiry Date | PIN | Status |
-| ---------------- | :----- | :---- | :------------ |
-| 8888880000000001 | 09/21 | 1234 | CAPTURED |
-| 8888880000000002 | 05/21 | 1234 | NOT CAPTURED |
+| Card Number      | Expiry Date  | PIN  |    Status     |
+|------------------|:------------:|:-----|:-------------:|
+| 8888880000000001 |    09/25     | 1234 |   CAPTURED    |
+| 8888880000000002 |    05/25     | 1234 | NOT CAPTURED  |
 
 
 ## Events
