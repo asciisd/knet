@@ -6,13 +6,11 @@ use Asciisd\Knet\Exceptions\SignatureVerificationException;
 
 abstract class KnetResponseSignature
 {
-    public static function verifyHeader($payload, $header, $trackid)
+    public static function verifyHeader($payload, $header, $trackid): bool
     {
         if (KnetTransaction::findByTrackId($trackid) == null) {
             throw SignatureVerificationException::factory(
-                __('NO_TRACK_ID_MATCH'),
-                $payload,
-                $header
+                __('NO_TRACK_ID_MATCH'), $payload, $header
             );
         }
 

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @method static KnetTransaction create($params)
@@ -58,12 +59,12 @@ class KnetTransaction extends Model
     ];
 
     /**
-     * get transaction from database by it's track id
+     * get transaction from database by its track id
      *
      * @param $trackId
      * @return KnetTransaction|Model
      */
-    public static function findByTrackId($trackId)
+    public static function findByTrackId($trackId): KnetTransaction
     {
         return static::where('trackid', $trackId)->first();
     }
@@ -72,7 +73,7 @@ class KnetTransaction extends Model
      * @param $paymentid
      * @return KnetTransaction|Model
      */
-    public static function findByPaymentId($paymentid)
+    public static function findByPaymentId($paymentid): KnetTransaction
     {
         return static::where('paymentid', $paymentid)->first();
     }
@@ -81,24 +82,24 @@ class KnetTransaction extends Model
      * @param $uuid
      * @return KnetTransaction|Model
      */
-    public static function findByUuid($uuid)
+    public static function findByUuid($uuid): KnetTransaction
     {
         return static::where('uuid', $uuid)->first();
     }
 
-    public function owner()
+    public function owner(): BelongsTo
     {
         $model = config('knet.model');
 
         return $this->belongsTo($model, (new $model)->getForeignKey());
     }
 
-    public function isCaptured()
+    public function isCaptured(): bool
     {
         return $this->result == 'CAPTURED';
     }
 
-    public function hasStatus()
+    public function hasStatus(): bool
     {
         return !empty($this->result);
     }

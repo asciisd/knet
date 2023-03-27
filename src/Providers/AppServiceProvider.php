@@ -15,7 +15,7 @@ class AppServiceProvider extends ServiceProvider
     protected $details = [];
 
     /**
-     * All of the application developer e-mail addresses.
+     * All the application developer e-mail addresses.
      *
      * @var array
      */

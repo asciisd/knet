@@ -2,8 +2,9 @@
 
 namespace Asciisd\Knet\Tests\Integration;
 
-use Asciisd\Knet\Facades\Knet;
 use Asciisd\Knet\Payment;
+use Asciisd\Knet\KPayManager;
+use Asciisd\Knet\Exceptions\PaymentActionRequired;
 
 class PayTest extends IntegrationTestCase
 {
@@ -13,7 +14,13 @@ class PayTest extends IntegrationTestCase
     {
         $user = $this->createCustomer('customer_can_be_charged');
 
-        $response = $user->pay(100);
+        try {
+            $response = $user->pay(100);
+        } catch (PaymentActionRequired $e) {
+            $response = $e->payment;
+            dump($response);
+        }
+
         $this->assertInstanceOf(Payment::class, $response);
         $this->assertEquals(100, $response->rawAmount());
         $this->assertEquals($user->id, $response->owner()->id);
@@ -22,10 +29,10 @@ class PayTest extends IntegrationTestCase
     /** @test */
     public function customer_can_override_trackid()
     {
-        $user = $this->createCustomer('customer_can_override_trackid');
-        $trackid = 'teyYtsvvxbYUyw78767678';
+        $user     = $this->createCustomer('customer_can_override_trackid');
+        $trackid  = 'teyYtsvvxbYUyw78767678';
         $response = $user->pay(100, [
-            'trackid' => $trackid
+            'trackid' => $trackid,
         ]);
 
         $this->assertInstanceOf(Payment::class, $response);
@@ -62,9 +69,9 @@ class PayTest extends IntegrationTestCase
         $user = $this->createCustomer('customer_can_use_facade');
         auth()->login($user);
 
-        $response = Knet::make(100);
+        $response = KPayManager::make(100);
 
-        $this->assertInstanceOf(\Asciisd\Knet\Knet::class, $response);
+        $this->assertInstanceOf(KPayManager::class, $response);
         $this->assertEquals(auth()->id(), $response->toArray()['user_id']);
     }
 }

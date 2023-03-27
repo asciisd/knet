@@ -22,7 +22,7 @@ class KPayClient
         return unpack('C*', $string);
     }
 
-    public function byteArray2String($byteArray)
+    public function byteArray2String($byteArray): string
     {
         $chars = array_map('chr', $byteArray);
 
@@ -42,7 +42,7 @@ class KPayClient
         return substr($text, 0, -1 * $pad);
     }
 
-    public function encryptAES($str, $key)
+    public function encryptAES($str, $key): string
     {
         $str = $this->pkcs5_pad($str);
         $encrypted = openssl_encrypt($str, 'AES-128-CBC', $key, OPENSSL_ZERO_PADDING, $key);
@@ -54,7 +54,7 @@ class KPayClient
         return $encrypted;
     }
 
-    public function pkcs5_pad($text)
+    public function pkcs5_pad($text): string
     {
         $blockSize = 16;
         $pad = $blockSize - (strlen($text) % $blockSize);
@@ -62,7 +62,7 @@ class KPayClient
         return $text . str_repeat(chr($pad), $pad);
     }
 
-    public function byteArray2Hex($byteArray)
+    public function byteArray2Hex($byteArray): string
     {
         $chars = array_map('chr', $byteArray);
         $bin = implode($chars);

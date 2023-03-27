@@ -13,7 +13,7 @@ return [
     |
     */
     'production_url' => env('KENT_PRODUCTION_URL', 'https://kpay.com.kw/kpg/PaymentHTTP.htm'),
-    'development_url' => env('KENT_PRODUCTION_URL', 'https://kpaytest.com.kw/kpg/PaymentHTTP.htm'),
+    'development_url' => env('KENT_DEVELOPMENT_URL', 'https://kpaytest.com.kw/kpg/PaymentHTTP.htm'),
 
     /*
     |--------------------------------------------------------------------------
