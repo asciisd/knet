@@ -11,12 +11,12 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('knet_transactions', function (Blueprint $table) {
-            $table->after('utf5', function () use ($table) {
-                $table->string('utf6')->nullable();
-                $table->string('utf7')->nullable();
-                $table->string('utf8')->nullable();
-                $table->string('utf9')->nullable();
-                $table->string('utf10')->nullable();
+            $table->after('udf5', function () use ($table) {
+                $table->string('udf6')->nullable();
+                $table->string('udf7')->nullable();
+                $table->string('udf8')->nullable();
+                $table->string('udf9')->nullable();
+                $table->string('udf10')->nullable();
             });
         });
     }
