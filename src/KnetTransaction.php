@@ -26,6 +26,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string udf3
  * @property string udf4
  * @property string udf5
+ * @property string udf6
+ * @property string udf7
+ * @property string udf8
+ * @property string udf9
+ * @property string udf10
  * @property float amt
  * @property string error
  * @property string auth_resp_code
@@ -49,13 +54,13 @@ class KnetTransaction extends Model
      */
     protected $fillable = [
         'user_id', 'error_text', 'paymentid', 'paid', 'result', 'auth', 'avr', 'ref', 'tranid', 'postdate', 'trackid',
-        'udf1', 'udf2', 'udf3', 'udf4', 'udf5', 'amt', 'error', 'auth_resp_code', 'livemode', 'trackid', 'url',
-        'card_number', 'brand_id', 'ip_address',
+        'udf1', 'udf2', 'udf3', 'udf4', 'udf5', 'udf6', 'udf7', 'udf8', 'udf9', 'udf10', 'amt', 'error', 'auth_resp_code',
+        'livemode', 'trackid', 'url', 'card_number', 'brand_id', 'ip_address',
     ];
 
-    protected $dates = [
-        'created_at',
-        'updated_at'
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -66,7 +71,7 @@ class KnetTransaction extends Model
      */
     public static function findByTrackId($trackId): KnetTransaction
     {
-        return static::where('trackid', $trackId)->first();
+        return static::where('trackid', $trackId)->firstOrFail();
     }
 
     /**
@@ -75,7 +80,7 @@ class KnetTransaction extends Model
      */
     public static function findByPaymentId($paymentid): KnetTransaction
     {
-        return static::where('paymentid', $paymentid)->first();
+        return static::where('paymentid', $paymentid)->firstOrFail();
     }
 
     /**
@@ -84,7 +89,7 @@ class KnetTransaction extends Model
      */
     public static function findByUuid($uuid): KnetTransaction
     {
-        return static::where('uuid', $uuid)->first();
+        return static::where('uuid', $uuid)->firstOrFail();
     }
 
     public function owner(): BelongsTo
