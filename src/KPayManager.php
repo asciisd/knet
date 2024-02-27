@@ -111,6 +111,19 @@ class KPayManager extends KPayClient
         return $url.'?param=paymentInit';
     }
 
+    private static function getEnvInquiryUrl(): string
+    {
+        $url = config('knet.development_inquiry_url');
+
+        if (App::environment(['production'])) {
+            if ( ! env('KNET_DEBUG')) {
+                $url = config('knet.production_inquiry_url');
+            }
+        }
+
+        return $url.'?param=tranInit';
+    }
+
     private function setTranData()
     {
         $this->trandata = $this->encryptedParams();
@@ -158,16 +171,31 @@ class KPayManager extends KPayClient
     /**
      * @throws KnetException
      */
-    public static function inquiry($trackid, $options = []): self
+    public static function inquiry($amt, $trackid): array
     {
-        //        throw new Exception('this method not yet supported by api');
+        $paymentUrl = self::getEnvInquiryUrl();
+        $xmlData = "<id>" .config('knet.transport.id') ."</id><password>" .config('knet.transport.password') ."</password><action>8</action><amt>" .$amt ."</amt><transid>" .$trackid ."</transid><udf5>" ."TrackID" ."</udf5><trackid>" .$trackid ."</trackid>";
 
-        $options['trackid'] = $trackid;
+        $ch = curl_init($paymentUrl);
+        curl_setopt($ch, CURLOPT_VERBOSE, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: text/xml"]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $xmlData);
 
-        $new_instance         = (new self)->fillInquiryWithOptions($options);
-        $new_instance->action = 8;
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        $output = curl_exec($ch);
+        $err = curl_error($ch);
+        curl_close($ch);
 
-        return $new_instance;
+        $xml = "<div>" . $output . "</div>";
+        $xml = preg_replace("/(<\/?)(\w+):([^>]*>)/", '$1$2$3', $xml);
+        $xml = simplexml_load_string($xml);
+
+        $json = json_encode($xml);
+        return json_decode($json, true); // true to have an array, false for an object
     }
 
     /**

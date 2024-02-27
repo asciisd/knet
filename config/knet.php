@@ -15,6 +15,8 @@ return [
     'production_url' => env('KENT_PRODUCTION_URL', 'https://kpay.com.kw/kpg/PaymentHTTP.htm'),
     'development_url' => env('KENT_DEVELOPMENT_URL', 'https://kpaytest.com.kw/kpg/PaymentHTTP.htm'),
 
+    'production_inquiry_url' => env('KENT_PRODUCTION_INQUIRY_URL', 'https://www.kpay.com.kw/kpg/tranPipe.htm'),
+    'development_inquiry_url' => env('KENT_DEVELOPMENT_INQUIRY_URL', 'https://www.kpaytest.com.kw/kpg/tranPipe.htm'),
     /*
     |--------------------------------------------------------------------------
     | Knet Credentials
