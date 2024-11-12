@@ -8,4 +8,6 @@ use Asciisd\Knet\HasKnet;
 class User extends Authenticatable
 {
     use HasKnet, Notifiable;
+
+    protected $guarded = [];
 }

@@ -1,5 +1,10 @@
-/vendor
+vendor
 composer.lock
 .phpunit.result.cache
-/.idea
 .env
+.env.testing
+phpunit.xml
+.idea
+build
+coverage
+docs

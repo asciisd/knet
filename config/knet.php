@@ -12,10 +12,10 @@ return [
     | production Api while the "development" url accesses testing API endpoints.
     |
     */
-    'production_url' => env('KENT_PRODUCTION_URL', 'https://kpay.com.kw/kpg/PaymentHTTP.htm'),
+    'production_url'  => env('KENT_PRODUCTION_URL', 'https://kpay.com.kw/kpg/PaymentHTTP.htm'),
     'development_url' => env('KENT_DEVELOPMENT_URL', 'https://kpaytest.com.kw/kpg/PaymentHTTP.htm'),
 
-    'production_inquiry_url' => env('KENT_PRODUCTION_INQUIRY_URL', 'https://www.kpay.com.kw/kpg/tranPipe.htm'),
+    'production_inquiry_url'  => env('KENT_PRODUCTION_INQUIRY_URL', 'https://www.kpay.com.kw/kpg/tranPipe.htm'),
     'development_inquiry_url' => env('KENT_DEVELOPMENT_INQUIRY_URL', 'https://www.kpaytest.com.kw/kpg/tranPipe.htm'),
     /*
     |--------------------------------------------------------------------------
@@ -32,8 +32,8 @@ return [
     | an https post for transmitting the data to Payment Gateway.
     |
     */
-    'transport' => [
-        'id' => env('KENT_TRANSPORT_ID'),
+    'transport'               => [
+        'id'       => env('KENT_TRANSPORT_ID'),
         'password' => env('KENT_TRANSPORT_PASSWORD'),
     ],
 
@@ -49,8 +49,8 @@ return [
     | various world currencies that are currently supported via Knet.
     |
     */
-    'currency' => env('KENT_CURRENCY', 414),
-    'decimals' => '3',
+    'currency'     => env('KENT_CURRENCY', 414),
+    'decimals'     => '3',
 
     /*
     |--------------------------------------------------------------------------
@@ -62,7 +62,7 @@ return [
     | this path according to your preferences and application design.
     |
     */
-    'path' => env('KNET_PATH', 'knet'),
+    'path'         => env('KNET_PATH', 'knet'),
 
     /*
     |--------------------------------------------------------------------------
@@ -83,20 +83,8 @@ return [
     | error while processing the transaction.
     |
     */
-    'error_url' => '/knet/error',
+    'error_url'    => '/knet/error',
     'redirect_url' => env('KENT_REDIRECT_URL', '/'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Knet Model
-    |--------------------------------------------------------------------------
-    |
-    | This is the model in your application that implements the HasKnet trait
-    | provided by Knet. It will serve as the primary model you use while
-    | interacting with Knet related methods, and so on.
-    |
-    */
-    'model' => env('KNET_MODEL', App\Models\User::class),
 
     /*
     |--------------------------------------------------------------------------
@@ -123,7 +111,7 @@ return [
     | Supported sizes: 'letter', 'legal', 'A4'
     |
     */
-    'paper' => env('KNET_PAPER', 'letter'),
+    'paper'           => env('KNET_PAPER', 'letter'),
 
     /*
     |--------------------------------------------------------------------------
@@ -136,7 +124,7 @@ return [
     | Transaction Action Type, "8" for Inquiry.
     |
     */
-    'action_code' => env('KENT_ACTION_CODE', 1),
+    'action_code'     => env('KENT_ACTION_CODE', 1),
 
     /*
     |--------------------------------------------------------------------------
@@ -148,5 +136,5 @@ return [
     | Supported languages: 'AR', 'EN'
     |
     */
-    'language' => env('KENT_LANGUAGE', 'EN'),
+    'language'        => env('KENT_LANGUAGE', 'EN'),
 ];

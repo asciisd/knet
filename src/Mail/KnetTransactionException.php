@@ -12,14 +12,14 @@ class KnetTransactionException extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $transaction;
-    protected $error_message;
+    protected KnetTransaction $transaction;
+    protected string $error_message;
 
     /**
      * Create a new message instance.
      *
-     * @param KnetTransaction $transaction
-     * @param String $error_message
+     * @param  KnetTransaction  $transaction
+     * @param  String  $error_message
      */
     public function __construct(KnetTransaction $transaction, string $error_message)
     {
@@ -29,10 +29,8 @@ class KnetTransactionException extends Mailable
 
     /**
      * Build the message.
-     *
-     * @return $this
      */
-    public function build()
+    public function build(): static
     {
         return $this->subject("Knet Order #{$this->transaction->paymentid}")
             ->html(

@@ -2,13 +2,13 @@
 
 namespace Asciisd\Knet;
 
-use Money\Money;
-use Money\Currency;
-use NumberFormatter;
-use Money\Currencies\ISOCurrencies;
-use Money\Formatter\IntlMoneyFormatter;
 use Asciisd\Knet\Traits\ManagesAppDetails;
 use Asciisd\Knet\Traits\ManagesSupportOptions;
+use Money\Currencies\ISOCurrencies;
+use Money\Currency;
+use Money\Formatter\IntlMoneyFormatter;
+use Money\Money;
+use NumberFormatter;
 
 class Knet
 {
@@ -18,12 +18,12 @@ class Knet
     /**
      * The Knet library version.
      */
-    const VERSION = '2.6.0';
+    const string VERSION = '3.0.0';
 
     /**
      * The KPay API version.
      */
-    const KPAY_VERSION = 'v2';
+    const string KPAY_VERSION = 'v2';
 
     /**
      * The custom currency formatter.
@@ -33,12 +33,12 @@ class Knet
     /**
      * Indicates if Knet migrations will be run.
      */
-    public static $runsMigrations = true;
+    public static bool $runsMigrations = true;
 
     /**
      * Indicates if Knet routes will be registered.
      */
-    public static $registersRoutes = true;
+    public static bool $registersRoutes = true;
 
     /**
      * Configure Knet to not register its migrations.
@@ -72,7 +72,7 @@ class Knet
         $money = new Money($amount, new Currency(strtoupper($currency ?? config('knet.currency'))));
 
         $numberFormatter = new NumberFormatter(config('knet.currency_locale'), NumberFormatter::CURRENCY);
-        $moneyFormatter  = new IntlMoneyFormatter($numberFormatter, new ISOCurrencies());
+        $moneyFormatter = new IntlMoneyFormatter($numberFormatter, new ISOCurrencies());
 
         return $moneyFormatter->format($money);
     }

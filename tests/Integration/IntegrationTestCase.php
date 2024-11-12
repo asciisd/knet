@@ -8,10 +8,7 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
 
 abstract class IntegrationTestCase extends TestCase
 {
-    /**
-     * @var string
-     */
-    protected static $knetPrefix = 'knet-test-';
+    protected static string $knetPrefix = 'knet-test-';
 
     public static function setUpBeforeClass(): void
     {
@@ -38,7 +35,7 @@ abstract class IntegrationTestCase extends TestCase
         ]);
     }
 
-    protected function createKnetResponse($trackid)
+    protected function createKnetResponse($trackid): array
     {
         return [
             "paymentid" => "100201933228935684",

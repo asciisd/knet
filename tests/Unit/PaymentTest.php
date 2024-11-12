@@ -51,6 +51,6 @@ class PaymentTest extends TestCase
 
         $payment = new Payment($transaction);
 
-        $this->assertEquals('10 KD', $payment->amount());
+        $this->assertEquals('10 KWD', $payment->amount());
     }
 }

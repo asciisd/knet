@@ -1,22 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit backupGlobals="false"
-         backupStaticAttributes="false"
-         bootstrap="vendor/autoload.php"
-         colors="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
-         processIsolation="false"
-         stopOnFailure="false"
->
+<phpunit colors="true">
     <testsuites>
-        <testsuite name="Package Test Suite">
-            <directory suffix=".php">./tests</directory>
-        </testsuite>
-        <testsuite name="Package Unit Test">
+        <testsuite name="Unit">
             <directory suffix="Test.php">./tests/Unit</directory>
         </testsuite>
-        <testsuite name="Package Feature Test">
+        <testsuite name="Feature">
             <directory suffix="Test.php">./tests/Feature</directory>
         </testsuite>
     </testsuites>
@@ -25,11 +13,9 @@
         <env name="DB_CONNECTION" value="sqlite"/>
         <env name="DB_DATABASE" value=":memory:"/>
 
-        <env name="KNET_MODEL" value="Asciisd\Knet\Tests\Fixtures\User"/>
-
         <env name="KNET_DEBUG" value="true"/>
-        <!-- <env name="KENT_TRANSPORT_ID" value=""/> -->
-        <!-- <env name="KENT_TRANSPORT_PASSWORD" value=""/> -->
-        <!-- <env name="KENT_RESOURCE_KEY" value=""/> -->
+        <!--         <env name="KENT_TRANSPORT_ID" value=""/>-->
+        <!--         <env name="KENT_TRANSPORT_PASSWORD" value=""/>-->
+        <!--         <env name="KENT_RESOURCE_KEY" value=""/>-->
     </php>
 </phpunit>

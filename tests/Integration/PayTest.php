@@ -2,9 +2,9 @@
 
 namespace Asciisd\Knet\Tests\Integration;
 
-use Asciisd\Knet\Payment;
-use Asciisd\Knet\KPayManager;
 use Asciisd\Knet\Exceptions\PaymentActionRequired;
+use Asciisd\Knet\KPayManager;
+use Asciisd\Knet\Payment;
 
 class PayTest extends IntegrationTestCase
 {
@@ -18,7 +18,6 @@ class PayTest extends IntegrationTestCase
             $response = $user->pay(100);
         } catch (PaymentActionRequired $e) {
             $response = $e->payment;
-            dump($response);
         }
 
         $this->assertInstanceOf(Payment::class, $response);
@@ -29,8 +28,11 @@ class PayTest extends IntegrationTestCase
     /** @test */
     public function customer_can_override_trackid()
     {
-        $user     = $this->createCustomer('customer_can_override_trackid');
-        $trackid  = 'teyYtsvvxbYUyw78767678';
+        $user = $this->createCustomer('customer_can_override_trackid');
+        $trackid = 'teyYtsvvxbYUyw78767678';
+
+        $this->expectException(PaymentActionRequired::class);
+
         $response = $user->pay(100, [
             'trackid' => $trackid,
         ]);
@@ -44,6 +46,8 @@ class PayTest extends IntegrationTestCase
     public function client_can_set_user_defined_properties()
     {
         $user = $this->createCustomer('customer_can_override_udf1');
+
+        $this->expectException(PaymentActionRequired::class);
 
         $response = $user->pay(100, [
             'udf1' => $user->name,

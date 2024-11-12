@@ -11,7 +11,7 @@ class KnetServiceProvider extends ServiceProvider
      *
      * @var array
      */
-    protected $details = [
+    protected array $details = [
         'vendor' => 'Your Company',
         'product' => 'Your Product',
         'street' => 'PO Box 111',
@@ -27,14 +27,14 @@ class KnetServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    protected $sendSupportEmailsTo = null;
+    protected ?string $sendSupportEmailsTo = null;
 
     /**
-     * All of the application developer e-mail addresses.
+     * All the application developer e-mail addresses.
      *
      * @var array
      */
-    protected $developers = [
+    protected array $developers = [
         //
     ];
 

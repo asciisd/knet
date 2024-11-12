@@ -8,10 +8,8 @@ class KnetException extends Exception
 {
     /**
      * Create a new PaymentFailure instance.
-     *
-     * @return self
      */
-    public static function unauthorizedReferer()
+    public static function unauthorizedReferer(): KnetException
     {
         return new self(
             __('UNAUTHORIZED_REFERER')
@@ -20,10 +18,8 @@ class KnetException extends Exception
 
     /**
      * Create a new PaymentFailure instance.
-     *
-     * @return self
      */
-    public static function missingResourceKey()
+    public static function missingResourceKey(): KnetException
     {
         return new self(
             __('MISSING_RESOURCE_KEY')
@@ -32,10 +28,8 @@ class KnetException extends Exception
 
     /**
      * Create a new PaymentFailure instance.
-     *
-     * @return self
      */
-    public static function missingAmount()
+    public static function missingAmount(): KnetException
     {
         return new self(
             __('MISSING_AMOUNT')
@@ -44,10 +38,8 @@ class KnetException extends Exception
 
     /**
      * Create a new PaymentFailure instance.
-     *
-     * @return self
      */
-    public static function missingTrackId()
+    public static function missingTrackId(): KnetException
     {
         return new self(
             __('MISSING_TRACK_ID')

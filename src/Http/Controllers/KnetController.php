@@ -6,7 +6,6 @@ use Asciisd\Knet\Events\KnetResponseHandled;
 use Asciisd\Knet\Events\KnetResponseReceived;
 use Asciisd\Knet\Events\KnetTransactionHasErrors;
 use Asciisd\Knet\Events\KnetTransactionUpdated;
-use Asciisd\Knet\Exceptions\KnetException;
 use Asciisd\Knet\Http\Middleware\VerifyKnetResponseSignature;
 use Asciisd\Knet\KnetTransaction;
 use Asciisd\Knet\KPayResponseHandler;
@@ -29,7 +28,7 @@ class KnetController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      * @return RedirectResponse|Response|Redirector
      */
     public function handleKnet(Request $request)

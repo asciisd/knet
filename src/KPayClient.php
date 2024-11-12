@@ -59,7 +59,7 @@ class KPayClient
         $blockSize = 16;
         $pad = $blockSize - (strlen($text) % $blockSize);
 
-        return $text . str_repeat(chr($pad), $pad);
+        return $text.str_repeat(chr($pad), $pad);
     }
 
     public function byteArray2Hex($byteArray): string

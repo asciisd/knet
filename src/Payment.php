@@ -13,8 +13,6 @@ use Illuminate\Auth\Authenticatable;
 use Illuminate\Support\Str;
 
 /**
- * Class Payment
- *
  * @property string result
  * @property integer amt
  * @property string url
@@ -27,8 +25,6 @@ use Illuminate\Support\Str;
  * @property string udf4
  * @property string udf5
  * @property string trackid
- *
- * @package Asciisd\Knet
  */
 class Payment
 {
@@ -47,7 +43,7 @@ class Payment
     /**
      * Create a new Payment instance.
      *
-     * @param KnetTransaction $transaction
+     * @param  KnetTransaction  $transaction
      */
     public function __construct(KnetTransaction $transaction)
     {
@@ -63,7 +59,7 @@ class Payment
      */
     public function amount()
     {
-        return $this->rawAmount() . ' ' . self::CURRENCY;
+        return $this->rawAmount().' '.self::CURRENCY;
     }
 
     /**
@@ -186,7 +182,7 @@ class Payment
     /**
      * Get a Carbon date for the invoice.
      *
-     * @param DateTimeZone|string $timezone
+     * @param  DateTimeZone|string  $timezone
      * @return Carbon
      */
     public function date($timezone = null)
@@ -219,7 +215,7 @@ class Payment
     /**
      * Dynamically get values from the PaymentIntent.
      *
-     * @param string $key
+     * @param  string  $key
      * @return mixed
      */
     public function __get($key)

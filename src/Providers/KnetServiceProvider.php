@@ -12,10 +12,8 @@ class KnetServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
 //        $this->registerLogger();
         $this->registerRoutes();
@@ -26,10 +24,8 @@ class KnetServiceProvider extends ServiceProvider
 
     /**
      * Register the application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->configure();
         $this->registerServices();
@@ -41,92 +37,80 @@ class KnetServiceProvider extends ServiceProvider
     }
 
     /**
-     * Setup the configuration for Cashier.
-     *
-     * @return void
+     * Set up the configuration for Cashier.
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../../config/knet.php', 'knet'
+            __DIR__.'/../../config/knet.php', 'knet'
         );
     }
 
     /**
      * Register the package routes.
-     *
-     * @return void
      */
-    protected function registerRoutes()
+    protected function registerRoutes(): void
     {
         Route::group([
-            'prefix' => config('knet.path'),
+            'prefix'    => config('knet.path'),
             'namespace' => 'Asciisd\Knet\Http\Controllers',
-            'as' => 'knet.',
+            'as'        => 'knet.',
         ], function () {
-            $this->loadRoutesFrom(__DIR__ . '/../../routes/web.php');
+            $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
         });
     }
 
     /**
      * Register the package resources.
-     *
-     * @return void
      */
-    protected function registerResources()
+    protected function registerResources(): void
     {
-        $this->loadJsonTranslationsFrom(__DIR__ . '/../../resources/lang');
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'knet');
+        $this->loadJsonTranslationsFrom(__DIR__.'/../../resources/lang');
+        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'knet');
     }
 
     /**
      * Register the package migrations.
-     *
-     * @return void
      */
-    protected function registerMigrations()
+    protected function registerMigrations(): void
     {
         if ($this->app->runningInConsole()) {
-            $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+            $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         }
     }
 
     /**
      * Register the package's publishable resources.
-     *
-     * @return void
      */
-    protected function registerPublishing()
+    protected function registerPublishing(): void
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../../config/knet.php' => $this->app->configPath('knet.php'),
+                __DIR__.'/../../config/knet.php' => $this->app->configPath('knet.php'),
             ], 'knet-config');
 
             $this->publishes([
-                __DIR__ . '/../../database/migrations' => $this->app->databasePath('migrations'),
+                __DIR__.'/../../database/migrations' => $this->app->databasePath('migrations'),
             ], 'knet-migrations');
 
             $this->publishes([
-                __DIR__ . '/../../resources/views' => $this->app->resourcePath('views/vendor/knet'),
+                __DIR__.'/../../resources/views' => $this->app->resourcePath('views/vendor/knet'),
             ], 'knet-views');
 
             $this->publishes([
-                __DIR__ . '/../../public' => public_path('vendor/knet'),
+                __DIR__.'/../../public' => public_path('vendor/knet'),
             ], 'knet-assets');
 
             $this->publishes([
-                __DIR__ . '/../../stubs/KnetServiceProvider.stub' => app_path('Providers/KnetServiceProvider.php'),
+                __DIR__.'/../../stubs/KnetServiceProvider.stub' => app_path('Providers/KnetServiceProvider.php'),
             ], 'knet-provider');
         }
     }
 
     /**
      * Register the Horizon Artisan commands.
-     *
-     * @return void
      */
-    protected function registerCommands()
+    protected function registerCommands(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([

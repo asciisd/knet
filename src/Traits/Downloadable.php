@@ -9,26 +9,33 @@ use Symfony\Component\HttpFoundation\Response;
 trait Downloadable
 {
     /**
-     * Get the View instance for the invoice.
-     *
-     * @param array $data
-     * @return \Illuminate\Contracts\View\View
+     * Create an invoice download response.
      */
-    public function view(array $data)
+    public function download(array $data): Response
     {
-        return View::make('knet::pdf_receipt', array_merge($data, [
-            'invoice' => $this,
-            'owner' => $this->owner()
-        ]));
+        $filename = $data['product'].'_'.$this->date()->month.'_'.$this->date()->year;
+
+        return $this->downloadAs($filename, $data);
+    }
+
+    /**
+     * Create an invoice download response with a specific filename.
+     */
+    public function downloadAs($filename, array $data): Response
+    {
+        return new Response($this->pdf($data), 200, [
+            'Content-Description'       => 'File Transfer',
+            'Content-Disposition'       => 'attachment; filename="'.$filename.'.pdf"',
+            'Content-Transfer-Encoding' => 'binary',
+            'Content-Type'              => 'application/pdf',
+            'X-Vapor-Base64-Encode'     => 'True',
+        ]);
     }
 
     /**
      * Capture the invoice as a PDF and return the raw bytes.
-     *
-     * @param array $data
-     * @return string
      */
-    public function pdf(array $data)
+    public function pdf(array $data): string
     {
         if (!defined('DOMPDF_ENABLE_AUTOLOAD')) {
             define('DOMPDF_ENABLE_AUTOLOAD', false);
@@ -43,33 +50,13 @@ trait Downloadable
     }
 
     /**
-     * Create an invoice download response.
-     *
-     * @param array $data
-     * @return \Symfony\Component\HttpFoundation\Response
+     * Get the View instance for the invoice.
      */
-    public function download(array $data)
+    public function view(array $data)
     {
-        $filename = $data['product'] . '_' . $this->date()->month . '_' . $this->date()->year;
-
-        return $this->downloadAs($filename, $data);
-    }
-
-    /**
-     * Create an invoice download response with a specific filename.
-     *
-     * @param string $filename
-     * @param array $data
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function downloadAs($filename, array $data)
-    {
-        return new Response($this->pdf($data), 200, [
-            'Content-Description' => 'File Transfer',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '.pdf"',
-            'Content-Transfer-Encoding' => 'binary',
-            'Content-Type' => 'application/pdf',
-            'X-Vapor-Base64-Encode' => 'True',
-        ]);
+        return View::make('knet::pdf_receipt', array_merge($data, [
+            'invoice' => $this,
+            'owner'   => $this->owner()
+        ]));
     }
 }

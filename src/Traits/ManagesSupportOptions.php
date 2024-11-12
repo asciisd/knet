@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Asciisd\Knet\Traits;
-
 
 trait ManagesSupportOptions
 {
@@ -36,7 +34,7 @@ trait ManagesSupportOptions
     /**
      * Set the e-mail address to send customer support e-mails to.
      *
-     * @param string $address
+     * @param  string  $address
      * @return void
      */
     public static function sendSupportEmailsTo($address)

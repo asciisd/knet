@@ -9,31 +9,23 @@ class AppServiceProvider extends ServiceProvider
 {
     /**
      * Your application and company details.
-     *
-     * @var array
      */
-    protected $details = [];
+    protected array $details = [];
 
     /**
      * All the application developer e-mail addresses.
-     *
-     * @var array
      */
-    protected $developers = [];
+    protected array $developers = [];
 
     /**
      * The address where customer support e-mails should be sent.
-     *
-     * @var string
      */
-    protected $sendSupportEmailsTo = null;
+    protected ?string $sendSupportEmailsTo = null;
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         Knet::details($this->details);
         Knet::sendSupportEmailsTo($this->sendSupportEmailsTo);
@@ -45,8 +37,6 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register()
     {

@@ -15,7 +15,7 @@ class ReceiptController
     /**
      * Display receipt.
      *
-     * @param ReceiptRequest $request
+     * @param  ReceiptRequest  $request
      * @return View
      */
     public function show(ReceiptRequest $request)

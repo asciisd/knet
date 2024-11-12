@@ -2,11 +2,11 @@
 
 namespace Asciisd\Knet;
 
-use Exception;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\App;
-use Asciisd\Knet\Exceptions\KnetException;
 use Asciisd\Knet\Concerns\ManagesEncryption;
+use Asciisd\Knet\Exceptions\KnetException;
+use Exception;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Str;
 
 class KPayManager extends KPayClient
 {
@@ -52,16 +52,16 @@ class KPayManager extends KPayClient
 
     private function initiatePaymentConfig()
     {
-        $this->id           = config('knet.transport.id');
+        $this->id = config('knet.transport.id');
         $this->tranportalId = config('knet.transport.id');
-        $this->password     = config('knet.transport.password');
+        $this->password = config('knet.transport.password');
 
-        $this->action       = config('knet.action_code', 1);
-        $this->langid       = config('knet.language', 'EN');
+        $this->action = config('knet.action_code', 1);
+        $this->langid = config('knet.language', 'EN');
         $this->currencycode = config('knet.currency', 414);
 
         $this->responseURL = url(config('knet.response_url'));
-        $this->errorURL    = url(config('knet.error_url'));
+        $this->errorURL = url(config('knet.error_url'));
     }
 
     /**
@@ -69,11 +69,11 @@ class KPayManager extends KPayClient
      */
     private function fillPaymentWithOptions(array $options = []): self
     {
-        if ( ! isset($options['amt'])) {
+        if (!isset($options['amt'])) {
             throw KnetException::missingAmount();
         }
 
-        if ( ! isset($options['trackid'])) {
+        if (!isset($options['trackid'])) {
             throw KnetException::missingTrackId();
         }
 
@@ -103,7 +103,7 @@ class KPayManager extends KPayClient
         $url = config('knet.development_url');
 
         if (App::environment(['production'])) {
-            if ( ! env('KNET_DEBUG')) {
+            if (!env('KNET_DEBUG')) {
                 $url = config('knet.production_url');
             }
         }
@@ -116,7 +116,7 @@ class KPayManager extends KPayClient
         $url = config('knet.development_inquiry_url');
 
         if (App::environment(['production'])) {
-            if ( ! env('KNET_DEBUG')) {
+            if (!env('KNET_DEBUG')) {
                 $url = config('knet.production_inquiry_url');
             }
         }
@@ -160,9 +160,9 @@ class KPayManager extends KPayClient
      */
     public static function make($amount, array $options = []): static
     {
-        $options['amt']     = $amount;
+        $options['amt'] = $amount;
         $options['trackid'] = $options['trackid'] ?? Str::uuid();
-        $options['result']  = $options['result'] ?? 'INITIATED';
+        $options['result'] = $options['result'] ?? 'INITIATED';
         $options['user_id'] = $options['user_id'] ?? auth()->id();
 
         return (new self)->fillPaymentWithOptions($options);
@@ -174,7 +174,7 @@ class KPayManager extends KPayClient
     public static function inquiry($amt, $trackid): array
     {
         $paymentUrl = self::getEnvInquiryUrl();
-        $xmlData = "<id>" .config('knet.transport.id') ."</id><password>" .config('knet.transport.password') ."</password><action>8</action><amt>" .$amt ."</amt><transid>" .$trackid ."</transid><udf5>" ."TrackID" ."</udf5><trackid>" .$trackid ."</trackid>";
+        $xmlData = "<id>".config('knet.transport.id')."</id><password>".config('knet.transport.password')."</password><action>8</action><amt>".$amt."</amt><transid>".$trackid."</transid><udf5>"."TrackID"."</udf5><trackid>".$trackid."</trackid>";
 
         $ch = curl_init($paymentUrl);
         curl_setopt($ch, CURLOPT_VERBOSE, 1);
@@ -190,7 +190,7 @@ class KPayManager extends KPayClient
         $err = curl_error($ch);
         curl_close($ch);
 
-        $xml = "<div>" . $output . "</div>";
+        $xml = "<div>".$output."</div>";
         $xml = preg_replace("/(<\/?)(\w+):([^>]*>)/", '$1$2$3', $xml);
         $xml = simplexml_load_string($xml);
 
@@ -209,10 +209,10 @@ class KPayManager extends KPayClient
     {
         throw new Exception('this method not yet supported by api');
 
-        $options['amt']     = $amount;
+        $options['amt'] = $amount;
         $options['trackid'] = $trackid;
 
-        $new_instance         = (new self)->fillPaymentWithOptions($options);
+        $new_instance = (new self)->fillPaymentWithOptions($options);
         $new_instance->action = 2;
 
         return $new_instance;
@@ -225,10 +225,10 @@ class KPayManager extends KPayClient
     {
         throw new Exception('this method not yet supported by api');
 
-        $options['amt']     = $amount;
+        $options['amt'] = $amount;
         $options['trackid'] = $trackid;
 
-        $new_instance         = (new self)->fillPaymentWithOptions($options);
+        $new_instance = (new self)->fillPaymentWithOptions($options);
         $new_instance->action = 3;
 
         return $new_instance;
@@ -246,7 +246,7 @@ class KPayManager extends KPayClient
 
     public function livemode(): bool
     {
-        return App::environment(['production']) && ! env('KNET_DEBUG');
+        return App::environment(['production']) && !env('KNET_DEBUG');
     }
 
     protected function addTo($param, $key, $value): string
