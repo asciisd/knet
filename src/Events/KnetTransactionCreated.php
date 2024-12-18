@@ -10,20 +10,9 @@ use Illuminate\Queue\SerializesModels;
 class KnetTransactionCreated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-    /**
-     * The response payload.
-     *
-     * @var array
-     */
-    public $transaction;
 
-    /**
-     * Create a new event instance.
-     *
-     * @param KnetTransaction $transaction
-     */
-    public function __construct(KnetTransaction $transaction)
+    public function __construct(public KnetTransaction $transaction)
     {
-        $this->transaction = $transaction;
+        //
     }
 }

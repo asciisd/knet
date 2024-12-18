@@ -4,32 +4,32 @@ namespace Asciisd\Knet;
 
 class KPayClient
 {
-    public function decryptAES($code, $key)
+    public static function decryptAES($code, $key): string
     {
-        $code = $this->hex2ByteArray(trim($code));
-        $code = $this->byteArray2String($code);
+        $code = self::hex2ByteArray(trim($code));
+        $code = self::byteArray2String($code);
         $iv = $key;
         $code = base64_encode($code);
         $decrypted = openssl_decrypt($code, 'AES-128-CBC', $key, OPENSSL_ZERO_PADDING, $iv);
 
-        return $this->pkcs5_unpad($decrypted);
+        return self::pkcs5_unpad($decrypted);
     }
 
-    public function hex2ByteArray($hexString)
+    public static function hex2ByteArray($hexString): false|array
     {
         $string = hex2bin($hexString);
 
         return unpack('C*', $string);
     }
 
-    public function byteArray2String($byteArray): string
+    public static function byteArray2String($byteArray): string
     {
         $chars = array_map('chr', $byteArray);
 
         return implode($chars);
     }
 
-    public function pkcs5_unpad($text)
+    public static function pkcs5_unpad($text): string
     {
         $pad = ord($text[strlen($text) - 1]);
         if ($pad > strlen($text)) {
@@ -42,19 +42,19 @@ class KPayClient
         return substr($text, 0, -1 * $pad);
     }
 
-    public function encryptAES($str, $key): string
+    public static function encryptAES($str, $key): string
     {
-        $str = $this->pkcs5_pad($str);
+        $str = self::pkcs5_pad($str);
         $encrypted = openssl_encrypt($str, 'AES-128-CBC', $key, OPENSSL_ZERO_PADDING, $key);
         $encrypted = base64_decode($encrypted);
         $encrypted = unpack('C*', ($encrypted));
-        $encrypted = $this->byteArray2Hex($encrypted);
+        $encrypted = self::byteArray2Hex($encrypted);
         $encrypted = urlencode($encrypted);
 
         return $encrypted;
     }
 
-    public function pkcs5_pad($text): string
+    public static function pkcs5_pad($text): string
     {
         $blockSize = 16;
         $pad = $blockSize - (strlen($text) % $blockSize);
@@ -62,7 +62,7 @@ class KPayClient
         return $text.str_repeat(chr($pad), $pad);
     }
 
-    public function byteArray2Hex($byteArray): string
+    public static function byteArray2Hex($byteArray): string
     {
         $chars = array_map('chr', $byteArray);
         $bin = implode($chars);

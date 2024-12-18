@@ -12,20 +12,13 @@ class KnetReceiptSeen
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-     * The response payload.
-     *
-     * @var Payment
-     */
-    public $payment;
-
-    /**
      * Create a new event instance.
      *
      * @param Payment $payment
      * @return void
      */
-    public function __construct($payment)
+    public function __construct(public Payment $payment)
     {
-        $this->payment = $payment;
+        //
     }
 }

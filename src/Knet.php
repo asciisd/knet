@@ -18,27 +18,24 @@ class Knet
     /**
      * The Knet library version.
      */
-    const string VERSION = '3.0.0';
+    const string VERSION = '5.0.0';
 
     /**
      * The KPay API version.
      */
     const string KPAY_VERSION = 'v2';
-
-    /**
-     * The custom currency formatter.
-     */
-    protected static $formatCurrencyUsing;
-
     /**
      * Indicates if Knet migrations will be run.
      */
     public static bool $runsMigrations = true;
-
     /**
      * Indicates if Knet routes will be registered.
      */
     public static bool $registersRoutes = true;
+    /**
+     * The custom currency formatter.
+     */
+    protected static $formatCurrencyUsing;
 
     /**
      * Configure Knet to not register its migrations.

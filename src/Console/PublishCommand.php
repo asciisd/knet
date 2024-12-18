@@ -3,7 +3,9 @@
 namespace Asciisd\Knet\Console;
 
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'knet:publish')]
 class PublishCommand extends Command
 {
     /**
@@ -25,7 +27,7 @@ class PublishCommand extends Command
      *
      * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         $this->call('vendor:publish', [
             '--tag' => 'knet-assets',

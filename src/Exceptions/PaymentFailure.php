@@ -8,11 +8,8 @@ class PaymentFailure extends IncompletePayment
 {
     /**
      * Create a new PaymentFailure instance.
-     *
-     * @param Payment $payment
-     * @return static
      */
-    public static function invalidPaymentMethod(Payment $payment)
+    public static function invalidPaymentMethod(Payment $payment): self
     {
         return new static(
             $payment,

@@ -9,13 +9,15 @@
 |
 */
 
+use Asciisd\Knet\Http\Middleware\VerifyKnetResponseSignature;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['middleware' => ['web']], function () {
-    Route::get('receipt', 'ReceiptController@show')
-        ->middleware('auth')
-        ->name('receipt');
+Route::group(['middleware' => ['web', 'auth']], function () {
+    Route::get('receipt', 'ReceiptController@show')->name('receipt');
 });
 
-Route::post('/response', 'KnetController@handleKnet')->name('response');
+Route::post('/handle', 'KnetController@handle')->name('handle');
 Route::get('/error', 'KnetController@error')->name('error');
+Route::middleware([VerifyKnetResponseSignature::class])
+    ->post('/response', 'KnetController@response')
+    ->name('response');

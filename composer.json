@@ -19,7 +19,7 @@
         }
     ],
     "require": {
-        "php": "^8.3",
+        "php": "^8.2",
         "dompdf/dompdf": "^2.0.1",
         "moneyphp/money": "^4.0"
     },

@@ -8,11 +8,8 @@ class PaymentActionRequired extends IncompletePayment
 {
     /**
      * Create a new PaymentActionRequired instance.
-     *
-     * @param Payment $payment
-     * @return static
      */
-    public static function incomplete(Payment $payment)
+    public static function incomplete(Payment $payment): self
     {
         return new static(
             $payment,

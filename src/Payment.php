@@ -43,7 +43,7 @@ class Payment
     /**
      * Create a new Payment instance.
      *
-     * @param  KnetTransaction  $transaction
+     * @param KnetTransaction $transaction
      */
     public function __construct(KnetTransaction $transaction)
     {
@@ -72,16 +72,6 @@ class Payment
         return $this->transaction->amt;
     }
 
-    /**
-     * Determine if the payment needs an extra action like 3D Secure.
-     *
-     * @return bool
-     */
-    public function requiresAction()
-    {
-        return in_array($this->transaction->result, KPayResponseStatus::NEED_MORE_ACTION);
-    }
-
     public function actionUrl()
     {
         return $this->transaction->url;
@@ -107,16 +97,6 @@ class Payment
         return in_array($this->transaction->result, KPayResponseStatus::SUCCESS_RESPONSES);
     }
 
-    /**
-     * Determine if the payment was failed.
-     *
-     * @return bool
-     */
-    public function isFailure()
-    {
-        return in_array($this->transaction->result, KPayResponseStatus::FAILED_RESPONSES);
-    }
-
     public function receiptNo()
     {
         return $this->transaction->paymentid;
@@ -125,11 +105,6 @@ class Payment
     public function referenceNo()
     {
         return $this->transaction->ref ?? '00000000';
-    }
-
-    public function paymentMethod()
-    {
-        return 'Knet';
     }
 
     public function currency()
@@ -144,6 +119,11 @@ class Payment
         return url("vendor/knet/img/invoice/card/{$method}-dark@2x.png");
     }
 
+    public function paymentMethod()
+    {
+        return 'Knet';
+    }
+
     public function paymentMethodSvg()
     {
         $method = Str::lower(Str::kebab($this->paymentMethod()));
@@ -151,15 +131,15 @@ class Payment
         return url("vendor/knet/img/invoice/card/svg/{$method}.svg");
     }
 
-    public function status()
-    {
-        return $this->transaction->result;
-    }
-
     public function statusIcon()
     {
         $status = Str::lower($this->status());
         return url("vendor/knet/img/invoice/status/{$status}.png");
+    }
+
+    public function status()
+    {
+        return $this->transaction->result;
     }
 
     /**
@@ -180,9 +160,29 @@ class Payment
     }
 
     /**
+     * Determine if the payment was failed.
+     *
+     * @return bool
+     */
+    public function isFailure()
+    {
+        return in_array($this->transaction->result, KPayResponseStatus::FAILED_RESPONSES);
+    }
+
+    /**
+     * Determine if the payment needs an extra action like 3D Secure.
+     *
+     * @return bool
+     */
+    public function requiresAction()
+    {
+        return in_array($this->transaction->result, KPayResponseStatus::NEED_MORE_ACTION);
+    }
+
+    /**
      * Get a Carbon date for the invoice.
      *
-     * @param  DateTimeZone|string  $timezone
+     * @param DateTimeZone|string $timezone
      * @return Carbon
      */
     public function date($timezone = null)
@@ -215,7 +215,7 @@ class Payment
     /**
      * Dynamically get values from the PaymentIntent.
      *
-     * @param  string  $key
+     * @param string $key
      * @return mixed
      */
     public function __get($key)

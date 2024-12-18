@@ -20,7 +20,7 @@ class KnetTransaction extends Model
     protected $fillable = [
         'user_id', 'error_text', 'paymentid', 'paid', 'result', 'auth', 'avr', 'ref', 'tranid', 'postdate', 'trackid',
         'udf1', 'udf2', 'udf3', 'udf4', 'udf5', 'udf6', 'udf7', 'udf8', 'udf9', 'udf10', 'amt', 'error',
-        'auth_resp_code', 'livemode', 'trackid', 'url', 'card_number', 'brand_id', 'ip_address',
+        'rspcode', 'livemode', 'trackid', 'url', 'card_number', 'brand_id', 'ip_address',
     ];
 
     protected $casts = [
@@ -46,6 +46,14 @@ class KnetTransaction extends Model
         return static::where('uuid', $uuid)->firstOrFail();
     }
 
+    /**
+     * Set the customer model class name.
+     */
+    public static function useCustomerModel(string $customerModel): void
+    {
+        static::$customerModel = $customerModel;
+    }
+
     public function owner(): BelongsTo
     {
         $model = static::$customerModel;
@@ -60,14 +68,6 @@ class KnetTransaction extends Model
 
     public function hasStatus(): bool
     {
-        return !empty($this->result);
-    }
-
-    /**
-     * Set the customer model class name.
-     */
-    public static function useCustomerModel(string $customerModel): void
-    {
-        static::$customerModel = $customerModel;
+        return ! empty($this->result);
     }
 }

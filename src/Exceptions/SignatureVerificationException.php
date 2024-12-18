@@ -2,13 +2,12 @@
 
 namespace Asciisd\Knet\Exceptions;
 
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
-use Exception;
-
-class SignatureVerificationException extends Exception
+class SignatureVerificationException extends HttpException
 {
-    protected $httpBody;
-    protected $sigHeader;
+    protected ?string $httpBody;
+    protected ?string $sigHeader;
 
     /**
      * Creates a new SignatureVerificationException exception.
@@ -16,12 +15,10 @@ class SignatureVerificationException extends Exception
      * @param string $message The exception message.
      * @param string|null $httpBody The HTTP body as a string.
      * @param string|null $sigHeader The `KNet-Signature` HTTP header.
-     *
-     * @return SignatureVerificationException
      */
-    public static function factory($message, $httpBody = null, $sigHeader = null)
+    public static function factory(string $message, ?string $httpBody = null, ?string $sigHeader = null): self
     {
-        $instance = new static($message);
+        $instance = new static(403, $message);
         $instance->setHttpBody($httpBody);
         $instance->setSigHeader($sigHeader);
         return $instance;
@@ -29,41 +26,39 @@ class SignatureVerificationException extends Exception
 
     /**
      * Gets the HTTP body as a string.
-     *
-     * @return string|null
      */
-    public function getHttpBody()
+    public function getHttpBody(): ?string
     {
         return $this->httpBody;
     }
 
     /**
      * Sets the HTTP body as a string.
-     *
-     * @param string|null $httpBody
      */
-    public function setHttpBody($httpBody)
+    public function setHttpBody(?string $httpBody): self
     {
         $this->httpBody = $httpBody;
+
+        return $this;
     }
 
     /**
-     * Gets the `Stripe-Signature` HTTP header.
+     * Gets the `Knet-Signature` HTTP header.
      *
      * @return string|null
      */
-    public function getSigHeader()
+    public function getSigHeader(): ?string
     {
         return $this->sigHeader;
     }
 
     /**
-     * Sets the `Stripe-Signature` HTTP header.
-     *
-     * @param string|null $sigHeader
+     * Sets the `Knet-Signature` HTTP header.
      */
-    public function setSigHeader($sigHeader)
+    public function setSigHeader(?string $sigHeader): self
     {
         $this->sigHeader = $sigHeader;
+
+        return $this;
     }
 }
