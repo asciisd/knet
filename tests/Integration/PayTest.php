@@ -4,7 +4,7 @@ namespace Asciisd\Knet\Tests\Integration;
 
 use Asciisd\Knet\Exceptions\PaymentActionRequired;
 use Asciisd\Knet\KPayManager;
-use Asciisd\Knet\Payment;
+use Asciisd\Knet\KnetTransaction;
 
 class PayTest extends IntegrationTestCase
 {
@@ -17,10 +17,10 @@ class PayTest extends IntegrationTestCase
         try {
             $response = $user->pay(100);
         } catch (PaymentActionRequired $e) {
-            $response = $e->payment;
+            $response = $e->transaction;
         }
 
-        $this->assertInstanceOf(Payment::class, $response);
+        $this->assertInstanceOf(KnetTransaction::class, $response);
         $this->assertEquals(100, $response->rawAmount());
         $this->assertEquals($user->id, $response->owner()->id);
     }
@@ -37,7 +37,7 @@ class PayTest extends IntegrationTestCase
             'trackid' => $trackid,
         ]);
 
-        $this->assertInstanceOf(Payment::class, $response);
+        $this->assertInstanceOf(KnetTransaction::class, $response);
         $this->assertEquals($trackid, $response->trackid);
         $this->assertEquals($user->id, $response->owner()->id);
     }
@@ -57,7 +57,7 @@ class PayTest extends IntegrationTestCase
             'udf5' => 'i have some notes',
         ]);
 
-        $this->assertInstanceOf(Payment::class, $response);
+        $this->assertInstanceOf(KnetTransaction::class, $response);
         $this->assertEquals($user->id, $response->owner()->id);
 
         $this->assertEquals($user->name, $response->udf1);

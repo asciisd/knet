@@ -2,7 +2,6 @@
 
 namespace Asciisd\Knet\Providers;
 
-use Asciisd\Knet\Console\InstallCommand;
 use Asciisd\Knet\Console\KnetCommand;
 use Asciisd\Knet\Console\PublishCommand;
 use Illuminate\Support\Facades\Route;
@@ -15,9 +14,7 @@ class KnetServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-//        $this->registerLogger();
         $this->registerRoutes();
-        $this->registerResources();
         $this->registerMigrations();
         $this->registerPublishing();
     }
@@ -31,7 +28,7 @@ class KnetServiceProvider extends ServiceProvider
         $this->registerServices();
         $this->registerCommands();
 
-        if (!class_exists('Knet')) {
+        if (! class_exists('Knet')) {
             class_alias('Asciisd\Knet\Knet', 'Knet');
         }
     }
@@ -52,21 +49,12 @@ class KnetServiceProvider extends ServiceProvider
     protected function registerRoutes(): void
     {
         Route::group([
-            'prefix'    => config('knet.path'),
+            'prefix' => config('knet.path'),
             'namespace' => 'Asciisd\Knet\Http\Controllers',
-            'as'        => 'knet.',
+            'as' => 'knet.',
         ], function () {
             $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
         });
-    }
-
-    /**
-     * Register the package resources.
-     */
-    protected function registerResources(): void
-    {
-        $this->loadJsonTranslationsFrom(__DIR__.'/../../resources/lang');
-        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'knet');
     }
 
     /**
@@ -92,18 +80,6 @@ class KnetServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../../database/migrations' => $this->app->databasePath('migrations'),
             ], 'knet-migrations');
-
-            $this->publishes([
-                __DIR__.'/../../resources/views' => $this->app->resourcePath('views/vendor/knet'),
-            ], 'knet-views');
-
-            $this->publishes([
-                __DIR__.'/../../public' => public_path('vendor/knet'),
-            ], 'knet-assets');
-
-            $this->publishes([
-                __DIR__.'/../../stubs/KnetServiceProvider.stub' => app_path('Providers/KnetServiceProvider.php'),
-            ], 'knet-provider');
         }
     }
 
@@ -115,7 +91,6 @@ class KnetServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 KnetCommand::class,
-                InstallCommand::class,
                 PublishCommand::class,
             ]);
         }

@@ -3,34 +3,33 @@
 namespace Asciisd\Knet;
 
 use Asciisd\Knet\Exceptions\KnetException;
-use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
 class KPayManager extends KPayClient
 {
-    protected $id = null;
-    protected $password = null;
-    protected $action = null;
-    protected $langid = null;
-    protected $currencycode = null;
-    protected $responseURL = null;
-    protected $errorURL = null;
-    protected $amt = null;
-    protected $trackid = null;
-    protected $udf1 = null;
-    protected $udf2 = null;
-    protected $udf3 = null;
-    protected $udf4 = null;
-    protected $udf5 = null;
-    protected $user_id = null;
-    protected $result = null;
+    protected ?int $id = null;
+    protected ?string $password = null;
+    protected ?string $action = null;
+    protected ?string $langid = null;
+    protected ?string $currencycode = null;
+    protected ?string $responseURL = null;
+    protected ?string $errorURL = null;
+    protected ?string $amt = null;
+    protected ?string $trackid = null;
+    protected ?string $udf1 = null;
+    protected ?string $udf2 = null;
+    protected ?string $udf3 = null;
+    protected ?string $udf4 = null;
+    protected ?string $udf5 = null;
+    protected ?int $user_id = null;
+    protected ?string $result = null;
 
     // url params
-    protected $trandata = null;
-    protected $tranportalId = null;
-    protected $reqParams = ['trandata', 'tranportalId', 'responseURL', 'errorURL'];
-    private $paramsToEncrypt = [
+    protected ?string $trandata = null;
+    protected ?string $tranportalId = null;
+    protected array $reqParams = ['trandata', 'tranportalId', 'responseURL', 'errorURL'];
+    private array $paramsToEncrypt = [
         'id', 'password', 'action', 'langid', 'currencycode', 'amt', 'responseURL', 'errorURL', 'trackid', 'udf1',
         'udf2', 'udf3', 'udf4', 'udf5',
     ];
@@ -51,14 +50,14 @@ class KPayManager extends KPayClient
      *
      * @throws KnetException
      */
-    private function checkForResourceKey()
+    private function checkForResourceKey(): void
     {
         if (config('knet.resource_key') == null) {
             throw KnetException::missingResourceKey();
         }
     }
 
-    private function initiatePaymentConfig()
+    private function initiatePaymentConfig(): void
     {
         $this->id = config('knet.transport.id');
         $this->tranportalId = config('knet.transport.id');
@@ -111,9 +110,6 @@ class KPayManager extends KPayClient
         return $this;
     }
 
-    /**
-     * @throws KnetException
-     */
     public static function inquiry($amt, $trackid): array
     {
         $paymentUrl = self::getEnvInquiryUrl();
@@ -146,7 +142,7 @@ class KPayManager extends KPayClient
         $url = config('knet.development_inquiry_url');
 
         if (App::environment(['production'])) {
-            if (! env('KNET_DEBUG')) {
+            if (! config('knet.debug')) {
                 $url = config('knet.production_inquiry_url');
             }
         }
@@ -155,39 +151,19 @@ class KPayManager extends KPayClient
     }
 
     /**
-     * @param $amount
-     * @param $trackid
-     *
-     * @return $this
-     * @throws KnetException
+     * @throws \Exception
      */
     public static function refund($amount, $trackid)
     {
-        throw new Exception('this method not yet supported by api');
-
-        $options['amt'] = $amount;
-        $options['trackid'] = $trackid;
-
-        $new_instance = (new self)->fillPaymentWithOptions($options);
-        $new_instance->action = 2;
-
-        return $new_instance;
+        throw new \Exception('this method not yet supported by api');
     }
 
     /**
-     * @throws KnetException
+     * @throws \Exception
      */
     public static function void($amount, $trackid): self
     {
-        throw new Exception('this method not yet supported by api');
-
-        $options['amt'] = $amount;
-        $options['trackid'] = $trackid;
-
-        $new_instance = (new self)->fillPaymentWithOptions($options);
-        $new_instance->action = 3;
-
-        return $new_instance;
+        throw new \Exception('this method not yet supported by api');
     }
 
     public function inquiryUrl(): string
@@ -195,18 +171,16 @@ class KPayManager extends KPayClient
         return 'https://kpaytest.com.kw/kpg/inquiry/PaymentHTTP.htm&'.$this->urlParams();
     }
 
-    private function urlParams()
+    private function urlParams(): string
     {
         $this->setTranData();
 
         return $this->setAsKeyAndValue($this->reqParams);
     }
 
-    private function setTranData()
+    private function setTranData(): void
     {
         $this->trandata = $this->encryptedParams();
-
-        return $this;
     }
 
     private function setAsKeyAndValue($arrOfKeys): string
@@ -252,7 +226,7 @@ class KPayManager extends KPayClient
 
     public function livemode(): bool
     {
-        return App::environment(['production']) && ! env('KNET_DEBUG');
+        return App::environment(['production']) && ! config('knet.debug');
     }
 
     public function url(): string
@@ -265,7 +239,7 @@ class KPayManager extends KPayClient
         $url = config('knet.development_url');
 
         if (App::environment(['production'])) {
-            if (! env('KNET_DEBUG')) {
+            if (! config('knet.debug')) {
                 $url = config('knet.production_url');
             }
         }

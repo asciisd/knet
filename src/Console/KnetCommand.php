@@ -34,19 +34,17 @@ class KnetCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         if ($this->check_for_transport_id() && $this->check_for_resource_key() && $this->check_for_transport_password()) {
             $this->info('Everything Is OK, you can start receive knet payments');
         }
     }
 
-    private function check_for_transport_id()
+    private function check_for_transport_id(): bool
     {
-        if (env('KENT_TRANSPORT_ID') == null) {
+        if (config('knet.transport.id') == null) {
             $this->error('Missing TRANSPORT ID');
             return false;
         }
@@ -54,20 +52,20 @@ class KnetCommand extends Command
         return true;
     }
 
-    private function check_for_transport_password()
+    private function check_for_resource_key(): bool
     {
-        if (env('KENT_TRANSPORT_PASSWORD') == null) {
-            $this->error('Missing TRANSPORT PASSWORD');
+        if (config('knet.resource_key') == null) {
+            $this->error('Missing RESOURCE KEY');
             return false;
         }
 
         return true;
     }
 
-    private function check_for_resource_key()
+    private function check_for_transport_password(): bool
     {
-        if (env('KENT_RESOURCE_KEY') == null) {
-            $this->error('Missing RESOURCE KEY');
+        if (config('knet.transport.password') == null) {
+            $this->error('Missing TRANSPORT PASSWORD');
             return false;
         }
 

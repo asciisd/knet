@@ -137,4 +137,31 @@ return [
     |
     */
     'language' => env('KENT_LANGUAGE', 'EN'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Debug mode
+    |--------------------------------------------------------------------------
+    |
+    | Sometimes you may need to use test credentials in production, or vice versa.
+    |
+    | So you can change this to true to use the development url in production.
+    |
+    */
+    'debug' => env('KNET_DEBUG', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Conversion currency
+    |--------------------------------------------------------------------------
+    |
+    | Sometimes you may need to use invoice, but you want to put another currency.
+    |
+    | as converted currency with conversion rate, so you can use any currency and
+    | use the dependency injection to change the rate depends on api you use
+    |
+    */
+    'conversion_currency' => env('KENT_CONVERSION_CURRENCY', 'KWD'),
+    'conversion_rate' => env('KENT_CONVERSION_RATE', 1),
+    'conversion_bank' => env('KENT_CONVERSION_BANK', 'KFH'),
 ];

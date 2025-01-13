@@ -16,13 +16,19 @@ class KPayResponseHandler extends KPayClient
 
     public function __construct(public array $transaction, Request $request)
     {
-        $this->transaction['paid'] = $this->transaction['result'] == 'CAPTURED';
-        $this->transaction['error_text'] = $request->input('ErrorText');
-        $this->transaction['error'] =  $request->input('Error');
-        $this->transaction['rspcode'] =  $request->input('rspcode');
+        logger('Request:', $request->all());
+        logger()->info('Transaction:', $transaction);
 
-        if (! $this->transaction['paid']) {
-            $this->handleError($request->all());
+        $this->transaction['paid'] = $this->transaction['result'] == 'CAPTURED';
+
+        if ($request->has('error')) {
+            $this->transaction['error_text'] = $request->input('ErrorText');
+            $this->transaction['error'] = $request->input('Error');
+            $this->transaction['rspcode'] = $request->input('rspcode');
+
+            if (! $this->transaction['paid']) {
+                $this->handleError($request->all());
+            }
         }
     }
 

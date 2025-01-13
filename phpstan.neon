@@ -2,7 +2,6 @@ parameters:
         paths:
         - config
         - database
-        - resources
         - routes
         - src
 

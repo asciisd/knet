@@ -2,17 +2,17 @@
 
 namespace Asciisd\Knet\Exceptions;
 
-use Asciisd\Knet\Payment;
+use Asciisd\Knet\KnetTransaction;
 
 class PaymentActionRequired extends IncompletePayment
 {
     /**
      * Create a new PaymentActionRequired instance.
      */
-    public static function incomplete(Payment $payment): self
+    public static function incomplete(KnetTransaction $transaction): self
     {
         return new static(
-            $payment,
+            $transaction,
             'The payment attempt failed because additional action is required before it can be completed.'
         );
     }

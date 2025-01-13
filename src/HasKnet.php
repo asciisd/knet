@@ -11,19 +11,13 @@ trait HasKnet
      * @throws Exceptions\PaymentActionRequired
      * @throws Exceptions\PaymentFailure
      */
-    public function pay(int $amount, array $options = []): Payment
+    public function pay(int $amount, array $options = []): KnetTransaction
     {
         $options['user_id'] = $options['user_id'] ?? $this->id ?? auth()->id();
 
         $knet = KPayManager::make($amount, $options);
 
-        $payment = new Payment(
-            KnetTransaction::create($knet->toArray())
-        );
-
-        $payment->validate();
-
-        return $payment;
+        return KnetTransaction::create($knet->toArray());
     }
 
     /**

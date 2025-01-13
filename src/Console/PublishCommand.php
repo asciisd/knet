@@ -30,16 +30,6 @@ class PublishCommand extends Command
     public function handle(): void
     {
         $this->call('vendor:publish', [
-            '--tag' => 'knet-assets',
-            '--force' => $this->option('force'),
-        ]);
-
-        $this->call('vendor:publish', [
-            '--tag' => 'knet-views',
-            '--force' => $this->option('force'),
-        ]);
-
-        $this->call('vendor:publish', [
             '--tag' => 'knet-config',
             '--force' => $this->option('force'),
         ]);

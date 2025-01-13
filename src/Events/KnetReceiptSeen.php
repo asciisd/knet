@@ -2,7 +2,7 @@
 
 namespace Asciisd\Knet\Events;
 
-use Asciisd\Knet\Payment;
+use Asciisd\Knet\KnetTransaction;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -14,10 +14,10 @@ class KnetReceiptSeen
     /**
      * Create a new event instance.
      *
-     * @param Payment $payment
+     * @param KnetTransaction $transaction
      * @return void
      */
-    public function __construct(public Payment $payment)
+    public function __construct(public KnetTransaction $transaction)
     {
         //
     }

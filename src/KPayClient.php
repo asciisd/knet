@@ -49,9 +49,7 @@ class KPayClient
         $encrypted = base64_decode($encrypted);
         $encrypted = unpack('C*', ($encrypted));
         $encrypted = self::byteArray2Hex($encrypted);
-        $encrypted = urlencode($encrypted);
-
-        return $encrypted;
+        return urlencode($encrypted);
     }
 
     public static function pkcs5_pad($text): string
