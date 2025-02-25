@@ -19,19 +19,26 @@ class VerifyKnetResponseSignature
      */
     public function handle(Request $request, Closure $next): Response
     {
+        logger()->info('Knet Response Signature Verification Middleware', [
+            'request' => $request->all(),
+            'content' => $request->getContent(),
+        ]);
+
         $trandata = $request->getContent();
 
+        if (! $trandata) {
+            throw new AccessDeniedHttpException('Invalid Request');
+        }
+
         // Decrypt Content and verify signature if exists
-        if ($trandata) {
-            $payload = KPayClient::decryptAES($trandata, config('knet.resource_key'));
+        $payload = KPayClient::decryptAES($trandata, config('knet.resource_key'));
 
-            parse_str($payload, $payloadArray);
+        parse_str($payload, $payloadArray);
 
-            try {
-                KnetResponseSignature::verifyHeader($payload, $request->headers, $payloadArray['trackid']);
-            } catch (SignatureVerificationException $exception) {
-                throw new AccessDeniedHttpException($exception->getMessage(), $exception);
-            }
+        try {
+            KnetResponseSignature::verifyHeader($payload, $request->headers, $payloadArray['trackid']);
+        } catch (SignatureVerificationException $exception) {
+            throw new AccessDeniedHttpException($exception->getMessage(), $exception);
         }
 
         return $next($request);
