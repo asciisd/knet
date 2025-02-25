@@ -2,6 +2,7 @@
 
 namespace Asciisd\Knet\Http\Controllers;
 
+use Asciisd\Knet\Events\KnetResponseReceived;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
@@ -11,12 +12,10 @@ class HandleController extends Controller
     {
         logger()->info('HandleController | Knet Response: ', $request->all());
 
-        $baseUrl = config('knet.redirect_url');
-        $params = [
-            'paymentid' => $request->paymentid,
-            'result' => $request->result,
-        ];
+        KnetResponseReceived::dispatch($request->all());
 
-        echo "REDIRECT=" . redirect($baseUrl.'?'.http_build_query($params))->getTargetUrl();
+        $baseUrl = config('knet.redirect_url');
+
+        echo "REDIRECT=" . redirect($baseUrl)->getTargetUrl();
     }
 }
