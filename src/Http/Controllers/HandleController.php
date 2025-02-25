@@ -20,6 +20,6 @@ class HandleController extends Controller
 
         $baseUrl = config('knet.redirect_url');
 
-        echo "REDIRECT=" . redirect($baseUrl)->getTargetUrl();
+        echo "REDIRECT=" . redirect($baseUrl)->getTargetUrl() . '&paymentId=' . $payloadArray['paymentId'];
     }
 }
