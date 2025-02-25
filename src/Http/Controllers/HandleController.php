@@ -9,6 +9,8 @@ class HandleController extends Controller
 {
     public function __invoke(Request $request)
     {
+        logger()->info('HandleController | Knet Response: ', $request->all());
+
         $baseUrl = config('knet.redirect_url');
         $params = [
             'paymentid' => $request->paymentid,
