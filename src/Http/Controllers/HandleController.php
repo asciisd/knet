@@ -17,6 +17,6 @@ class HandleController extends Controller
             'result' => $request->result,
         ];
 
-        echo redirect($baseUrl.'?'.http_build_query($params))->getTargetUrl();
+        echo "REDIRECT=" . redirect($baseUrl.'?'.http_build_query($params))->getTargetUrl();
     }
 }
