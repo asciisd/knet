@@ -27,6 +27,9 @@ class VerifyKnetResponseSignature
         $trandata = $request->getContent();
 
         if (! $trandata) {
+            logger()->error('Knet Response Signature Verification Failed', [
+                'message' => 'Invalid Request',
+            ]);
             throw new AccessDeniedHttpException('Invalid Request');
         }
 
@@ -38,6 +41,10 @@ class VerifyKnetResponseSignature
         try {
             KnetResponseSignature::verifyHeader($payload, $request->headers, $payloadArray['trackid']);
         } catch (SignatureVerificationException $exception) {
+            logger()->error('Knet Response Signature Verification Failed', [
+                'exception' => $exception,
+                'payload' => $payload
+            ]);
             throw new AccessDeniedHttpException($exception->getMessage(), $exception);
         }
 

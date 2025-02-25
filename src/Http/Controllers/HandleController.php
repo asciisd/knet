@@ -15,6 +15,6 @@ class HandleController extends Controller
             'result' => $request->result,
         ];
 
-        return redirect($baseUrl.'?'.http_build_query($params));
+        echo redirect($baseUrl.'?'.http_build_query($params));
     }
 }
