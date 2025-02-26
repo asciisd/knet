@@ -6,26 +6,34 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class SignatureVerificationException extends HttpException
 {
-    protected ?string $httpBody;
-    protected ?string $sigHeader;
+    private ?string $httpBody;
+    private ?string $sigHeader;
 
     /**
-     * Creates a new SignatureVerificationException exception.
+     * Creates a new SignatureVerificationException instance.
      *
      * @param string $message The exception message.
      * @param string|null $httpBody The HTTP body as a string.
      * @param string|null $sigHeader The `KNet-Signature` HTTP header.
      */
-    public static function factory(string $message, ?string $httpBody = null, ?string $sigHeader = null): self
+    public function __construct(string $message, ?string $httpBody = null, ?string $sigHeader = null)
     {
-        $instance = new static(403, $message);
-        $instance->setHttpBody($httpBody);
-        $instance->setSigHeader($sigHeader);
-        return $instance;
+        parent::__construct(403, $message);
+
+        $this->httpBody = $httpBody;
+        $this->sigHeader = $sigHeader;
     }
 
     /**
-     * Gets the HTTP body as a string.
+     * Creates a new instance of SignatureVerificationException.
+     */
+    public static function factory(string $message, ?string $httpBody = null, ?string $sigHeader = null): self
+    {
+        return new self($message, $httpBody, $sigHeader);
+    }
+
+    /**
+     * Gets the HTTP body.
      */
     public function getHttpBody(): ?string
     {
@@ -33,32 +41,10 @@ class SignatureVerificationException extends HttpException
     }
 
     /**
-     * Sets the HTTP body as a string.
-     */
-    public function setHttpBody(?string $httpBody): self
-    {
-        $this->httpBody = $httpBody;
-
-        return $this;
-    }
-
-    /**
      * Gets the `Knet-Signature` HTTP header.
-     *
-     * @return string|null
      */
     public function getSigHeader(): ?string
     {
         return $this->sigHeader;
-    }
-
-    /**
-     * Sets the `Knet-Signature` HTTP header.
-     */
-    public function setSigHeader(?string $sigHeader): self
-    {
-        $this->sigHeader = $sigHeader;
-
-        return $this;
     }
 }

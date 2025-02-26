@@ -4,83 +4,127 @@ namespace Asciisd\Knet;
 
 use Illuminate\Http\Request;
 
-class KPayResponseHandler extends KPayClient
+class KPayResponseHandler
 {
+    private array $transaction;
     private ?string $error = null;
     private string $error_code = '';
 
-    public static function make(array $payloadArray, Request $request): static
+    /**
+     * Factory method to create a new instance.
+     */
+    public static function make(array $payloadArray, Request $request): self
     {
-        return new static($payloadArray, $request);
+        return new self($payloadArray, $request);
     }
 
-    public function __construct(public array $transaction, Request $request)
+    /**
+     * KPayResponseHandler Constructor.
+     */
+    public function __construct(array $transaction, Request $request)
     {
-        logger('Request:', $request->all());
-        logger()->info('Transaction:', $transaction);
+        logger()->info('Request Data:', $request->all());
+        logger()->info('Transaction Data:', $transaction);
 
-        $this->transaction['paid'] = $this->transaction['result'] == 'CAPTURED';
+        $this->transaction = $transaction;
+        $this->setPaymentStatus();
 
         if ($request->has('error')) {
-            $this->transaction['error_text'] = $request->input('ErrorText');
-            $this->transaction['error'] = $request->input('Error');
-            $this->transaction['rspcode'] = $request->input('rspcode');
-
-            if (! $this->transaction['paid']) {
-                $this->handleError($request->all());
-            }
+            $this->setTransactionError($request);
         }
     }
 
-    public function handleError(array $error): void
+    /**
+     * Sets the payment status based on the transaction result.
+     */
+    private function setPaymentStatus(): void
     {
-        $this->transaction['result'] = 'FAILED';
-        $this->error_code = $error['Error'];
-        $this->error = $error['ErrorText'];
+        $this->transaction['paid'] = ($this->transaction['result'] ?? '') === 'CAPTURED';
     }
 
-    private function decrypt($tranData): string
+    /**
+     * Handles errors in the transaction response.
+     */
+    private function setTransactionError(Request $request): void
     {
-        return $this->decryptAES($tranData, config('knet.resource_key'));
+        $this->error_code = $request->input('Error', '');
+        $this->error = $request->input('ErrorText', '');
+        $this->transaction['rspcode'] = $request->input('rspcode', '');
+
+        if (! $this->transaction['paid']) {
+            $this->transaction['result'] = 'FAILED';
+        }
     }
 
-    public function __toString()
+    /**
+     * Decrypts transaction data.
+     */
+    private function decrypt(string $tranData): string
     {
-        return json_encode($this->transaction);
+        return KPayClient::decryptAES($tranData, config('knet.resource_key'));
     }
 
+    /**
+     * Converts the transaction data to an array.
+     */
     public function toArray(): array
     {
         return $this->transaction;
     }
 
+    /**
+     * Converts the transaction data to a JSON string.
+     */
+    public function __toString(): string
+    {
+        return json_encode($this->transaction, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Checks if the transaction has errors.
+     */
+    public function hasErrors(): bool
+    {
+        return !empty($this->error);
+    }
+
+    /**
+     * Gets the error message.
+     */
     public function error(): ?string
     {
         return $this->error;
     }
 
-    public function hasErrors(): bool
-    {
-        return ! is_null($this->error);
-    }
-
+    /**
+     * Gets the error code.
+     */
     public function errorCode(): string
     {
         return $this->error_code;
     }
 
+    /**
+     * Checks if the transaction is a duplicate.
+     */
     public function isDuplicated(): bool
     {
-        return $this->error_code == 'IPAY0100114';
+        return $this->error_code === 'IPAY0100114';
     }
 
+    /**
+     * Checks if the transaction has an invalid payment status.
+     */
     public function isInvalidPaymentStatus(): bool
     {
-        return $this->error_code == 'IPAY0100055';
+        return $this->error_code === 'IPAY0100055';
     }
 
-    public function __get($name)
+    /**
+     * Getter method for transaction properties.
+     */
+    public function getTransactionProperty(string $name)
     {
-        return $this->transaction[$name];
+        return $this->transaction[$name] ?? null;
     }
 }
