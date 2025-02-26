@@ -2,20 +2,20 @@
 
 namespace Asciisd\Knet\Http\Middleware;
 
-use Asciisd\Knet\Exceptions\SignatureVerificationException;
-use Asciisd\Knet\KnetResponseSignature;
+use Asciisd\Knet\KnetTransaction;
 use Asciisd\Knet\Services\KnetResponseService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class VerifyKnetResponseSignature
 {
     /**
      * Handle an incoming request.
      *
-     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
+     * @param Request $request
+     * @param Closure(Request): Response $next
+     * @return Response
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -23,22 +23,24 @@ class VerifyKnetResponseSignature
             'content' => $request->getContent(),
         ]);
 
-        try {
-            $payloadArray = KnetResponseService::decryptAndParse($request);
+        $payloadArray = KnetResponseService::decryptAndParse($request);
 
-            KnetResponseSignature::verifyHeader(
-                http_build_query($payloadArray),
-                $request->headers,
-                $payloadArray['trackid']
-            );
-
-        } catch (SignatureVerificationException $exception) {
-            logger()->error('Knet Response Signature Verification Failed', [
-                'exception' => $exception,
-            ]);
-            throw new AccessDeniedHttpException($exception->getMessage(), $exception);
+        if (! $this->isValidResponse($payloadArray)) {
+            logger()->error('Knet Response Signature Verification Failed', $payloadArray);
+            abort(403, 'Knet Response Signature Verification Failed');
         }
 
         return $next($request);
+    }
+
+    /**
+     * Validate the response signature.
+     *
+     * @param array $payloadArray
+     * @return bool
+     */
+    private function isValidResponse(array $payloadArray): bool
+    {
+        return isset($payloadArray['trackid']) && KnetTransaction::findByTrackId($payloadArray['trackid']) !== null;
     }
 }
