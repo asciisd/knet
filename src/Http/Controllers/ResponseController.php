@@ -16,11 +16,13 @@ class ResponseController extends Controller
 {
     public function __invoke(Request $request)
     {
+        logger()->info('ResponseController | Knet Header: ', $request->header());
+        logger()->info($request->getContent());
+
         // Decrypt and parse response
         $payloadArray = KnetResponseService::decryptAndParse($request);
 
         logger()->info('ResponseController | Knet Response: ', $payloadArray);
-        logger()->info('ResponseController | Knet Header: ', $request->header());
 
         // Dispatch received event
         KnetResponseReceived::dispatch($payloadArray);
