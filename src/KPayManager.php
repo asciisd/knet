@@ -4,7 +4,6 @@ namespace Asciisd\Knet;
 
 use Asciisd\Knet\Config\KnetConfig;
 use Asciisd\Knet\Exceptions\KnetException;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
 class KPayManager extends KPayClient
@@ -123,11 +122,9 @@ class KPayManager extends KPayClient
     {
         $url = config('knet.development_inquiry_url');
 
-//        if (App::environment(['production'])) {
-            if (! config('knet.debug')) {
-                $url = config('knet.production_inquiry_url');
-            }
-//        }
+        if (! config('knet.debug')) {
+            $url = config('knet.production_inquiry_url');
+        }
 
         return $url.'?param=tranInit';
     }
@@ -198,7 +195,7 @@ class KPayManager extends KPayClient
     {
         return [
             'trackid' => $this->trackid,
-            'livemode' => !$this->config->isDebugMode(),
+            'livemode' => ! $this->config->isDebugMode(),
             'result' => $this->result,
             'user_id' => $this->user_id,
             'amt' => $this->amt,

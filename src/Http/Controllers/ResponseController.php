@@ -12,14 +12,16 @@ use Illuminate\Routing\Controller;
 class ResponseController extends Controller
 {
     public function __construct(
-        private readonly KnetPaymentService $paymentService,
+        private readonly KnetPaymentService  $paymentService,
         private readonly KnetResponseService $responseService
-    ) {}
+    )
+    {
+    }
 
     public function __invoke(Request $request)
     {
         try {
-            logger()->info("Request Method: " . $request->method());
+            logger()->info("Request Method: ".$request->method());
 
             // Log incoming request
             logger()->info('Knet Response:', [
@@ -39,8 +41,11 @@ class ResponseController extends Controller
             // Dispatch handled event
             KnetResponseHandled::dispatch($payload);
 
-            // Redirect to handler
-            return response('REDIRECT=' . route('knet.handle'));
+            logger()->info("ResponseController | Dispatch KnetResponseHandled", [
+                'transaction' => $transaction
+            ]);
+
+            $response = 'REDIRECT='.route('knet.handle');
 
         } catch (\Exception $e) {
             logger()->error('Knet Response Error:', [
@@ -48,10 +53,10 @@ class ResponseController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return redirect()->route('knet.error', [
-                'error' => 'Payment processing failed',
-                'error_text' => $e->getMessage()
-            ]);
+            $response = 'REDIRECT='.route('knet.error')."?error=Payment processing failed&error_text=".$e->getMessage();
         }
+
+        // Redirect to handler
+        return $response;
     }
 }

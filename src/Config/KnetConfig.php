@@ -31,7 +31,7 @@ class KnetConfig
 
     public function getPaymentUrl(): string
     {
-        if ($this->isDebugMode() || app()->environment('local')) {
+        if ($this->isDebugMode()) {
             return $this->config['development_url'];
         }
         return $this->config['production_url'];
@@ -51,4 +51,4 @@ class KnetConfig
             throw new \InvalidArgumentException('Knet resource key is required');
         }
     }
-} 
+}
