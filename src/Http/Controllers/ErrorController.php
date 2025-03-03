@@ -19,16 +19,16 @@ class ErrorController extends Controller
 
         // Log the error
         logger()->error('Knet Payment Error:', $errorData);
-        logger()->error('ErrorController | Request', $request->all());
+        logger()->error($request->getMethod().' | ErrorController | Request', $request->all());
 
         // Dispatch payment failed event
         KnetPaymentFailed::dispatch($request, "Payment processing failed");
 
         // Redirect with error data
         return redirect(config('knet.redirect_url'))
+            ->with('knet_error', $errorData)
             ->withErrors([
                 'payment_error' => $request->error_text ?? 'Payment processing failed',
-            ])
-            ->with('knet_error', $errorData);
+            ]);
     }
 }

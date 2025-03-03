@@ -21,10 +21,8 @@ class ResponseController extends Controller
     public function __invoke(Request $request)
     {
         try {
-            logger()->info("Request Method: ".$request->method());
-
             // Log incoming request
-            logger()->info('Knet Response:', [
+            logger()->info($request->getMethod().' | ResponseController | Knet Response:', [
                 'headers' => $request->header(),
                 'content' => $request->getContent()
             ]);
@@ -34,6 +32,10 @@ class ResponseController extends Controller
 
             // Dispatch received event
             KnetResponseReceived::dispatch($payload);
+
+            logger()->info("ResponseController | Dispatch KnetResponseReceived", [
+                'payload' => $payload
+            ]);
 
             // Process payment
             $transaction = $this->paymentService->handlePaymentResponse($payload);
