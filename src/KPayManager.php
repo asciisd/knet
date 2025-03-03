@@ -123,11 +123,11 @@ class KPayManager extends KPayClient
     {
         $url = config('knet.development_inquiry_url');
 
-        if (App::environment(['production'])) {
+//        if (App::environment(['production'])) {
             if (! config('knet.debug')) {
                 $url = config('knet.production_inquiry_url');
             }
-        }
+//        }
 
         return $url.'?param=tranInit';
     }

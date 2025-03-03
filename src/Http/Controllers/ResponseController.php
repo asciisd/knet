@@ -19,6 +19,8 @@ class ResponseController extends Controller
     public function __invoke(Request $request)
     {
         try {
+            logger()->info("Request Method: " . $request->method());
+
             // Log incoming request
             logger()->info('Knet Response:', [
                 'headers' => $request->header(),
@@ -27,7 +29,7 @@ class ResponseController extends Controller
 
             // Decrypt and parse response
             $payload = $this->responseService->decryptAndParse($request);
-            
+
             // Dispatch received event
             KnetResponseReceived::dispatch($payload);
 
