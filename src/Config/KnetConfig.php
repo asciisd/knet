@@ -31,7 +31,7 @@ class KnetConfig
 
     public function getPaymentUrl(): string
     {
-        if ($this->isDebugMode()) {
+        if ($this->isDebugMode() || app()->environment('local')) {
             return $this->config['development_url'];
         }
         return $this->config['production_url'];

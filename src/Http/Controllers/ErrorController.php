@@ -22,7 +22,7 @@ class ErrorController extends Controller
         logger()->error('ErrorController | Request', $request->all());
 
         // Dispatch payment failed event
-//        KnetPaymentFailed::dispatch($errorData);
+        KnetPaymentFailed::dispatch($request, "Payment processing failed");
 
         // Redirect with error data
         return redirect(config('knet.redirect_url'))
