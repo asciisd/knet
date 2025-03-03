@@ -20,7 +20,3 @@ Route::post('/error', ErrorController::class)->name('error');
 Route::middleware([VerifyKnetResponseSignature::class])
     ->post('/response', ResponseController::class)
     ->name('response');
-
-Route::middleware([VerifyKnetResponseSignature::class])
-    ->get('/response', ResponseController::class)
-    ->name('response');
