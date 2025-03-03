@@ -10,8 +10,7 @@ class KnetResponseHandled
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public function __construct(public array $payload)
-    {
-        //
-    }
+    public function __construct(
+        public readonly array $payload
+    ) {}
 }

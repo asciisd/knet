@@ -6,6 +6,8 @@ use Asciisd\Knet\Console\KnetCommand;
 use Asciisd\Knet\Console\PublishCommand;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Asciisd\Knet\Config\KnetConfig;
+use Asciisd\Knet\Console\InstallCommand;
 
 class KnetServiceProvider extends ServiceProvider
 {
@@ -25,6 +27,11 @@ class KnetServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->configure();
+        
+        $this->app->singleton(KnetConfig::class, function ($app) {
+            return new KnetConfig(config('knet'));
+        });
+
         $this->registerServices();
         $this->registerCommands();
 
@@ -90,6 +97,7 @@ class KnetServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
+                InstallCommand::class,
                 KnetCommand::class,
                 PublishCommand::class,
             ]);

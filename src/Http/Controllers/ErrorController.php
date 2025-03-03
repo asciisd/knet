@@ -2,6 +2,7 @@
 
 namespace Asciisd\Knet\Http\Controllers;
 
+use Asciisd\Knet\Events\KnetPaymentFailed;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
@@ -9,11 +10,24 @@ class ErrorController extends Controller
 {
     public function __invoke(Request $request)
     {
-        $params = [
+        $errorData = [
             'paymentid' => $request->paymentid,
             'result' => $request->result,
+            'error' => $request->error,
+            'error_text' => $request->error_text,
         ];
 
-        return redirect(config('knet.redirect_url').'?'.http_build_query($params));
+        // Log the error
+        logger()->error('Knet Payment Error:', $errorData);
+
+        // Dispatch payment failed event
+        KnetPaymentFailed::dispatch($errorData);
+
+        // Redirect with error data
+        return redirect(config('knet.redirect_url'))
+            ->withErrors([
+                'payment_error' => $request->error_text ?? 'Payment processing failed',
+            ])
+            ->with('knet_error', $errorData);
     }
 }

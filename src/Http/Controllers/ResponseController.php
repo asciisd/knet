@@ -4,48 +4,52 @@ namespace Asciisd\Knet\Http\Controllers;
 
 use Asciisd\Knet\Events\KnetResponseHandled;
 use Asciisd\Knet\Events\KnetResponseReceived;
-use Asciisd\Knet\Events\KnetTransactionHasErrors;
-use Asciisd\Knet\Events\KnetTransactionUpdated;
-use Asciisd\Knet\KnetTransaction;
-use Asciisd\Knet\KPayResponseHandler;
+use Asciisd\Knet\Services\KnetPaymentService;
 use Asciisd\Knet\Services\KnetResponseService;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
 class ResponseController extends Controller
 {
+    public function __construct(
+        private readonly KnetPaymentService $paymentService,
+        private readonly KnetResponseService $responseService
+    ) {}
+
     public function __invoke(Request $request)
     {
-        logger()->info('ResponseController | Knet Header: ', $request->header());
-        logger()->info($request->getContent());
+        try {
+            // Log incoming request
+            logger()->info('Knet Response:', [
+                'headers' => $request->header(),
+                'content' => $request->getContent()
+            ]);
 
-        // Decrypt and parse response
-        $payloadArray = KnetResponseService::decryptAndParse($request);
+            // Decrypt and parse response
+            $payload = $this->responseService->decryptAndParse($request);
+            
+            // Dispatch received event
+            KnetResponseReceived::dispatch($payload);
 
-        logger()->info('ResponseController | Knet Response: ', $payloadArray);
+            // Process payment
+            $transaction = $this->paymentService->handlePaymentResponse($payload);
 
-        // Dispatch received event
-        KnetResponseReceived::dispatch($payloadArray);
+            // Dispatch handled event
+            KnetResponseHandled::dispatch($payload);
 
-        // Handle Knet response
-        $knetResponseHandler = KPayResponseHandler::make($payloadArray, $request);
+            // Redirect to handler
+            return response('REDIRECT=' . route('knet.handle'));
 
-        // Find transaction by track ID
-        $transaction = KnetTransaction::findByTrackId($payloadArray['trackid']);
+        } catch (\Exception $e) {
+            logger()->error('Knet Response Error:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
-        // Update transaction
-        $transaction->forceFill($knetResponseHandler->toArray())->save();
-        KnetTransactionUpdated::dispatch($transaction);
-
-        // Handle duplicated response or invalid status
-        if (($knetResponseHandler->isDuplicated() || $knetResponseHandler->isInvalidPaymentStatus())
-            && $transaction->isCaptured()) {
-            KnetTransactionHasErrors::dispatch($transaction);
+            return redirect()->route('knet.error', [
+                'error' => 'Payment processing failed',
+                'error_text' => $e->getMessage()
+            ]);
         }
-
-        // Dispatch response handled event
-        KnetResponseHandled::dispatch($knetResponseHandler->toArray());
-
-        echo 'REDIRECT='.route('knet.handle');
     }
 }

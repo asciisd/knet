@@ -2,6 +2,8 @@
 
 namespace Asciisd\Knet;
 
+use Asciisd\Knet\Events\KnetTransactionCreated;
+use Asciisd\Knet\Events\KnetTransactionUpdated;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -26,6 +28,11 @@ class KnetTransaction extends Model
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+    ];
+
+    protected $dispatchesEvents = [
+        'created' => KnetTransactionCreated::class,
+        'updated' => KnetTransactionUpdated::class,
     ];
 
     /**

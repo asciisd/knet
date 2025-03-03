@@ -2,6 +2,7 @@
 
 namespace Asciisd\Knet\Console;
 
+use Asciisd\Knet\Config\KnetConfig;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 
@@ -20,7 +21,7 @@ class KnetCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Check if everything is ok or not';
+    protected $description = 'Check Knet configuration and requirements';
 
     /**
      * Create a new command instance.
@@ -35,40 +36,94 @@ class KnetCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(KnetConfig $config): int
     {
-        if ($this->check_for_transport_id() && $this->check_for_resource_key() && $this->check_for_transport_password()) {
-            $this->info('Everything Is OK, you can start receive knet payments');
+        $this->info('Checking Knet configuration...');
+
+        try {
+            // Check required configuration
+            $this->checkConfiguration($config);
+            
+            // Check database migrations
+            $this->checkMigrations();
+
+            // Check routes
+            $this->checkRoutes();
+
+            $this->newLine();
+            $this->info('✓ Everything is configured correctly! You can start processing Knet payments.');
+            
+            return self::SUCCESS;
+
+        } catch (\Exception $e) {
+            $this->newLine();
+            $this->error('✗ ' . $e->getMessage());
+            
+            return self::FAILURE;
         }
     }
 
-    private function check_for_transport_id(): bool
+    private function checkConfiguration(KnetConfig $config): void
     {
-        if (config('knet.transport.id') == null) {
-            $this->error('Missing TRANSPORT ID');
-            return false;
-        }
+        $this->components->task('Checking Transport ID', function() use ($config) {
+            if (empty($config->getTransportId())) {
+                throw new \Exception('Missing KENT_TRANSPORT_ID in environment variables');
+            }
+            return true;
+        });
 
-        return true;
+        $this->components->task('Checking Transport Password', function() use ($config) {
+            if (empty($config->getTransportPassword())) {
+                throw new \Exception('Missing KENT_TRANSPORT_PASSWORD in environment variables');
+            }
+            return true;
+        });
+
+        $this->components->task('Checking Resource Key', function() use ($config) {
+            if (empty($config->getResourceKey())) {
+                throw new \Exception('Missing KENT_RESOURCE_KEY in environment variables');
+            }
+            return true;
+        });
+
+        $this->components->task('Checking Debug Mode', function() use ($config) {
+            if ($config->isDebugMode() && app()->environment('production')) {
+                $this->warn('Warning: Debug mode is enabled in production environment');
+            }
+            return true;
+        });
     }
 
-    private function check_for_resource_key(): bool
+    private function checkMigrations(): void
     {
-        if (config('knet.resource_key') == null) {
-            $this->error('Missing RESOURCE KEY');
-            return false;
-        }
-
-        return true;
+        $this->components->task('Checking Database Migrations', function() {
+            if (!$this->hasRunMigrations()) {
+                throw new \Exception('Knet migrations have not been run. Please run: php artisan migrate');
+            }
+            return true;
+        });
     }
 
-    private function check_for_transport_password(): bool
+    private function checkRoutes(): void
     {
-        if (config('knet.transport.password') == null) {
-            $this->error('Missing TRANSPORT PASSWORD');
-            return false;
-        }
+        $this->components->task('Checking Routes', function() {
+            if (!$this->hasRequiredRoutes()) {
+                throw new \Exception('Knet routes are not registered. Please check your service provider');
+            }
+            return true;
+        });
+    }
 
-        return true;
+    private function hasRunMigrations(): bool
+    {
+        return \Schema::hasTable('knet_transactions');
+    }
+
+    private function hasRequiredRoutes(): bool
+    {
+        $routes = app('router')->getRoutes();
+        return $routes->hasNamedRoute('knet.response') 
+            && $routes->hasNamedRoute('knet.error')
+            && $routes->hasNamedRoute('knet.handle');
     }
 }

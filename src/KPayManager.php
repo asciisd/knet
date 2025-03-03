@@ -2,6 +2,7 @@
 
 namespace Asciisd\Knet;
 
+use Asciisd\Knet\Config\KnetConfig;
 use Asciisd\Knet\Exceptions\KnetException;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
@@ -34,34 +35,22 @@ class KPayManager extends KPayClient
         'udf2', 'udf3', 'udf4', 'udf5',
     ];
 
-    /**
-     * KPayManager constructor.
-     *
-     * @throws KnetException
-     */
-    public function __construct()
-    {
-        $this->checkForResourceKey();
-        $this->initiatePaymentConfig();
-    }
+    private readonly KnetConfig $config;
 
     /**
-     * check for existence of resource key
-     *
-     * @throws KnetException
+     * KPayManager constructor.
      */
-    private function checkForResourceKey(): void
+    public function __construct(KnetConfig $config)
     {
-        if (config('knet.resource_key') == null) {
-            throw KnetException::missingResourceKey();
-        }
+        $this->config = $config;
+        $this->initiatePaymentConfig();
     }
 
     private function initiatePaymentConfig(): void
     {
-        $this->id = config('knet.transport.id');
-        $this->tranportalId = config('knet.transport.id');
-        $this->password = config('knet.transport.password');
+        $this->id = $this->config->getTransportId();
+        $this->tranportalId = $this->config->getTransportId();
+        $this->password = $this->config->getTransportPassword();
 
         $this->action = config('knet.action_code', 1);
         $this->langid = config('knet.language', 'EN');
@@ -72,11 +61,7 @@ class KPayManager extends KPayClient
     }
 
     /**
-     * @param $amount
-     * @param array $options
-     *
-     * @return $this
-     * @throws KnetException
+     * Create a new payment instance
      */
     public static function make($amount, array $options = []): static
     {
@@ -85,12 +70,9 @@ class KPayManager extends KPayClient
         $options['result'] = $options['result'] ?? 'INITIATED';
         $options['user_id'] = $options['user_id'] ?? auth()->id();
 
-        return (new self)->fillPaymentWithOptions($options);
+        return app(static::class)->fillPaymentWithOptions($options);
     }
 
-    /**
-     * @throws KnetException
-     */
     private function fillPaymentWithOptions(array $options = []): self
     {
         if (! isset($options['amt'])) {
@@ -174,7 +156,6 @@ class KPayManager extends KPayClient
     private function urlParams(): string
     {
         $this->setTranData();
-
         return $this->setAsKeyAndValue($this->reqParams);
     }
 
@@ -183,35 +164,41 @@ class KPayManager extends KPayClient
         $this->trandata = $this->encryptedParams();
     }
 
-    private function setAsKeyAndValue($arrOfKeys): string
+    private function encryptedParams(): string
+    {
+        $params = $this->setAsKeyAndValue($this->paramsToEncrypt);
+        return $this->encrypt($params);
+    }
+
+    private function encrypt(string $params): string
+    {
+        return $this->encryptAES($params, $this->config->getResourceKey());
+    }
+
+    protected function setAsKeyAndValue($arrOfKeys): string
     {
         $params = '';
-
         foreach ($arrOfKeys as $param) {
             if ($this->{$param} != null) {
                 $params = $this->addTo($params, $param, $this->{$param});
             }
         }
-
         return $params;
     }
 
     protected function addTo($param, $key, $value): string
     {
         if ($param === '') {
-            $param .= "{$key}={$value}";
-        } else {
-            $param .= "&{$key}={$value}";
+            return "{$key}={$value}";
         }
-
-        return $param;
+        return $param."&{$key}={$value}";
     }
 
     public function toArray(): array
     {
         return [
             'trackid' => $this->trackid,
-            'livemode' => $this->livemode(),
+            'livemode' => !$this->config->isDebugMode(),
             'result' => $this->result,
             'user_id' => $this->user_id,
             'amt' => $this->amt,
@@ -224,38 +211,8 @@ class KPayManager extends KPayClient
         ];
     }
 
-    public function livemode(): bool
-    {
-        return App::environment(['production']) && ! config('knet.debug');
-    }
-
     public function url(): string
     {
-        return $this->getEnvUrl().'&'.$this->urlParams();
-    }
-
-    private function getEnvUrl(): string
-    {
-        $url = config('knet.development_url');
-
-        if (App::environment(['production'])) {
-            if (! config('knet.debug')) {
-                $url = config('knet.production_url');
-            }
-        }
-
-        return $url.'?param=paymentInit';
-    }
-
-    private function encrypt(string $params): string
-    {
-        return $this->encryptAES($params, config('knet.resource_key'));
-    }
-
-    private function encryptedParams(): string
-    {
-        $params = $this->setAsKeyAndValue($this->paramsToEncrypt);
-
-        return $this->encrypt($params);
+        return $this->config->getPaymentUrl().'?param=paymentInit&'.$this->urlParams();
     }
 }

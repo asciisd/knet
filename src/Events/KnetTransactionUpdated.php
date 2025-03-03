@@ -3,16 +3,14 @@
 namespace Asciisd\Knet\Events;
 
 use Asciisd\Knet\KnetTransaction;
-use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 class KnetTransactionUpdated
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, SerializesModels;
 
-    public function __construct(public KnetTransaction $transaction)
-    {
-        //
-    }
+    public function __construct(
+        public readonly KnetTransaction $transaction
+    ) {}
 }
