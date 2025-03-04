@@ -17,6 +17,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/handle', HandleController::class)->name('handle');
 Route::post('/error', ErrorController::class)->name('error');
+//Route::middleware([VerifyKnetResponseSignature::class])
+//    ->post('/response', ResponseController::class)
+//    ->name('response');
+
 Route::middleware([VerifyKnetResponseSignature::class])
-    ->post('/response', ResponseController::class)
+    ->get('/response', ResponseController::class)
     ->name('response');
