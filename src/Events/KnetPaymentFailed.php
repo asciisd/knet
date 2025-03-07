@@ -12,7 +12,7 @@ class KnetPaymentFailed
     use Dispatchable, SerializesModels;
 
     public function __construct(
-        public readonly Request $request,
+        public readonly KnetTransaction $transaction,
         public readonly ?string $errorMessage = null
     ) {}
 }
