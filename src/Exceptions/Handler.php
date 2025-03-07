@@ -9,7 +9,7 @@ class Handler
 {
     public function handle(Request $request, Throwable $e)
     {
-        logger()->error('Knet Error:', [
+        logger()->error($request->getMethod().' | Exceptions | Handler | Knet Error:', [
             'message' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),
             'request' => $request->all(),
@@ -24,4 +24,4 @@ class Handler
 
         throw $e;
     }
-} 
+}

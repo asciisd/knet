@@ -33,7 +33,7 @@ class ResponseController extends Controller
             // Dispatch received event
             KnetResponseReceived::dispatch($payload);
 
-            logger()->info("ResponseController | Dispatch KnetResponseReceived", [
+            logger()->info($request->getMethod().' | ResponseController | Dispatch KnetResponseReceived', [
                 'payload' => $payload
             ]);
 
@@ -43,14 +43,14 @@ class ResponseController extends Controller
             // Dispatch handled event
             KnetResponseHandled::dispatch($payload);
 
-            logger()->info("ResponseController | Dispatch KnetResponseHandled", [
+            logger()->info($request->getMethod().' | ResponseController | Dispatch KnetResponseHandled', [
                 'transaction' => $transaction
             ]);
 
             $response = 'REDIRECT='.route('knet.handle');
 
         } catch (\Exception $e) {
-            logger()->error('Knet Response Error:', [
+            logger()->error($request->getMethod().' | ResponseController | Knet Response Error:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);

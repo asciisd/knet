@@ -23,8 +23,8 @@ class KPayResponseHandler
      */
     public function __construct(array $transaction, Request $request)
     {
-        logger()->info('Request Data:', $request->all());
-        logger()->info('Transaction Data:', $transaction);
+        logger()->info($request->getMethod().' | KPayResponseHandler | Request Data:', $request->all());
+        logger()->info($request->getMethod().' | KPayResponseHandler | Transaction Data:', $transaction);
 
         $this->transaction = $transaction;
         $this->setPaymentStatus();

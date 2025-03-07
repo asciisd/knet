@@ -19,14 +19,14 @@ class VerifyKnetResponseSignature
      */
     public function handle(Request $request, Closure $next): Response
     {
-        logger()->info('Knet Response Signature Verification Middleware', [
+        logger()->info($request->getMethod().' | VerifyKnetResponseSignature | Knet Response Signature Verification Middleware', [
             'content' => $request->getContent(),
         ]);
 
         $payloadArray = KnetResponseService::decryptAndParse($request);
 
         if (! $this->isValidResponse($payloadArray)) {
-            logger()->error('Knet Response Signature Verification Failed', $payloadArray);
+            logger()->error($request->getMethod().' | VerifyKnetResponseSignature | Knet Response Signature Verification Failed', $payloadArray);
             abort(403, 'Knet Response Signature Verification Failed');
         }
 

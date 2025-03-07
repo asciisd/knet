@@ -18,8 +18,8 @@ class ErrorController extends Controller
         ];
 
         // Log the error
-        logger()->error('Knet Payment Error:', $errorData);
-        logger()->error($request->getMethod().' | ErrorController | Request', $request->all());
+        logger()->error($request->getMethod().' | ErrorController | Knet Payment Error:', $errorData);
+        logger()->error($request->getMethod().' | ErrorController | Request All: ', $request->all());
 
         // Dispatch payment failed event
         KnetPaymentFailed::dispatch($request, "Payment processing failed");
