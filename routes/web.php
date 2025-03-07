@@ -19,4 +19,8 @@ Route::post('/handle', HandleController::class)->name('handle');
 Route::post('/error', ErrorController::class)->name('error');
 Route::middleware([VerifyKnetResponseSignature::class])
     ->post('/response', ResponseController::class)
-    ->name('response');
+    ->name('response.store');
+
+Route::middleware([VerifyKnetResponseSignature::class])
+    ->get('/response', ResponseController::class)
+    ->name('response.show');

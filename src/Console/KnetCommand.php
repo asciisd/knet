@@ -43,7 +43,7 @@ class KnetCommand extends Command
         try {
             // Check required configuration
             $this->checkConfiguration($config);
-            
+
             // Check database migrations
             $this->checkMigrations();
 
@@ -52,13 +52,13 @@ class KnetCommand extends Command
 
             $this->newLine();
             $this->info('✓ Everything is configured correctly! You can start processing Knet payments.');
-            
+
             return self::SUCCESS;
 
         } catch (\Exception $e) {
             $this->newLine();
             $this->error('✗ ' . $e->getMessage());
-            
+
             return self::FAILURE;
         }
     }
@@ -122,7 +122,7 @@ class KnetCommand extends Command
     private function hasRequiredRoutes(): bool
     {
         $routes = app('router')->getRoutes();
-        return $routes->hasNamedRoute('knet.response') 
+        return $routes->hasNamedRoute('knet.response.store')
             && $routes->hasNamedRoute('knet.error')
             && $routes->hasNamedRoute('knet.handle');
     }
