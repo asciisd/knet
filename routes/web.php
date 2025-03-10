@@ -12,15 +12,13 @@
 use Asciisd\Knet\Http\Controllers\ErrorController;
 use Asciisd\Knet\Http\Controllers\HandleController;
 use Asciisd\Knet\Http\Controllers\ResponseController;
-use Asciisd\Knet\Http\Middleware\VerifyKnetResponseSignature;
+//use Asciisd\Knet\Http\Middleware\VerifyKnetResponseSignature; TODO: add this line as a middleware
 use Illuminate\Support\Facades\Route;
 
 Route::post('/handle', HandleController::class)->name('handle');
 Route::post('/error', ErrorController::class)->name('error');
-Route::middleware([VerifyKnetResponseSignature::class])
-    ->post('/response', ResponseController::class)
+Route::post('/response', ResponseController::class)
     ->name('response.store');
 
-Route::middleware([VerifyKnetResponseSignature::class])
-    ->get('/response', ResponseController::class)
+Route::get('/response', ResponseController::class)
     ->name('response.show');
