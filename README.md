@@ -34,9 +34,9 @@ php artisan migrate
 
 1. Add environment variables to your `.env` file:
 ```dotenv
-KENT_TRANSPORT_ID=your_transport_id
-KENT_TRANSPORT_PASSWORD=your_password
-KENT_RESOURCE_KEY=your_resource_key
+KNET_TRANSPORT_ID=your_transport_id
+KNET_TRANSPORT_PASSWORD=your_password
+KNET_RESOURCE_KEY=your_resource_key
 KNET_DEBUG=true # Set to false in production
 ```
 

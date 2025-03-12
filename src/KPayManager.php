@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 
 class KPayManager extends KPayClient
 {
+    // Payment request properties
     protected ?int $id = null;
     protected ?string $password = null;
     protected ?string $action = null;
@@ -17,6 +18,8 @@ class KPayManager extends KPayClient
     protected ?string $errorURL = null;
     protected ?string $amt = null;
     protected ?string $trackid = null;
+    
+    // User-defined fields
     protected ?string $udf1 = null;
     protected ?string $udf2 = null;
     protected ?string $udf3 = null;
@@ -25,13 +28,15 @@ class KPayManager extends KPayClient
     protected ?int $user_id = null;
     protected ?string $result = null;
 
-    // url params
+    // URL parameters
     protected ?string $trandata = null;
     protected ?string $tranportalId = null;
+    
+    // Configuration arrays
     protected array $reqParams = ['trandata', 'tranportalId', 'responseURL', 'errorURL'];
     private array $paramsToEncrypt = [
-        'id', 'password', 'action', 'langid', 'currencycode', 'amt', 'responseURL', 'errorURL', 'trackid', 'udf1',
-        'udf2', 'udf3', 'udf4', 'udf5',
+        'id', 'password', 'action', 'langid', 'currencycode', 'amt', 'responseURL', 'errorURL', 
+        'trackid', 'udf1', 'udf2', 'udf3', 'udf4', 'udf5',
     ];
 
     private readonly KnetConfig $config;

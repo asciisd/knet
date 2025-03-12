@@ -12,11 +12,11 @@ return [
     | production Api while the "development" url accesses testing API endpoints.
     |
     */
-    'production_url' => env('KENT_PRODUCTION_URL', 'https://kpay.com.kw/kpg/PaymentHTTP.htm'),
-    'development_url' => env('KENT_DEVELOPMENT_URL', 'https://kpaytest.com.kw/kpg/PaymentHTTP.htm'),
+    'production_url' => env('KNET_PRODUCTION_URL', 'https://kpay.com.kw/kpg/PaymentHTTP.htm'),
+    'development_url' => env('KNET_DEVELOPMENT_URL', 'https://kpaytest.com.kw/kpg/PaymentHTTP.htm'),
 
-    'production_inquiry_url' => env('KENT_PRODUCTION_INQUIRY_URL', 'https://www.kpay.com.kw/kpg/tranPipe.htm'),
-    'development_inquiry_url' => env('KENT_DEVELOPMENT_INQUIRY_URL', 'https://www.kpaytest.com.kw/kpg/tranPipe.htm'),
+    'production_inquiry_url' => env('KNET_PRODUCTION_INQUIRY_URL', 'https://www.kpay.com.kw/kpg/tranPipe.htm'),
+    'development_inquiry_url' => env('KNET_DEVELOPMENT_INQUIRY_URL', 'https://www.kpaytest.com.kw/kpg/tranPipe.htm'),
     /*
     |--------------------------------------------------------------------------
     | Knet Credentials
@@ -33,11 +33,11 @@ return [
     |
     */
     'transport' => [
-        'id' => env('KENT_TRANSPORT_ID'),
-        'password' => env('KENT_TRANSPORT_PASSWORD'),
+        'id' => env('KNET_TRANSPORT_ID'),
+        'password' => env('KNET_TRANSPORT_PASSWORD'),
     ],
 
-    'resource_key' => env('KENT_RESOURCE_KEY'),
+    'resource_key' => env('KNET_RESOURCE_KEY'),
 
     /*
     |--------------------------------------------------------------------------
@@ -49,7 +49,7 @@ return [
     | various world currencies that are currently supported via Knet.
     |
     */
-    'currency' => env('KENT_CURRENCY', 414),
+    'currency' => env('KNET_CURRENCY', 414),
     'decimals' => '3',
 
     /*
@@ -84,7 +84,7 @@ return [
     |
     */
     'error_url' => '/knet/error',
-    'redirect_url' => env('KENT_REDIRECT_URL', '/'),
+    'redirect_url' => env('KNET_REDIRECT_URL', '/'),
 
     /*
     |--------------------------------------------------------------------------
@@ -124,7 +124,7 @@ return [
     | Transaction Action Type, "8" for Inquiry.
     |
     */
-    'action_code' => env('KENT_ACTION_CODE', 1),
+    'action_code' => env('KNET_ACTION_CODE', 1),
 
     /*
     |--------------------------------------------------------------------------
@@ -136,7 +136,7 @@ return [
     | Supported languages: 'AR', 'EN'
     |
     */
-    'language' => env('KENT_LANGUAGE', 'EN'),
+    'language' => env('KNET_LANGUAGE', 'EN'),
 
     /*
     |--------------------------------------------------------------------------
@@ -161,7 +161,7 @@ return [
     | use the dependency injection to change the rate depends on api you use
     |
     */
-    'conversion_currency' => env('KENT_CONVERSION_CURRENCY', 'KWD'),
-    'conversion_rate' => env('KENT_CONVERSION_RATE', 1),
-    'conversion_bank' => env('KENT_CONVERSION_BANK', 'KFH'),
+    'conversion_currency' => env('KNET_CONVERSION_CURRENCY', 'KWD'),
+    'conversion_rate' => env('KNET_CONVERSION_RATE', 1),
+    'conversion_bank' => env('KNET_CONVERSION_BANK', 'KFH'),
 ];

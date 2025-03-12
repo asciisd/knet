@@ -50,9 +50,9 @@ class PublishCommand extends Command
 
         if ($publishConfig) {
             $this->info('Please update your .env file with your Knet credentials:');
-            $this->line('  KENT_TRANSPORT_ID=');
-            $this->line('  KENT_TRANSPORT_PASSWORD=');
-            $this->line('  KENT_RESOURCE_KEY=');
+            $this->line('  KNET_TRANSPORT_ID=');
+            $this->line('  KNET_TRANSPORT_PASSWORD=');
+            $this->line('  KNET_RESOURCE_KEY=');
             $this->line('  KNET_DEBUG=true');
         }
 
@@ -61,25 +61,17 @@ class PublishCommand extends Command
 
     private function publishConfiguration(): void
     {
-        $this->components->task('Publishing configuration', function() {
-            $params = ['--provider' => 'Asciisd\Knet\Providers\KnetServiceProvider'];
-            
-            if ($this->option('force')) {
-                $params['--force'] = true;
-            }
-
-            $this->call('vendor:publish', array_merge(
-                $params,
-                ['--tag' => 'knet-config']
-            ));
-
-            return true;
-        });
+        $this->publishResource('config', 'Publishing configuration');
     }
 
     private function publishMigrations(): void
     {
-        $this->components->task('Publishing migrations', function() {
+        $this->publishResource('migrations', 'Publishing migrations');
+    }
+
+    private function publishResource(string $tag, string $description): void
+    {
+        $this->components->task($description, function() use ($tag) {
             $params = ['--provider' => 'Asciisd\Knet\Providers\KnetServiceProvider'];
             
             if ($this->option('force')) {
@@ -88,7 +80,7 @@ class PublishCommand extends Command
 
             $this->call('vendor:publish', array_merge(
                 $params,
-                ['--tag' => 'knet-migrations']
+                ['--tag' => "knet-$tag"]
             ));
 
             return true;

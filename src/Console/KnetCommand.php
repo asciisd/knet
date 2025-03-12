@@ -67,21 +67,21 @@ class KnetCommand extends Command
     {
         $this->components->task('Checking Transport ID', function() use ($config) {
             if (empty($config->getTransportId())) {
-                throw new \Exception('Missing KENT_TRANSPORT_ID in environment variables');
+                throw new \Exception('Missing KNET_TRANSPORT_ID in environment variables');
             }
             return true;
         });
 
         $this->components->task('Checking Transport Password', function() use ($config) {
             if (empty($config->getTransportPassword())) {
-                throw new \Exception('Missing KENT_TRANSPORT_PASSWORD in environment variables');
+                throw new \Exception('Missing KNET_TRANSPORT_PASSWORD in environment variables');
             }
             return true;
         });
 
         $this->components->task('Checking Resource Key', function() use ($config) {
             if (empty($config->getResourceKey())) {
-                throw new \Exception('Missing KENT_RESOURCE_KEY in environment variables');
+                throw new \Exception('Missing KNET_RESOURCE_KEY in environment variables');
             }
             return true;
         });

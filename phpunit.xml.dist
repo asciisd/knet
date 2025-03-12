@@ -14,8 +14,8 @@
         <env name="DB_DATABASE" value=":memory:"/>
 
         <env name="KNET_DEBUG" value="true"/>
-        <!--         <env name="KENT_TRANSPORT_ID" value=""/>-->
-        <!--         <env name="KENT_TRANSPORT_PASSWORD" value=""/>-->
-        <!--         <env name="KENT_RESOURCE_KEY" value=""/>-->
+        <!--         <env name="KNET_TRANSPORT_ID" value=""/>-->
+        <!--         <env name="KNET_TRANSPORT_PASSWORD" value=""/>-->
+        <!--         <env name="KNET_RESOURCE_KEY" value=""/>-->
     </php>
 </phpunit>
