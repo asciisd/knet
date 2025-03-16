@@ -20,6 +20,3 @@ Route::post('/error', ErrorController::class)->name('error');
 Route::post('/response', ResponseController::class)
     ->middleware(VerifyKnetResponseSignature::class)
     ->name('response.store');
-
-Route::get('/response', ResponseController::class)
-    ->name('response.show');
