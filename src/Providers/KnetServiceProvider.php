@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Asciisd\Knet\Config\KnetConfig;
 use Asciisd\Knet\Console\InstallCommand;
+use Illuminate\Support\Facades\Config;
 
 class KnetServiceProvider extends ServiceProvider
 {
@@ -17,26 +18,9 @@ class KnetServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerRoutes();
-        
-        if ($this->app->runningInConsole()) {
-            $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
-            
-            // Register publishable resources
-            $this->publishes([
-                __DIR__.'/../../config/knet.php' => $this->app->configPath('knet.php'),
-            ], 'knet-config');
-
-            $this->publishes([
-                __DIR__.'/../../database/migrations' => $this->app->databasePath('migrations'),
-            ], 'knet-migrations');
-            
-            // Register commands
-            $this->commands([
-                InstallCommand::class,
-                KnetCommand::class,
-                PublishCommand::class,
-            ]);
-        }
+        $this->registerMigrations();
+        $this->registerPublishing();
+        $this->registerCommands();
     }
 
     /**
@@ -44,12 +28,10 @@ class KnetServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom(
-            __DIR__.'/../../config/knet.php', 'knet'
-        );
+        $this->mergeConfigFrom(__DIR__.'/../../config/knet.php', 'knet');
         
-        $this->app->singleton(KnetConfig::class, function ($app) {
-            return new KnetConfig(config('knet'));
+        $this->app->singleton(KnetConfig::class, function () {
+            return new KnetConfig(Config::get('knet'));
         });
 
         if (! class_exists('Knet')) {
@@ -63,7 +45,7 @@ class KnetServiceProvider extends ServiceProvider
     protected function registerRoutes(): void
     {
         Route::group([
-            'prefix' => config('knet.path'),
+            'prefix' => Config::get('knet.path'),
             'namespace' => 'Asciisd\Knet\Http\Controllers',
             'as' => 'knet.',
         ], function () {
@@ -74,5 +56,34 @@ class KnetServiceProvider extends ServiceProvider
     public function registerServices()
     {
         //
+    }
+
+    protected function registerMigrations()
+    {
+        if ($this->app->runningInConsole()) {
+            $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
+        }
+    }
+
+    protected function registerPublishing()
+    {
+        $this->publishes([
+            __DIR__.'/../../config/knet.php' => $this->app->configPath('knet.php'),
+        ], 'knet-config');
+
+        $this->publishes([
+            __DIR__.'/../../database/migrations' => $this->app->databasePath('migrations'),
+        ], 'knet-migrations');
+    }
+
+    protected function registerCommands()
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                InstallCommand::class,
+                KnetCommand::class,
+                PublishCommand::class,
+            ]);
+        }
     }
 }

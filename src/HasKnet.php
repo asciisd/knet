@@ -2,6 +2,9 @@
 
 namespace Asciisd\Knet;
 
+use Asciisd\Knet\Services\KnetPaymentService;
+use Illuminate\Support\Facades\App;
+
 trait HasKnet
 {
     /**
@@ -11,13 +14,9 @@ trait HasKnet
      * @throws Exceptions\PaymentActionRequired
      * @throws Exceptions\PaymentFailure
      */
-    public function pay(int $amount, array $options = []): KnetTransaction
+    public function pay(float $amount, array $options = []): KnetTransaction
     {
-        $options['user_id'] = $options['user_id'] ?? $this->id ?? auth()->id();
-
-        $knet = KPayManager::make($amount, $options);
-
-        return KnetTransaction::create($knet->toArray());
+        return App::make(KnetPaymentService::class)->createPayment($this, $amount, $options);
     }
 
     /**

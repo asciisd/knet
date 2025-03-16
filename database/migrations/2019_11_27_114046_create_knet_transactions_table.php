@@ -13,6 +13,8 @@ return new class extends Migration {
         Schema::create('knet_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable();
+            $table->foreignId('original_transaction_id')->nullable();
+            $table->integer('action')->default(1);
 
             $table->string('paymentid')->nullable();
             $table->string('result')->nullable();
@@ -41,7 +43,12 @@ return new class extends Migration {
             $table->string('card_number')->nullable();
             $table->string('brand_id')->nullable();
             $table->string('ip_address')->nullable();
-            $table->text('url');
+            $table->text('url')->nullable();
+
+            // Refund related columns
+            $table->boolean('refunded')->default(false);
+            $table->timestamp('refunded_at')->nullable();
+            $table->decimal('refund_amount', 10, 3)->nullable();
 
             $table->timestamps();
         });

@@ -2,9 +2,11 @@
 
 namespace Asciisd\Knet\Config;
 
+use Illuminate\Support\Facades\App;
+
 class KnetConfig
 {
-    public function __construct(private array $config)
+    public function __construct(private readonly array $config)
     {
         $this->validateConfig();
     }
@@ -31,10 +33,20 @@ class KnetConfig
 
     public function getPaymentUrl(): string
     {
-        if ($this->isDebugMode() || app()->environment('local')) {
+        if ($this->isDebugMode() || App::environment('local')) {
             return $this->config['development_url'];
         }
+
         return $this->config['production_url'];
+    }
+
+    public function getInquiryUrl(): string
+    {
+        if ($this->isDebugMode() || App::environment('local')) {
+            return $this->config['development_inquiry_url'];
+        }
+
+        return $this->config['production_inquiry_url'];
     }
 
     private function validateConfig(): void
@@ -49,6 +61,14 @@ class KnetConfig
 
         if (empty($this->config['resource_key'])) {
             throw new \InvalidArgumentException('Knet resource key is required');
+        }
+
+        if (empty($this->config['development_url'])) {
+            throw new \InvalidArgumentException('Knet development URL is required');
+        }
+
+        if (empty($this->config['production_url'])) {
+            throw new \InvalidArgumentException('Knet production URL is required');
         }
     }
 }

@@ -1,14 +1,17 @@
 <?php
 
-namespace Asciisd\Knet;
+namespace Asciisd\Knet\Services;
 
+use Asciisd\Knet\Enums\Errors;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class KPayResponseHandler
 {
     private array $transaction;
     private ?string $error = null;
     private string $error_code = '';
+    private ?Errors $error_enum = null;
 
     /**
      * Factory method to create a new instance.
@@ -23,8 +26,8 @@ class KPayResponseHandler
      */
     public function __construct(array $transaction, Request $request)
     {
-        logger()->info($request->getMethod().' | KPayResponseHandler | Request Data:', $request->all());
-        logger()->info($request->getMethod().' | KPayResponseHandler | Transaction Data:', $transaction);
+        Log::info('KPayResponseHandler | Request Data:', $request->all());
+        Log::info('KPayResponseHandler | Transaction Data:', $transaction);
 
         $this->transaction = $transaction;
         $this->setPaymentStatus();
@@ -54,14 +57,15 @@ class KPayResponseHandler
         if (! $this->transaction['paid']) {
             $this->transaction['result'] = 'FAILED';
         }
-    }
 
-    /**
-     * Decrypts transaction data.
-     */
-    private function decrypt(string $tranData): string
-    {
-        return KPayClient::decryptAES($tranData, config('knet.resource_key'));
+        // Try to map the error code to an enum value
+        if ($this->error_code) {
+            try {
+                $this->error_enum = constant(Errors::class.'::'.$this->error_code);
+            } catch (\Throwable $e) {
+                // If the error code doesn't match any enum value, leave error_enum as null
+            }
+        }
     }
 
     /**
@@ -85,7 +89,7 @@ class KPayResponseHandler
      */
     public function hasErrors(): bool
     {
-        return !empty($this->error);
+        return ! empty($this->error);
     }
 
     /**
@@ -93,6 +97,9 @@ class KPayResponseHandler
      */
     public function error(): ?string
     {
+        if ($this->error_enum) {
+            return $this->error_enum->description();
+        }
         return $this->error;
     }
 
@@ -105,11 +112,19 @@ class KPayResponseHandler
     }
 
     /**
+     * Gets the error enum if available.
+     */
+    public function errorEnum(): ?Errors
+    {
+        return $this->error_enum;
+    }
+
+    /**
      * Checks if the transaction is a duplicate.
      */
     public function isDuplicated(): bool
     {
-        return $this->error_code === 'IPAY0100114';
+        return $this->error_enum === Errors::IPAY0100114;
     }
 
     /**
@@ -117,7 +132,7 @@ class KPayResponseHandler
      */
     public function isInvalidPaymentStatus(): bool
     {
-        return $this->error_code === 'IPAY0100055';
+        return $this->error_enum === Errors::IPAY0100055;
     }
 
     /**

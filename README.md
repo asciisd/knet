@@ -2,56 +2,50 @@
 [![Software License][ico-license]](LICENSE.md)
 [![Total Downloads][ico-downloads]][link-downloads]
 
-# Knet Payment Integration for Laravel
+# Laravel KNET Payment Integration
 
-A Laravel package for integrating with the new Knet payment portal.
+A robust Laravel package for integrating KNET payment gateway services in your applications. This package provides a clean and elegant way to handle payment processing, refunds, and transaction management with KNET.
 
-> [!CAUTION]
-> This package works with the new Knet payment portal and is not compatible with the old version. The receipt system has been removed to avoid conflicts with your application's existing system. Use the `KnetTransaction` model to implement your own receipt handling.
+## Features
 
-> [!NOTE]
-> This package is currently being updated. Please avoid using in production until a stable version is released.
+- 🔒 Secure payment processing
+- 💳 Transaction management
+- 🔄 Payment status inquiries
+- ↩️ Refund processing
+- 🎯 Event-driven architecture
+- 📝 Detailed transaction logging
+- 🛡️ Error handling
+- 🔍 Transaction tracking
 
 ## Installation
 
-1. Install via Composer:
+You can install the package via composer:
+
 ```bash
 composer require asciisd/knet
 ```
 
-2. Install package resources:
-```bash
-php artisan knet:install
-php artisan knet:publish
-```
+After installation, publish the configuration file:
 
-3. Run migrations:
 ```bash
-php artisan migrate
+php artisan vendor:publish --provider="Asciisd\Knet\KnetServiceProvider"
 ```
 
 ## Configuration
 
-1. Add environment variables to your `.env` file:
-```dotenv
+Configure your KNET credentials in your `.env` file:
+
+```env
 KNET_TRANSPORT_ID=your_transport_id
-KNET_TRANSPORT_PASSWORD=your_password
+KNET_TRANSPORT_PASSWORD=your_transport_password
 KNET_RESOURCE_KEY=your_resource_key
-KNET_DEBUG=true # Set to false in production
-```
+KNET_DEBUG_MODE=true
+KNET_CURRENCY=414
+KNET_LANGUAGE=EN
 
-2. Add the `HasKnet` trait to your User model:
-```php
-namespace App\Models;
-
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Asciisd\Knet\HasKnet;
-
-class User extends Authenticatable
-{
-    use HasKnet;
-    // ...
-}
+# URLs
+KNET_RESPONSE_URL=payment/response
+KNET_ERROR_URL=payment/error
 ```
 
 ## Basic Usage
@@ -61,89 +55,163 @@ class User extends Authenticatable
 ```php
 use Asciisd\Knet\Services\KnetPaymentService;
 
-class PaymentController 
+class PaymentController extends Controller
 {
-    public function __construct(
-        private KnetPaymentService $paymentService
-    ) {}
+    public function createPayment(
+        Request $request, 
+        KnetPaymentService $paymentService
+    ) {
+        $transaction = $paymentService->createPayment(
+            user: $request->user(),
+            amount: 10.000,
+            options: [
+                'udf1' => 'custom_data_1',
+                'udf2' => 'custom_data_2',
+            ]
+        );
 
-    public function createPayment(Request $request)
-    {
-        try {
-            $transaction = $this->paymentService->createPayment(
-                user: auth()->user(),
-                amount: $request->amount,
-                options: [
-                    'udf1' => 'Custom field 1',
-                    'udf2' => 'Custom field 2',
-                ]
-            );
-
-            return redirect($transaction->url);
-            
-        } catch (KnetException $e) {
-            return back()->withErrors(['payment' => $e->getMessage()]);
-        }
+        return redirect($transaction->url);
     }
 }
 ```
 
 ### Handling Payment Response
 
-The package automatically handles the payment response through its built-in controllers. You can listen for various events to handle the payment outcome:
+```php
+public function handleResponse(
+    Request $request, 
+    KnetPaymentService $paymentService
+) {
+    $transaction = $paymentService->handlePaymentResponse($request->all());
+
+    if ($transaction->paid) {
+        return redirect()->route('payment.success');
+    }
+
+    return redirect()->route('payment.failed');
+}
+```
+
+### Processing Refunds
+
+```php
+public function refund(
+    KnetTransaction $transaction, 
+    KnetPaymentService $paymentService
+) {
+    // Full refund
+    $result = $paymentService->refundPayment($transaction);
+
+    // Partial refund
+    $result = $paymentService->refundPayment($transaction, 5.000);
+
+    return $result;
+}
+```
+
+### Checking Transaction Status
+
+```php
+public function checkStatus(
+    KnetTransaction $transaction, 
+    KnetPaymentService $paymentService
+) {
+    $updatedTransaction = $paymentService->inquireAndUpdateTransaction($transaction);
+    return $updatedTransaction;
+}
+```
+
+## Events
+
+The package dispatches several events that you can listen to:
+
+- `KnetPaymentSucceeded`: Fired when a payment is successfully captured
+- `KnetPaymentFailed`: Fired when a payment fails
+- `KnetTransactionUpdated`: Fired when a transaction status is updated
+- `KnetResponseReceived`: Fired when a payment response is received
+
+### Event Listeners Example
 
 ```php
 use Asciisd\Knet\Events\KnetPaymentSucceeded;
-use Asciisd\Knet\Events\KnetPaymentFailed;
 
-class PaymentEventServiceProvider extends ServiceProvider
+class PaymentSuccessListener
 {
-    protected $listen = [
-        KnetPaymentSucceeded::class => [
-            function (KnetPaymentSucceeded $event) {
-                $transaction = $event->transaction;
-                // Handle successful payment
-            },
-        ],
-        KnetPaymentFailed::class => [
-            function (KnetPaymentFailed $event) {
-                $transaction = $event->transaction;
-                $errorMessage = $event->errorMessage;
-                // Handle failed payment
-            },
-        ],
-    ];
+    public function handle(KnetPaymentSucceeded $event)
+    {
+        $transaction = $event->transaction;
+        // Handle successful payment
+    }
 }
 ```
 
-### Available Events
+## Transaction Model
 
-- `KnetTransactionCreated`: Fired when a new transaction is created
-- `KnetTransactionUpdated`: Fired when a transaction is updated
-- `KnetResponseReceived`: Fired when response is received from Knet
-- `KnetResponseHandled`: Fired after response is processed
-- `KnetPaymentSucceeded`: Fired when payment is successful
-- `KnetPaymentFailed`: Fired when payment fails
+The `KnetTransaction` model provides several helpful methods:
 
-### Test Cards
-
-| Card Number      | Expiry Date | PIN  | Status       |
-|-----------------|-------------|------|--------------|
-| 8888880000000001| 09/25       | 1234 | CAPTURED     |
-| 8888880000000002| 05/25       | 1234 | NOT CAPTURED |
+```php
+$transaction->rawAmount(); // Get the raw amount
+$transaction->isPaid(); // Check if transaction is paid
+$transaction->isRefunded(); // Check if transaction is refunded
+$transaction->isRefundable(); // Check if transaction can be refunded
+```
 
 ## Error Handling
 
-The package throws `KnetException` for various error cases. Always wrap your payment code in try-catch blocks:
+The package includes comprehensive error handling:
 
 ```php
 try {
-    $transaction = $paymentService->createPayment($user, $amount);
-} catch (KnetException $e) {
-    // Handle the error
-    logger()->error('Payment failed: ' . $e->getMessage());
+    $result = $paymentService->refundPayment($transaction);
+} catch (\Exception $e) {
+    Log::error('Refund failed', [
+        'message' => $e->getMessage(),
+        'transaction_id' => $transaction->id
+    ]);
 }
 ```
+
+## Database Schema
+
+The package includes migrations for the `knet_transactions` table with the following fields:
+
+- `id`: Primary key
+- `user_id`: Foreign key to users table
+- `trackid`: KNET tracking ID
+- `amt`: Transaction amount
+- `paymentid`: KNET payment ID
+- `tranid`: KNET transaction ID
+- `ref`: Reference number
+- `result`: Transaction result
+- `auth`: Authorization code
+- `avr`: AVR value
+- `postdate`: Posting date
+- `paid`: Payment status
+- `error_text`: Error message if any
+- `url`: Payment URL
+- `livemode`: Production/Test mode flag
+- Various UDF fields (udf1 to udf5)
+- Refund-related fields
+- Timestamps
+
+## Testing
+
+```bash
+composer test
+```
+
+## Security
+
+If you discover any security-related issues, please email security@asciisd.com instead of using the issue tracker.
+
+## Credits
+
+- [Your Name](https://github.com/yourusername)
+- [All Contributors](../../contributors)
+
+## License
+
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
 [ico-version]: https://img.shields.io/packagist/v/asciisd/knet.svg?style=flat
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat
