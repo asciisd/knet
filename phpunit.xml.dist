@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit colors="true">
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.4/phpunit.xsd"
+    bootstrap="vendor/autoload.php"
+    colors="true"
+    cacheDirectory=".phpunit.cache"
+>
     <testsuites>
         <testsuite name="Unit">
             <directory suffix="Test.php">./tests/Unit</directory>
         </testsuite>
-        <testsuite name="Feature">
-            <directory suffix="Test.php">./tests/Feature</directory>
+        <testsuite name="Integration">
+            <directory suffix="Test.php">./tests/Integration</directory>
         </testsuite>
     </testsuites>
     <php>
@@ -14,8 +20,13 @@
         <env name="DB_DATABASE" value=":memory:"/>
 
         <env name="KNET_DEBUG" value="true"/>
-        <!--         <env name="KNET_TRANSPORT_ID" value=""/>-->
-        <!--         <env name="KNET_TRANSPORT_PASSWORD" value=""/>-->
-        <!--         <env name="KNET_RESOURCE_KEY" value=""/>-->
+        <env name="KNET_TRANSPORT_ID" value="test_id"/>
+        <env name="KNET_TRANSPORT_PASSWORD" value="test_password"/>
+        <env name="KNET_RESOURCE_KEY" value="test_key"/>
     </php>
+    <source>
+        <include>
+            <directory suffix=".php">src/</directory>
+        </include>
+    </source>
 </phpunit>
