@@ -39,13 +39,11 @@ Configure your KNET credentials in your `.env` file:
 KNET_TRANSPORT_ID=your_transport_id
 KNET_TRANSPORT_PASSWORD=your_transport_password
 KNET_RESOURCE_KEY=your_resource_key
-KNET_DEBUG_MODE=true
-KNET_CURRENCY=414
-KNET_LANGUAGE=EN
 
-# URLs
-KNET_RESPONSE_URL=payment/response
-KNET_ERROR_URL=payment/error
+# URLs Optional
+KNET_RESPONSE_URL=/knet/response
+KNET_REDIRECT_URL=/dashboard
+KNET_DEBUG=false
 ```
 
 ## Basic Usage
@@ -75,7 +73,7 @@ class PaymentController extends Controller
 }
 ```
 
-### Handling Payment Response
+### Manual Handling Payment Response
 
 ```php
 public function handleResponse(
@@ -125,22 +123,20 @@ public function checkStatus(
 
 The package dispatches several events that you can listen to:
 
-- `KnetPaymentSucceeded`: Fired when a payment is successfully captured
-- `KnetPaymentFailed`: Fired when a payment fails
-- `KnetTransactionUpdated`: Fired when a transaction status is updated
 - `KnetResponseReceived`: Fired when a payment response is received
+- `KnetResponsehandled`: Fired when a payment response is handled
 
 ### Event Listeners Example
 
 ```php
-use Asciisd\Knet\Events\KnetPaymentSucceeded;
+use Asciisd\Knet\Events\KnetResponseReceived;
 
-class PaymentSuccessListener
+class PaymentReceivedListener
 {
-    public function handle(KnetPaymentSucceeded $event)
+    public function handle(KnetResponseReceived $event)
     {
-        $transaction = $event->transaction;
-        // Handle successful payment
+        $transactionArray = $event->payload;
+        // Handle payload
     }
 }
 ```
