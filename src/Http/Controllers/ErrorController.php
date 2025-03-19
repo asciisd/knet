@@ -16,9 +16,19 @@ class ErrorController extends Controller
             'error_text' => $request->error_text,
         ];
 
+        //ResErrorText
+        if ($request->has('ErrorText')) {
+            $errorData['error_text'] = $request->ErrorText;
+        }
+
+        //ResErrorNo
+        if ($request->has('Error')) {
+            $errorData['error'] = $request->Error;
+        }
+
         // Log the error
-        logger()->error($request->getMethod().' | ErrorController | Knet Payment Error:', $errorData);
-        logger()->error($request->getMethod().' | ErrorController | Request All: ', $request->all());
+        logger()->error($request->getMethod().' | ErrorController | Knet Payment Error | Error Data:', $errorData);
+        logger()->error($request->getMethod().' | ErrorController | Knet Payment Error | Request All: ', $request->all());
 
         // Redirect with error data
         return redirect(config('knet.redirect_url'))

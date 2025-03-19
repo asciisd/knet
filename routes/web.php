@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/handle', HandleController::class)->name('handle');
 Route::post('/error', ErrorController::class)->name('error');
+Route::get('/error', ErrorController::class)->name('error.get');
 Route::post('/response', ResponseController::class)
     ->middleware(VerifyKnetResponseSignature::class)
     ->name('response.store');
