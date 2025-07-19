@@ -48,14 +48,23 @@ class KnetResponseService
      */
     public static function decryptAndParse(Request $request): array
     {
-        $trandata = $request->getContent();
+        // 1. Get the full request content
+        $content = $request->getContent();
+
+        // 2. Parse the content into an array
+        parse_str($content, $output);
+
+        // 3. Extract only the trandata field
+        $trandata = $output['trandata'] ?? null;
 
         if (! $trandata) {
             throw new AccessDeniedHttpException('Invalid Request');
         }
 
+        // 4. Decrypt only the trandata field
         $payload = KPayClient::decryptAES($trandata, config('knet.resource_key'));
 
+        // 5. Parse the decrypted result
         parse_str($payload, $payloadArray);
 
         if (! isset($payloadArray['trackid'])) {
