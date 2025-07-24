@@ -152,6 +152,61 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Debugging Configuration
+    |--------------------------------------------------------------------------
+    |
+    | These options control detailed logging and debugging features for
+    | troubleshooting KNet integration issues. Enable these only when
+    | debugging specific problems as they can generate significant log data.
+    |
+    */
+
+    // Enable detailed logging of hex conversion processes
+    'debug_hex_conversion' => env('KNET_DEBUG_HEX_CONVERSION', false),
+
+    // Enable logging of raw response data from KNet gateway
+    'debug_response_data' => env('KNET_DEBUG_RESPONSE_DATA', false),
+
+    // Enable detailed transaction processing logs
+    'debug_transactions' => env('KNET_DEBUG_TRANSACTIONS', false),
+
+    // Enable logging of encryption/decryption operations
+    'debug_encryption' => env('KNET_DEBUG_ENCRYPTION', false),
+
+    // Log validation failures with detailed context
+    'debug_validation_failures' => env('KNET_DEBUG_VALIDATION_FAILURES', true),
+
+    // Maximum length of hex data to log (prevents excessive log sizes)
+    'debug_hex_preview_length' => env('KNET_DEBUG_HEX_PREVIEW_LENGTH', 200),
+
+    // Enable automatic hex data analysis on errors
+    'debug_auto_hex_analysis' => env('KNET_DEBUG_AUTO_HEX_ANALYSIS', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Error Handling Configuration
+    |--------------------------------------------------------------------------
+    |
+    | These settings control how errors are handled and reported, particularly
+    | for hex validation and response processing failures.
+    |
+    */
+
+    // Retry failed hex conversions with data cleanup
+    'retry_hex_conversion' => env('KNET_RETRY_HEX_CONVERSION', true),
+
+    // Maximum number of retry attempts for hex conversion
+    'max_hex_retry_attempts' => env('KNET_MAX_HEX_RETRY_ATTEMPTS', 2),
+
+    // Store failed hex data for later analysis
+    'store_failed_hex_data' => env('KNET_STORE_FAILED_HEX_DATA', false),
+
+    // Fallback behavior when hex validation fails
+    // Options: 'strict' (throw exception), 'lenient' (log and continue), 'fallback' (attempt recovery)
+    'hex_validation_mode' => env('KNET_HEX_VALIDATION_MODE', 'strict'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Conversion currency
     |--------------------------------------------------------------------------
     |

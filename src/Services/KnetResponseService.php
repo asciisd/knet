@@ -2,6 +2,7 @@
 
 namespace Asciisd\Knet\Services;
 
+use Asciisd\Knet\Exceptions\InvalidHexDataException;
 use Asciisd\Knet\KnetTransaction;
 use Asciisd\Knet\KPayClient;
 use Asciisd\Knet\Repositories\KnetTransactionRepository;
@@ -42,26 +43,148 @@ class KnetResponseService
     }
 
     /**
-     * Decrypts and parses Knet response payload.
+     * Decrypts and parses Knet response payload with enhanced error handling.
      *
      * @throws AccessDeniedHttpException
+     * @throws InvalidHexDataException
      */
     public static function decryptAndParse(Request $request): array
     {
         $trandata = $request->getContent();
 
-        if (! $trandata) {
-            throw new AccessDeniedHttpException('Invalid Request');
+        // Enhanced validation for request data
+        if (empty($trandata) || $trandata === null) {
+            logger()->error('KnetResponseService | Empty or null transaction data received', [
+                'request_method' => $request->getMethod(),
+                'request_headers' => $request->headers->all(),
+                'content_length' => $request->headers->get('content-length', 0),
+                'user_agent' => $request->headers->get('user-agent'),
+                'ip_address' => $request->ip(),
+            ]);
+            
+            throw new AccessDeniedHttpException('Invalid Request: No transaction data received from KNet gateway');
         }
 
-        $payload = KPayClient::decryptAES($trandata, config('knet.resource_key'));
-
-        parse_str($payload, $payloadArray);
-
-        if (! isset($payloadArray['trackid'])) {
-            throw new AccessDeniedHttpException('Missing track ID in response.');
+        // Log the raw transaction data for debugging (if enabled)
+        if (config('knet.debug_response_data', false)) {
+            logger()->debug('KnetResponseService | Raw transaction data received:', [
+                'data_length' => strlen($trandata),
+                'data_preview' => substr($trandata, 0, 100) . '...',
+                'request_info' => [
+                    'method' => $request->getMethod(),
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->headers->get('user-agent'),
+                ]
+            ]);
         }
 
-        return $payloadArray;
+        try {
+            // Attempt to decrypt the transaction data
+            $payload = KPayClient::decryptAES($trandata, config('knet.resource_key'));
+
+            if (empty($payload)) {
+                logger()->error('KnetResponseService | Decryption resulted in empty payload', [
+                    'original_data_length' => strlen($trandata),
+                    'resource_key_configured' => !empty(config('knet.resource_key')),
+                ]);
+                
+                throw new AccessDeniedHttpException('Failed to decrypt KNet response: Empty payload after decryption');
+            }
+
+            // Parse the decrypted payload
+            parse_str($payload, $payloadArray);
+
+            if (empty($payloadArray)) {
+                logger()->error('KnetResponseService | Failed to parse decrypted payload', [
+                    'payload_length' => strlen($payload),
+                    'payload_preview' => substr($payload, 0, 200),
+                ]);
+                
+                throw new AccessDeniedHttpException('Failed to parse KNet response: Invalid payload format');
+            }
+
+            // Validate required fields
+            if (!isset($payloadArray['trackid']) || empty($payloadArray['trackid'])) {
+                logger()->error('KnetResponseService | Missing or empty track ID in response', [
+                    'payload_keys' => array_keys($payloadArray),
+                    'payload_data' => config('knet.debug_response_data', false) ? $payloadArray : '[hidden]',
+                ]);
+                
+                throw new AccessDeniedHttpException('Missing track ID in response: Invalid KNet response format');
+            }
+
+            // Log successful decryption and parsing
+            logger()->info('KnetResponseService | Successfully decrypted and parsed KNet response', [
+                'track_id' => $payloadArray['trackid'],
+                'result' => $payloadArray['result'] ?? 'not_set',
+                'payment_id' => $payloadArray['paymentid'] ?? 'not_set',
+                'payload_fields' => count($payloadArray),
+            ]);
+
+            return $payloadArray;
+
+        } catch (InvalidHexDataException $e) {
+            // Handle hex validation errors specifically
+            logger()->error('KnetResponseService | Invalid hex data in KNet response', [
+                'error_type' => 'invalid_hex_data',
+                'error_message' => $e->getMessage(),
+                'error_details' => $e->getErrorDetails(),
+                'hex_data_info' => [
+                    'length' => $e->getHexData() ? strlen($e->getHexData()) : 0,
+                    'preview' => $e->getHexData() ? substr($e->getHexData(), 0, 50) . '...' : 'null',
+                ],
+                'debug_info' => $e->getDebugInfo(),
+                'request_info' => [
+                    'method' => $request->getMethod(),
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->headers->get('user-agent'),
+                ]
+            ]);
+
+            // If debugging is enabled, also log the hex analysis
+            if (config('knet.debug_hex_conversion', false) && $e->getHexData()) {
+                try {
+                    $debugAnalysis = KPayClient::debugHexData($e->getHexData());
+                    logger()->debug('KnetResponseService | Hex data analysis:', $debugAnalysis);
+                } catch (\Exception $debugException) {
+                    logger()->warning('KnetResponseService | Failed to generate hex debug analysis', [
+                        'debug_error' => $debugException->getMessage()
+                    ]);
+                }
+            }
+
+            // Re-throw as AccessDeniedHttpException with user-friendly message
+            throw new AccessDeniedHttpException(
+                'Invalid response data from KNet gateway: ' . $e->getMessage(),
+                $e
+            );
+
+        } catch (\Exception $e) {
+            // Handle any other decryption or parsing errors
+            logger()->error('KnetResponseService | Unexpected error during response processing', [
+                'error_type' => get_class($e),
+                'error_message' => $e->getMessage(),
+                'error_trace' => $e->getTraceAsString(),
+                'trandata_info' => [
+                    'length' => strlen($trandata),
+                    'preview' => substr($trandata, 0, 100) . '...',
+                    'is_empty' => empty($trandata),
+                ],
+                'config_info' => [
+                    'resource_key_set' => !empty(config('knet.resource_key')),
+                    'debug_mode' => config('knet.debug', false),
+                ],
+                'request_info' => [
+                    'method' => $request->getMethod(),
+                    'ip' => $request->ip(),
+                    'content_type' => $request->headers->get('content-type'),
+                ]
+            ]);
+
+            throw new AccessDeniedHttpException(
+                'Failed to process KNet response: ' . $e->getMessage(),
+                $e
+            );
+        }
     }
 }
