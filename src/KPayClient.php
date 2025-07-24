@@ -37,35 +37,35 @@ class KPayClient
             throw InvalidHexDataException::emptyData($debugInfo);
         }
 
+        // Validate hex characters only FIRST (before length checks)
+        if (! ctype_xdigit($hexString)) {
+            $debugInfo = self::generateDebugInfo($hexString, 'Invalid hex characters detected');
+            throw InvalidHexDataException::invalidCharacters($hexString, $debugInfo);
+        }
+
         // Check for odd length (hex strings must have even number of characters)
         if (strlen($hexString) % 2 !== 0) {
             $debugInfo = self::generateDebugInfo($hexString, 'Odd length detected');
             throw InvalidHexDataException::oddLength($hexString, $debugInfo);
         }
 
-        // Validate hex characters only
-        if (!ctype_xdigit($hexString)) {
-            $debugInfo = self::generateDebugInfo($hexString, 'Invalid hex characters detected');
-            throw InvalidHexDataException::invalidCharacters($hexString, $debugInfo);
-        }
-
         // Additional check for minimum expected length (at least 32 characters for AES)
         if (strlen($hexString) < 32) {
             $debugInfo = self::generateDebugInfo($hexString, 'Hex string too short for AES decryption');
-            throw InvalidHexDataException::corruptedData($hexString, $debugInfo);
+            throw InvalidHexDataException::tooShort($hexString, $debugInfo);
         }
 
         // Attempt hex2bin conversion with error handling
         try {
             $binaryString = hex2bin($hexString);
-            
+
             if ($binaryString === false) {
                 $debugInfo = self::generateDebugInfo($hexString, 'hex2bin() returned false');
                 throw InvalidHexDataException::invalidCharacters($hexString, $debugInfo);
             }
 
             $result = unpack('C*', $binaryString);
-            
+
             if ($result === false || empty($result)) {
                 $debugInfo = self::generateDebugInfo($hexString, 'unpack() failed or returned empty result');
                 throw InvalidHexDataException::corruptedData($hexString, $debugInfo);
@@ -76,7 +76,7 @@ class KPayClient
                 logger()->debug('KPayClient | Successful hex conversion:', [
                     'input_length' => strlen($hexString),
                     'output_length' => count($result),
-                    'input_preview' => substr($hexString, 0, 50) . '...'
+                    'input_preview' => substr($hexString, 0, 50).'...',
                 ]);
             }
 
@@ -84,11 +84,11 @@ class KPayClient
 
         } catch (\ValueError $e) {
             // PHP 8+ throws ValueError for invalid hex strings
-            $debugInfo = self::generateDebugInfo($hexString, 'ValueError: ' . $e->getMessage());
+            $debugInfo = self::generateDebugInfo($hexString, 'ValueError: '.$e->getMessage());
             throw InvalidHexDataException::invalidCharacters($hexString, $debugInfo);
         } catch (\Exception $e) {
             // Catch any other unexpected errors
-            $debugInfo = self::generateDebugInfo($hexString, 'Unexpected error: ' . $e->getMessage());
+            $debugInfo = self::generateDebugInfo($hexString, 'Unexpected error: '.$e->getMessage());
             throw InvalidHexDataException::corruptedData($hexString, $debugInfo);
         }
     }
@@ -102,7 +102,7 @@ class KPayClient
             return json_encode([
                 'issue' => $issue,
                 'input_type' => 'null',
-                'timestamp' => now()->toISOString()
+                'timestamp' => now()->toISOString(),
             ]);
         }
 
@@ -112,10 +112,10 @@ class KPayClient
             'input_type' => gettype($hexString),
             'first_50_chars' => substr($hexString, 0, 50),
             'last_50_chars' => strlen($hexString) > 50 ? substr($hexString, -50) : null,
-            'contains_non_hex' => !ctype_xdigit($hexString),
+            'contains_non_hex' => ! ctype_xdigit($hexString),
             'is_odd_length' => strlen($hexString) % 2 !== 0,
             'character_analysis' => self::analyzeHexString($hexString),
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ];
 
         return json_encode($debugData, JSON_PRETTY_PRINT);
@@ -131,12 +131,12 @@ class KPayClient
             'valid_hex_chars' => 0,
             'invalid_chars' => [],
             'whitespace_count' => 0,
-            'special_chars' => []
+            'special_chars' => [],
         ];
 
         for ($i = 0; $i < strlen($hexString); $i++) {
             $char = $hexString[$i];
-            
+
             if (ctype_xdigit($char)) {
                 $analysis['valid_hex_chars']++;
             } else {
@@ -146,10 +146,10 @@ class KPayClient
                     $analysis['invalid_chars'][] = [
                         'char' => $char,
                         'position' => $i,
-                        'ascii' => ord($char)
+                        'ascii' => ord($char),
                     ];
                 }
-                
+
                 if (in_array($char, ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '='])) {
                     $analysis['special_chars'][] = $char;
                 }
@@ -171,7 +171,7 @@ class KPayClient
             'is_even_length' => strlen($hexString) % 2 === 0,
             'trimmed_data' => trim($hexString),
             'analysis' => self::analyzeHexString($hexString),
-            'sample_conversion_test' => self::testHexConversion(substr($hexString, 0, 10))
+            'sample_conversion_test' => self::testHexConversion(substr($hexString, 0, 10)),
         ];
     }
 
@@ -184,22 +184,23 @@ class KPayClient
             if (strlen($sample) % 2 !== 0) {
                 $sample = substr($sample, 0, -1); // Make even length
             }
-            
+
             if (empty($sample)) {
                 return ['status' => 'empty_sample'];
             }
 
             $result = hex2bin($sample);
+
             return [
                 'status' => 'success',
                 'sample' => $sample,
-                'result_length' => strlen($result)
+                'result_length' => strlen($result),
             ];
         } catch (\Exception $e) {
             return [
                 'status' => 'failed',
                 'sample' => $sample,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ];
         }
     }
@@ -231,6 +232,7 @@ class KPayClient
         $encrypted = base64_decode($encrypted);
         $encrypted = unpack('C*', ($encrypted));
         $encrypted = self::byteArray2Hex($encrypted);
+
         return urlencode($encrypted);
     }
 

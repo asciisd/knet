@@ -7,6 +7,7 @@ use Exception;
 class InvalidHexDataException extends KnetException
 {
     private ?string $hexData;
+
     private ?string $debugInfo;
 
     public function __construct(string $message, ?string $hexData = null, ?string $debugInfo = null, int $code = 0, ?Exception $previous = null)
@@ -53,6 +54,18 @@ class InvalidHexDataException extends KnetException
     }
 
     /**
+     * Create exception for hex string too short for AES
+     */
+    public static function tooShort(string $hexData, ?string $debugInfo = null): self
+    {
+        return new self(
+            'Hex string too short for AES decryption. Minimum 32 characters required.',
+            $hexData,
+            $debugInfo
+        );
+    }
+
+    /**
      * Create exception for corrupted response data
      */
     public static function corruptedData(string $hexData, ?string $debugInfo = null): self
@@ -89,9 +102,9 @@ class InvalidHexDataException extends KnetException
             'error_type' => 'invalid_hex_data',
             'message' => $this->getMessage(),
             'hex_data_length' => $this->hexData ? strlen($this->hexData) : 0,
-            'hex_data_preview' => $this->hexData ? substr($this->hexData, 0, 100) . '...' : null,
+            'hex_data_preview' => $this->hexData ? substr($this->hexData, 0, 100).'...' : null,
             'debug_info' => $this->debugInfo,
             'timestamp' => now()->toISOString(),
         ];
     }
-} 
+}
