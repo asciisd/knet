@@ -24,7 +24,7 @@ jobs:
             testbench: 9.*
             phpunit: ^10.5
           - laravel: 12.*
-            testbench: 9.*
+            testbench: 10.*
             phpunit: ^11.0
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
