@@ -1,11 +1,8 @@
-name: Tests
+name: tests
 
 on:
   push:
-    branches: [master, main]
   pull_request:
-    branches: [master, main]
-  workflow_dispatch:
 
 jobs:
   test:
@@ -14,20 +11,13 @@ jobs:
       fail-fast: true
       matrix:
         php: [8.3]
-        laravel: [10.*, 11.*, 12.*]
-        stability: [prefer-stable]
+        laravel: [11.*]
         include:
-          - laravel: 10.*
-            testbench: 8.*
-            phpunit: ^10.0
           - laravel: 11.*
             testbench: 9.*
             phpunit: ^10.5
-          - laravel: 12.*
-            testbench: 10.*
-            phpunit: ^11.0
 
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }}
 
     steps:
       - name: Checkout code
@@ -37,7 +27,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo, simplexml
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, simplexml
           coverage: none
 
       - name: Setup problem matchers
@@ -47,11 +37,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "phpunit/phpunit:${{ matrix.phpunit }}" --no-interaction --no-update
-          composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "phpunit/phpunit:${{ matrix.phpunit }}" --no-interaction --no-update --dev
+          composer update --${{ matrix.dependency-version || 'prefer-stable' }} --prefer-dist --no-interaction
 
-      - name: List Installed Dependencies
-        run: composer show -D
-
-      - name: Execute tests
+      - name: Run PHPUnit
         run: vendor/bin/phpunit --no-coverage
