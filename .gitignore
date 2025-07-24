@@ -1,11 +1,38 @@
-vendor
-composer.lock
-.phpunit.result.cache
+vendor/
+node_modules/
+npm-debug.log
+
+# Laravel 4 specific
+bootstrap/compiled.php
+app/storage/
+
+# Laravel 5 & Lumen specific
+public/storage
+public/hot
+storage/*.key
+.env.*.php
+.env.php
 .env
-.env.testing
+
+# PHPUnit and Testing
 phpunit.xml
-.idea
-build
-coverage
-docs
-.cursor
+.phpunit.cache/
+build/
+coverage/
+.phpunit.result.cache
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

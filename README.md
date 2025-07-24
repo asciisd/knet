@@ -202,7 +202,7 @@ If you discover any security-related issues, please email security@asciisd.com i
 
 ## Credits
 
-- [Your Name](https://github.com/yourusername)
+- [Amr Emad](https://github.com/aemaddin)
 - [All Contributors](../../contributors)
 
 ## License

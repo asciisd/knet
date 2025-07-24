@@ -30,10 +30,28 @@
         "illuminate/support": "^10.0|^11.0|^12.0",
         "illuminate/events": "^10.0|^11.0|^12.0"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0|^11.0",
+        "orchestra/testbench": "^8.0|^9.0",
+        "mockery/mockery": "^1.6",
+        "phpstan/phpstan": "^1.10",
+        "laravel/pint": "^1.0"
+    },
     "autoload": {
         "psr-4": {
             "Asciisd\\Knet\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Asciisd\\Knet\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
+        "format": "vendor/bin/pint",
+        "analyse": "vendor/bin/phpstan analyse"
     },
     "extra": {
         "laravel": {
