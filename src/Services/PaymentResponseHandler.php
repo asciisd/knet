@@ -28,6 +28,11 @@ class PaymentResponseHandler
         return $transaction;
     }
 
+    public function handleError(array $payload)
+    {
+        // TODO: Implement handleError() method.
+    }
+
     private function updateTransaction(KnetTransaction $transaction, KnetResponse $response): void
     {
         $status = $this->determineStatus($response->result);

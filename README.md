@@ -28,7 +28,7 @@ composer require asciisd/knet
 After installation, publish the configuration file:
 
 ```bash
-php artisan vendor:publish --provider="Asciisd\Knet\KnetServiceProvider"
+php artisan knet:publish"
 ```
 
 ## Configuration
