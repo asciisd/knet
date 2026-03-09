@@ -2,7 +2,9 @@
 
 namespace Asciisd\Knet\Tests;
 
+use Asciisd\Knet\KPayClient;
 use Asciisd\Knet\Providers\KnetServiceProvider;
+use Asciisd\Knet\Tests\Mocks\KnetApiMock;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
@@ -32,10 +34,10 @@ abstract class TestCase extends Orchestra
             'prefix'   => '',
         ]);
 
-        // Setup Knet configuration for testing
-        $app['config']->set('knet.transport.id', 'test_transport_id');
-        $app['config']->set('knet.transport.password', 'test_transport_password');
-        $app['config']->set('knet.resource_key', 'test_resource_key');
+        // KNET test credentials (loaded from phpunit.xml.dist env vars)
+        $app['config']->set('knet.transport.id', KnetApiMock::transportId());
+        $app['config']->set('knet.transport.password', KnetApiMock::transportPassword());
+        $app['config']->set('knet.resource_key', KnetApiMock::resourceKey());
         $app['config']->set('knet.debug', true);
         $app['config']->set('knet.debug_hex_conversion', true);
         $app['config']->set('knet.debug_response_data', true);
@@ -47,14 +49,11 @@ abstract class TestCase extends Orchestra
         $app['config']->set('knet.redirect_url', '/dashboard');
     }
 
-    /**
-     * Create a test user for payment testing
-     */
     protected function createTestUser(): \Illuminate\Foundation\Auth\User
     {
         return new class extends \Illuminate\Foundation\Auth\User {
             protected $fillable = ['id', 'name', 'email'];
-            
+
             public function __construct(array $attributes = [])
             {
                 parent::__construct(array_merge([
@@ -66,9 +65,44 @@ abstract class TestCase extends Orchestra
         };
     }
 
+    protected function setUpUsersTable(): void
+    {
+        $this->app['db']->connection()->getSchemaBuilder()->create('users', function ($table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email');
+            $table->timestamps();
+        });
+    }
+
+    protected function createDbUser(): \Illuminate\Foundation\Auth\User
+    {
+        return \Illuminate\Foundation\Auth\User::create([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+        ]);
+    }
+
+    protected function encryptPayload(array $data): string
+    {
+        return urldecode(KPayClient::encryptAES(
+            http_build_query($data),
+            KnetApiMock::resourceKey()
+        ));
+    }
+
     /**
-     * Create a mock request with KNet response data
+     * Rebuild service container bindings after config changes
      */
+    protected function refreshKnetServices(): void
+    {
+        $this->app->forgetInstance(\Asciisd\Knet\Services\KnetPaymentService::class);
+        $this->app->forgetInstance(\Asciisd\Knet\Services\KnetInquiryService::class);
+        $this->app->forgetInstance(\Asciisd\Knet\Services\KnetRefundService::class);
+        $this->app->forgetInstance(\Asciisd\Knet\Services\KnetPaymentInitiationService::class);
+        $this->app->forgetInstance(\Asciisd\Knet\Config\KnetConfig::class);
+    }
+
     protected function createMockKnetRequest(array $data = []): \Illuminate\Http\Request
     {
         $defaultData = [
@@ -81,14 +115,11 @@ abstract class TestCase extends Orchestra
         return \Illuminate\Http\Request::create('/knet/response', 'POST', $requestData);
     }
 
-    /**
-     * Create a mock request with raw content
-     */
     protected function createMockKnetRequestWithContent(string $content): \Illuminate\Http\Request
     {
         $request = \Illuminate\Http\Request::create('/knet/response', 'POST');
         $request->initialize([], [], [], [], [], ['CONTENT_TYPE' => 'application/x-www-form-urlencoded'], $content);
-        
+
         return $request;
     }
 } 

@@ -24,7 +24,7 @@ class KnetInquiryService extends AbstractKnetService
             'tranid' => $inquiryResult['tranid'] ?? $transaction->tranid,
             'trackid' => $inquiryResult['trackid'] ?? $transaction->trackid,
             'paymentid' => $inquiryResult['payid'] ?? $transaction->paymentid,
-            'amount' => $inquiryResult['amt'] ?? $transaction->amount,
+            'amt' => $inquiryResult['amt'] ?? $transaction->amt,
             'paid' => $inquiryResult['result'] === 'SUCCESS' ? true : false,
             'udf1' => $inquiryResult['udf1'] ?? $transaction->udf1,
             'udf2' => $inquiryResult['udf2'] ?? $transaction->udf2,
