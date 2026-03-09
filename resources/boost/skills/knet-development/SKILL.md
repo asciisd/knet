@@ -349,6 +349,169 @@ class HandleSuccessfulPayment
 }
 ```
 
+## KNET Gateway Protocol (K-064)
+
+This section documents the underlying KNET Payment Gateway protocol (doc K-064 v1.4) that the package abstracts.
+
+### Gateway URLs
+
+| Environment | Portal | Transaction Pipe (RAW) |
+| --- | --- | --- |
+| Test | `https://www.kpaytest.com.kw/kpg/merchant.htm` | `https://www.kpaytest.com.kw/kpg/tranPipe.htm?param=tranInit&` |
+| Production | `https://www.kpay.com.kw/portal/merchant.htm` | `https://www.kpay.com.kw/kpg/tranPipe.htm?param=tranInit&` |
+
+### Action Codes
+
+| Action | Code | Description |
+| --- | --- | --- |
+| Purchase | `1` | Standard payment transaction |
+| Refund (Credit) | `2` | Refund a captured transaction |
+| Inquiry | `8` | Query transaction status |
+
+### RAW Integration (used by this package)
+
+The package uses RAW-based integration which requires:
+- **Tran Portal ID** (`KNET_TRANSPORT_ID`) — unique terminal identifier
+- **Tran Portal Password** (`KNET_TRANSPORT_PASSWORD`) — terminal password
+- **Terminal Resource Key** (`KNET_RESOURCE_KEY`) — 16-char AES-128-CBC key for encrypting/decrypting `trandata`
+
+RAW requests use `Content-type: application/xml` and send XML-formatted parameters to the `tranPipe.htm` endpoint.
+
+### Payment Initialization Variables
+
+| Variable | Type | Length | Required | Description |
+| --- | --- | --- | --- | --- |
+| Tran Portal ID | STRING | 255 | Y | Unique terminal ID |
+| Tran Portal Password | STRING | 15 | Y | Terminal password |
+| Terminal Resource Key | STRING | 16 | Y | AES encryption key |
+| Action | STRING | 1 | Y | `1` (purchase), `2` (refund), `8` (inquiry) |
+| Amount | STRING | 10 | Y | 3 decimal places for KWD: `15.750`, `10.000` |
+| Currency Code | STRING | 3 | Y | `414` for KWD |
+| Language | STRING | 3 | Y | `EN` or `AR` |
+| Response URL | STRING | 255 | Y | URL for KNET to POST transaction response |
+| Error URL | STRING | 255 | Y | URL for consumer redirect on error |
+| Track ID | STRING | 40 | Y | Unique merchant-generated tracking ID (alphanumeric only) |
+| Trans ID | STRING | 19 | Y (Refund/Inquiry) | Identifies the original transaction |
+| UDF1–UDF4 | STRING | 255 | N | User-defined fields for custom data |
+| UDF3 (KFAST) | STRING | 8 | N | 8-digit numeric customer token for KFAST faster checkout |
+| UDF5 | STRING | 255 | N | **Purchase:** extra data, prefix with `"ptlf"` for bank reports (max 50 chars). **Inquiry:** identifier type — `"TrackID"`, `"PaymentID"`, `"TransID"`, or `"SeqNum"` |
+
+### Transaction Response Variables
+
+| Variable | Description |
+| --- | --- |
+| paymentid | Unique order ID from Payment Gateway |
+| result | `CAPTURED`, `NOT CAPTURED`, `CANCELED`, `HOST TIMEOUT` |
+| ref | Reference number from KNET |
+| trackid | Merchant's original tracking ID |
+| tranid | Transaction ID from Payment Gateway |
+| postdate | Post date in `MMDD` format |
+| auth | Authorization code from the bank |
+| amt | Transaction amount (3 decimal places) |
+| udf1–udf5 | User-defined fields echoed back |
+| avr | Address verification response |
+| authRespCode | Reason code for the transaction result |
+| Error | Error code (if unsuccessful) |
+| ErrorText | Error description (if unsuccessful) |
+
+### Response Notification Contract
+
+When KNET POSTs the response to the `responseURL`:
+1. KNET sends an encrypted `trandata` parameter via URL-encoded POST
+2. The merchant **must** decrypt the response, cross-verify with their database, and save both encrypted and plain text
+3. The response page **must** output a single line: `REDIRECT=<Merchant Receipt URL>`
+4. The response page must have **no HTML tags, no errors, no redirections** — only the `REDIRECT=` text
+5. KNET reads this output and redirects the customer's browser to that URL
+
+### Result Values
+
+| Result | Meaning | Context |
+| --- | --- | --- |
+| `CAPTURED` | Transaction approved | Purchase, Inquiry, Refund |
+| `NOT CAPTURED` | Transaction declined by bank | Purchase |
+| `CANCELED` | Customer canceled on payment page | Purchase |
+| `HOST TIMEOUT` | Bank did not respond in time | Purchase |
+| `SUCCESS` | Transaction available and captured | Inquiry |
+| `FAILURE` | Transaction failed | Inquiry |
+| `SUSPECTED` | Transaction suspected | Inquiry |
+
+### Inquiry Protocol
+
+Inquiry uses action code `8`. The `udf5` parameter determines which identifier is used to locate the original transaction:
+
+| Inquire by | transid value | udf5 value | amt | trackid |
+| --- | --- | --- | --- | --- |
+| Transaction ID | Original TransId | Empty or `"TransID"` | Original Amount | Original TrackId |
+| Track ID | Original TrackId | `"TrackID"` | Original Amount | Original TrackId |
+| Payment ID | Original PaymentId | `"PaymentID"` | Original Amount | Original TrackId |
+| Reference ID | Original RefId | `"SeqNum"` | Original Amount | Original TrackId |
+
+### Refund Protocol
+
+Refund uses action code `2`. When refunding by Track ID:
+- Set `transid` = original Track ID value
+- Set `trackid` = original Track ID value
+- Set `udf5` = `"TrackID"`
+- Refund is successful **only** if result is `CAPTURED`; any other value is a failure
+
+### KFAST (Faster Checkout)
+
+KFAST allows registered cardholders to skip entering card details. To enable:
+- Pass an 8-digit numeric token in `UDF3` that uniquely identifies the customer
+- The merchant **must** ensure the correct token is passed for each customer
+- KFAST must be enabled on the terminal by the acquirer bank
+- OTP is required for initial card registration
+
+### Validation Constraints
+
+**Restricted characters:**
+
+| Field | Forbidden Characters |
+| --- | --- |
+| UDF1–UDF5 | `@`, `/` |
+| Track ID | `-`, `=`, `[`, `]`, `/`, `?`, `.` |
+
+Track ID must be alphanumeric, max 40 characters, unique per transaction.
+
+### Test Environment
+
+- **Test URL:** `https://www.kpaytest.com.kw/kpg/merchant.htm`
+- **Test Card:** Select "KNET Test Card [KNET1]" from the bank dropdown
+- **CAPTURED result:** Set expiration date to `09/2021`
+- **NOT CAPTURED result:** Use any other expiration date
+- **PIN:** Any 4-digit numeric value works in the test environment
+
+### Error Codes (Common)
+
+Error codes follow the pattern `IPAY01xxxxx` (validation/processing) and `IPAY02xxxxx` (system/database). Key codes:
+
+| Code | Description |
+| --- | --- |
+| IPAY0100001 | Missing error URL |
+| IPAY0100003 | Missing response URL |
+| IPAY0100005 | Missing tranportal ID |
+| IPAY0100008 | Terminal not enabled |
+| IPAY0100013 | Invalid transaction data |
+| IPAY0100015 | Invalid tranportal password |
+| IPAY0100017 | Inactive terminal |
+| IPAY0100018 | Terminal password expired |
+| IPAY0100020 | Invalid action type |
+| IPAY0100023 | Missing amount |
+| IPAY0100024 | Invalid amount |
+| IPAY0100027 | Invalid track id |
+| IPAY0100033 | Terminal action not enabled |
+| IPAY0100036 | UDF Mismatched |
+| IPAY0100042 | Transaction time limit exceeded |
+| IPAY0100045 | Denied by Risk |
+| IPAY0100048 | Cancelled |
+| IPAY0100050 | Invalid terminal key |
+| IPAY0100158 | Host timeout |
+| IPAY0100176 | Decrypting transaction data failed |
+| IPAY0100249 | Merchant response URL is down |
+| IPAY0100264 | Signature validation failed |
+
+Full error code list: see K-064 Integration Manual Section 10.
+
 ## When Adding New Features
 
 - New services go in `src/Services/` and should implement the appropriate focused contract

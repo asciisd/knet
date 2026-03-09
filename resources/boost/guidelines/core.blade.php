@@ -221,3 +221,49 @@ The package registers these routes automatically (disable with `Knet::ignoreRout
 | `knet:install` | Full setup: publish config, run migrations, validate |
 | `knet:check` | Validate credentials and configuration |
 | `knet:publish` | Publish config (`--config`) and/or migrations (`--migrations`) |
+
+### KNET Gateway Protocol Reference (K-064)
+
+The underlying KNET Payment Gateway protocol (doc K-064 v1.4) that this package abstracts.
+
+**Gateway URLs:**
+
+| Environment | Portal | Transaction Pipe (RAW) |
+|---|---|---|
+| Test | `https://www.kpaytest.com.kw/kpg/merchant.htm` | `https://www.kpaytest.com.kw/kpg/tranPipe.htm?param=tranInit&` |
+| Production | `https://www.kpay.com.kw/portal/merchant.htm` | `https://www.kpay.com.kw/kpg/tranPipe.htm?param=tranInit&` |
+
+**Action Codes:** `1` = Purchase, `2` = Refund (Credit), `8` = Inquiry.
+
+**RAW Integration:** The package uses RAW-based integration with `Content-type: application/xml`. Requires Tran Portal ID, Tran Portal Password, and a 16-char Terminal Resource Key for AES-128-CBC encryption of `trandata`.
+
+**Response Notification Contract:** When KNET POSTs to the `responseURL`, the response page must output a single line `REDIRECT=<Merchant Receipt URL>` with no HTML tags, no errors, and no redirections. KNET reads this and redirects the customer's browser.
+
+**Result Values:**
+
+| Result | Meaning | Context |
+|---|---|---|
+| `CAPTURED` | Approved | Purchase, Inquiry, Refund |
+| `NOT CAPTURED` | Declined by bank | Purchase |
+| `CANCELED` | Customer canceled | Purchase |
+| `HOST TIMEOUT` | Bank did not respond | Purchase |
+| `SUCCESS` / `FAILURE` / `SUSPECTED` | Inquiry-specific results | Inquiry |
+
+**Inquiry Protocol:** Uses action `8`. Set `udf5` to specify the identifier type: `"TrackID"`, `"PaymentID"`, `"TransID"`, or `"SeqNum"`. Set `transid` to the corresponding original value. Always include the original `amt` and `trackid`.
+
+**Refund Protocol:** Uses action `2`. When refunding by Track ID, set both `transid` and `trackid` to the original Track ID, and `udf5` to `"TrackID"`. Refund is successful only when result is `CAPTURED`.
+
+**KFAST (Faster Checkout):** Pass an 8-digit numeric customer token in `UDF3`. Must be enabled on the terminal by the acquirer bank. Merchant must ensure the correct token per customer.
+
+**Validation Constraints:**
+
+| Field | Forbidden Characters |
+|---|---|
+| UDF1–UDF5 | `@`, `/` |
+| Track ID | `-`, `=`, `[`, `]`, `/`, `?`, `.` |
+
+Track ID: alphanumeric only, max 40 characters, unique per transaction. Amounts are STRING with 3 decimal places (KWD).
+
+**Test Environment:** Use test card "KNET Test Card [KNET1]". Expiry `09/2021` = CAPTURED, any other = NOT CAPTURED. Any 4-digit PIN.
+
+**Common Error Codes:** `IPAY0100001` (missing error URL), `IPAY0100005` (missing tranportal ID), `IPAY0100008` (terminal not enabled), `IPAY0100013` (invalid transaction data), `IPAY0100015` (invalid password), `IPAY0100027` (invalid track id), `IPAY0100042` (time limit exceeded), `IPAY0100045` (denied by risk), `IPAY0100158` (host timeout), `IPAY0100176` (decryption failed), `IPAY0100249` (response URL is down).
