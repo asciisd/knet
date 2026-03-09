@@ -1,5 +1,19 @@
 # Release Notes
 
+## [v7.1.0 (2026-3-9)](https://github.com/asciisd/knet/compare/v7.0.0...v7.1.0)
+### Added
+- KFAST faster checkout support via `payWithKfast()` on the `HasKnet` trait
+- `kfastToken()` method for auto-generating 8-digit customer tokens
+- UDF3 validation enforcing exactly 8 numeric digits for KFAST tokens
+- `refund()` convenience method on the `HasKnet` trait
+- Refund validation (non-refundable, exceeds amount, zero/negative)
+- `KnetRefundSucceeded` and `KnetRefundFailed` events
+- `isRefunded()` helper on `KnetTransaction`
+- Refund amount tracking on original transaction (`refund_amount`)
+- K-064 Integration Manual v1.4 documentation
+### Changed
+- Refund service now validates before processing and dispatches events
+
 ## [v1.1.16 (2020-2-11)](https://github.com/asciisd/knet/compare/v1.1.15...v1.1.16)
 ### Added
 - Knet Facade
