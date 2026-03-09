@@ -23,7 +23,7 @@ class KnetTransaction extends Model
         'user_id', 'original_transaction_id', 'action', 'error_text', 'paymentid', 'paid', 'result', 'auth', 'avr',
         'ref', 'tranid', 'postdate', 'trackid', 'udf1', 'udf2', 'udf3', 'udf4', 'udf5', 'udf6', 'udf7', 'udf8',
         'udf9', 'udf10', 'amt', 'error', 'rspcode', 'livemode', 'url', 'card_number', 'brand_id', 'ip_address',
-        'refunded', 'refunded_at', 'refund_amount', 'refund_id',
+        'refunded', 'refunded_at', 'refund_amount',
     ];
 
     protected $casts = [
@@ -82,9 +82,11 @@ class KnetTransaction extends Model
         return number_format($this->amount, 3, '.', '');
     }
 
-    /**
-     * Check if the transaction can be refunded
-     */
+    public function isRefunded(): bool
+    {
+        return (bool) $this->refunded;
+    }
+
     public function isRefundable(): bool
     {
         return $this->isCaptured() && ! $this->refunded;

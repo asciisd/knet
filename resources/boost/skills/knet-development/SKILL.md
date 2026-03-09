@@ -63,6 +63,9 @@ class User extends Authenticatable
 This adds:
 
 - `pay(float $amount, array $options = []): KnetTransaction` — create a payment
+- `payWithKfast(float $amount, array $options = []): KnetTransaction` — KFAST faster checkout (auto-generates 8-digit token)
+- `refund(KnetTransaction $transaction, ?float $amount = null): array` — full or partial refund
+- `kfastToken(): string` — overridable 8-digit numeric KFAST token generator
 - `knetTransactions(): HasMany` — relationship to all transactions
 
 ## Creating Payments
@@ -112,6 +115,45 @@ public function checkout(CreatesPayments $payments)
 }
 ```
 
+### With KFAST (Faster Checkout)
+
+```php
+// Auto-generates 8-digit token from user ID (e.g., user ID 42 → "00000042")
+$transaction = $user->payWithKfast(25.500, [
+    'udf1' => 'order_id',
+]);
+return redirect($transaction->url);
+
+// Or with a custom token override
+$transaction = $user->payWithKfast(25.500, [
+    'udf3' => '99887766',
+]);
+
+// Or pass udf3 directly to pay()
+$transaction = $user->pay(25.500, [
+    'udf3' => '12345678',
+]);
+```
+
+Override the token strategy by implementing `kfastToken()` on your model:
+
+```php
+class User extends Authenticatable
+{
+    use HasKnet;
+
+    public function kfastToken(): string
+    {
+        return str_pad((string) $this->customer_number, 8, '0', STR_PAD_LEFT);
+    }
+}
+```
+
+KFAST token rules:
+- Must be exactly 8 numeric digits (validated automatically by `PaymentRequest`)
+- Must uniquely identify the customer
+- KFAST must be enabled on the terminal by the acquirer bank
+
 ### Important Rules
 
 - Amounts MUST use 3 decimal places (KWD format): `10.000`, `25.500`, `0.250`
@@ -154,6 +196,8 @@ Event::listen(KnetPaymentFailed::class, function ($event) {
 |---|---|
 | `KnetPaymentSucceeded` | `KnetTransaction $transaction` |
 | `KnetPaymentFailed` | `KnetTransaction $transaction, ?string $errorMessage` |
+| `KnetRefundSucceeded` | `KnetTransaction $transaction, KnetTransaction $refundTransaction, float $amount` |
+| `KnetRefundFailed` | `KnetTransaction $transaction, KnetTransaction $refundTransaction, string $reason` |
 | `KnetResponseReceived` | `array $payload` |
 | `KnetResponseHandled` | `array $payload` |
 | `KnetTransactionCreated` | `KnetTransaction $transaction` |
@@ -170,6 +214,7 @@ use Asciisd\Knet\KnetTransaction;
 $transaction->isCaptured();   // true if result == 'CAPTURED'
 $transaction->hasStatus();    // true if result is not empty
 $transaction->isRefundable(); // true if captured and not yet refunded
+$transaction->isRefunded();   // true if refunded
 
 // Get amount
 $transaction->rawAmount();       // float, e.g. 10.0
@@ -244,6 +289,18 @@ $result = $paymentService->inquirePayment(10.000, 'track-123');
 
 ### Refunds
 
+#### Via Trait
+
+```php
+// Full refund
+$result = $user->refund($transaction);
+
+// Partial refund
+$result = $user->refund($transaction, 5.000);
+```
+
+#### Via Service
+
 ```php
 // Full refund
 $result = $paymentService->refundPayment($transaction);
@@ -252,7 +309,21 @@ $result = $paymentService->refundPayment($transaction);
 $result = $paymentService->refundPayment($transaction, 5.000);
 ```
 
-Only captured, non-refunded transactions can be refunded. Check with `$transaction->isRefundable()`.
+#### Refund Validation
+
+The service automatically validates before processing:
+- Transaction must be captured and not already refunded (`isRefundable()`)
+- Refund amount must be greater than zero
+- Refund amount must not exceed the original transaction amount
+
+Throws `KnetException` on validation failure.
+
+#### Refund Behavior
+
+- On success: original transaction is marked `refunded = true`, `refunded_at` is set, `refund_amount` is recorded
+- A separate `KnetTransaction` record is created for the refund (with `action = 2` and `original_transaction_id` linking to the original)
+- `KnetRefundSucceeded` event is dispatched on success; `KnetRefundFailed` on failure
+- Refund result is `CAPTURED` for success; any other value is a failure
 
 ## Routes
 

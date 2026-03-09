@@ -147,14 +147,14 @@ class PaymentFlowTest extends TestCase
         $transaction = $service->createPayment($user, 5.000, [
             'udf1' => 'field_1',
             'udf2' => 'field_2',
-            'udf3' => 'field_3',
+            'udf3' => '55443322',
             'udf4' => 'field_4',
             'udf5' => 'field_5',
         ]);
 
         $this->assertEquals('field_1', $transaction->udf1);
         $this->assertEquals('field_2', $transaction->udf2);
-        $this->assertEquals('field_3', $transaction->udf3);
+        $this->assertEquals('55443322', $transaction->udf3);
         $this->assertEquals('field_4', $transaction->udf4);
         $this->assertEquals('field_5', $transaction->udf5);
     }

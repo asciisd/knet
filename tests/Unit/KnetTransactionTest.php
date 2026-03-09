@@ -92,6 +92,21 @@ class KnetTransactionTest extends TestCase
         $this->assertFalse($transaction->isRefundable());
     }
 
+    public function test_is_refunded_returns_true_when_refunded()
+    {
+        $transaction = new KnetTransaction(['refunded' => true]);
+        $this->assertTrue($transaction->isRefunded());
+    }
+
+    public function test_is_refunded_returns_false_when_not_refunded()
+    {
+        $transaction = new KnetTransaction(['refunded' => false]);
+        $this->assertFalse($transaction->isRefunded());
+
+        $transaction = new KnetTransaction(['refunded' => 0]);
+        $this->assertFalse($transaction->isRefunded());
+    }
+
     public function test_use_customer_model_changes_model_class()
     {
         $original = KnetTransaction::$customerModel;

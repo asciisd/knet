@@ -3,6 +3,9 @@
 namespace Asciisd\Knet\Services;
 
 use Asciisd\Knet\Contracts\RefundsPayments;
+use Asciisd\Knet\Events\KnetRefundFailed;
+use Asciisd\Knet\Events\KnetRefundSucceeded;
+use Asciisd\Knet\Exceptions\KnetException;
 use Asciisd\Knet\KnetTransaction;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Carbon;
@@ -11,16 +14,13 @@ use Illuminate\Support\Facades\Log;
 class KnetRefundService extends AbstractKnetService implements RefundsPayments
 {
     /**
-     * Process a refund for a transaction
-     *
-     * @param  KnetTransaction  $transaction  The transaction to refund
-     * @param  float|null  $amount  The amount to refund. If null, refunds the full amount
-     * @return array The refund response
-     *
+     * @throws KnetException If the transaction is not refundable or the amount is invalid
      * @throws RequestException If the refund request fails
      */
     public function refundPayment(KnetTransaction $transaction, ?float $amount = null): array
     {
+        $this->validateRefund($transaction, $amount);
+
         $refundAmount = $amount ?? $transaction->rawAmount();
 
         // Create a new transaction for the refund
@@ -37,6 +37,7 @@ class KnetRefundService extends AbstractKnetService implements RefundsPayments
                 $this->repository->update($transaction, [
                     'refunded' => true,
                     'refunded_at' => Carbon::now(),
+                    'refund_amount' => $this->formatAmount($refundAmount),
                 ]);
 
                 $this->repository->update($refundTransaction, [
@@ -48,6 +49,17 @@ class KnetRefundService extends AbstractKnetService implements RefundsPayments
                     'paymentid' => $response['payid'],
                     'paid' => true,
                 ]);
+
+                KnetRefundSucceeded::dispatch($transaction, $refundTransaction, $refundAmount);
+            } else {
+                $reason = $response['result'] ?? 'Unknown error';
+
+                $this->repository->update($refundTransaction, [
+                    'result' => $response['result'] ?? 'FAILED',
+                    'error_text' => $response['error_message'] ?? $reason,
+                ]);
+
+                KnetRefundFailed::dispatch($transaction, $refundTransaction, $reason);
             }
 
             return $response;
@@ -57,6 +69,8 @@ class KnetRefundService extends AbstractKnetService implements RefundsPayments
                 'result' => 'FAILED',
                 'error_text' => $e->getMessage(),
             ]);
+
+            KnetRefundFailed::dispatch($transaction, $refundTransaction, $e->getMessage());
 
             Log::error('Knet Refund Error:', [
                 'message' => $e->getMessage(),
@@ -73,9 +87,25 @@ class KnetRefundService extends AbstractKnetService implements RefundsPayments
         }
     }
 
-    /**
-     * Create a new transaction record for a refund
-     */
+    private function validateRefund(KnetTransaction $transaction, ?float $amount): void
+    {
+        if (! $transaction->isRefundable()) {
+            throw new KnetException('Transaction is not refundable. It must be captured and not already refunded.');
+        }
+
+        if ($amount !== null) {
+            if ($amount <= 0) {
+                throw new KnetException('Refund amount must be greater than zero.');
+            }
+
+            if ($amount > $transaction->rawAmount()) {
+                throw new KnetException(
+                    sprintf('Refund amount (%.3f) exceeds the original transaction amount (%.3f).', $amount, $transaction->rawAmount())
+                );
+            }
+        }
+    }
+
     private function createRefundTransaction(KnetTransaction $originalTransaction, float $refundAmount): KnetTransaction
     {
         return $this->repository->create([

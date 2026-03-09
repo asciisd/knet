@@ -2,6 +2,9 @@
 
 namespace Asciisd\Knet\Tests\Feature;
 
+use Asciisd\Knet\Events\KnetRefundFailed;
+use Asciisd\Knet\Events\KnetRefundSucceeded;
+use Asciisd\Knet\Exceptions\KnetException;
 use Asciisd\Knet\KnetTransaction;
 use Asciisd\Knet\Services\KnetRefundService;
 use Asciisd\Knet\Tests\Mocks\KnetApiMock;
@@ -275,5 +278,167 @@ class KnetRefundApiTest extends TestCase
 
         $refundTx = KnetTransaction::where('original_transaction_id', $transaction->id)->first();
         $this->assertEquals(42, $refundTx->user_id);
+    }
+
+    public function test_full_refund_sets_refund_amount_on_original_transaction()
+    {
+        $transaction = $this->createCapturedTransaction([
+            'trackid' => 'REF-AMT-001',
+            'amt' => '25.500',
+        ]);
+
+        KnetApiMock::fakeRefundSuccess([
+            'trackid' => 'REF-AMT-001',
+            'amt' => '25.500',
+        ]);
+
+        $this->refundService->refundPayment($transaction);
+
+        $transaction->refresh();
+        $this->assertEquals(25.5, $transaction->refund_amount);
+    }
+
+    public function test_partial_refund_sets_refund_amount_on_original_transaction()
+    {
+        $transaction = $this->createCapturedTransaction([
+            'trackid' => 'REF-PAMT-001',
+            'amt' => '50.000',
+        ]);
+
+        KnetApiMock::fakeRefundSuccess([
+            'trackid' => 'REF-PAMT-001',
+            'amt' => '10.000',
+        ]);
+
+        $this->refundService->refundPayment($transaction, 10.000);
+
+        $transaction->refresh();
+        $this->assertEquals(10.0, $transaction->refund_amount);
+    }
+
+    public function test_refund_on_non_refundable_transaction_throws_exception()
+    {
+        $transaction = KnetTransaction::create([
+            'trackid' => 'REF-NOREF-001',
+            'user_id' => 1,
+            'amt' => '10.000',
+            'result' => 'FAILED',
+            'livemode' => false,
+        ]);
+
+        $this->expectException(KnetException::class);
+        $this->expectExceptionMessage('Transaction is not refundable');
+
+        $this->refundService->refundPayment($transaction);
+    }
+
+    public function test_refund_on_already_refunded_transaction_throws_exception()
+    {
+        $transaction = $this->createCapturedTransaction([
+            'trackid' => 'REF-ALRDY-001',
+            'amt' => '10.000',
+            'refunded' => true,
+        ]);
+
+        $this->expectException(KnetException::class);
+        $this->expectExceptionMessage('Transaction is not refundable');
+
+        $this->refundService->refundPayment($transaction);
+    }
+
+    public function test_refund_amount_exceeding_original_throws_exception()
+    {
+        $transaction = $this->createCapturedTransaction([
+            'trackid' => 'REF-EXCEED-001',
+            'amt' => '10.000',
+        ]);
+
+        $this->expectException(KnetException::class);
+        $this->expectExceptionMessage('exceeds the original transaction amount');
+
+        $this->refundService->refundPayment($transaction, 15.000);
+    }
+
+    public function test_refund_zero_amount_throws_exception()
+    {
+        $transaction = $this->createCapturedTransaction([
+            'trackid' => 'REF-ZERO-001',
+            'amt' => '10.000',
+        ]);
+
+        $this->expectException(KnetException::class);
+        $this->expectExceptionMessage('Refund amount must be greater than zero');
+
+        $this->refundService->refundPayment($transaction, 0);
+    }
+
+    public function test_refund_negative_amount_throws_exception()
+    {
+        $transaction = $this->createCapturedTransaction([
+            'trackid' => 'REF-NEG-001',
+            'amt' => '10.000',
+        ]);
+
+        $this->expectException(KnetException::class);
+        $this->expectExceptionMessage('Refund amount must be greater than zero');
+
+        $this->refundService->refundPayment($transaction, -5.000);
+    }
+
+    public function test_successful_refund_dispatches_refund_succeeded_event()
+    {
+        $transaction = $this->createCapturedTransaction([
+            'trackid' => 'REF-EVT-OK-001',
+            'amt' => '20.000',
+        ]);
+
+        KnetApiMock::fakeRefundSuccess([
+            'trackid' => 'REF-EVT-OK-001',
+            'amt' => '20.000',
+        ]);
+
+        $this->refundService->refundPayment($transaction);
+
+        Event::assertDispatched(KnetRefundSucceeded::class, function ($event) use ($transaction) {
+            return $event->transaction->id === $transaction->id
+                && $event->amount === 20.0;
+        });
+    }
+
+    public function test_error_response_dispatches_refund_failed_event()
+    {
+        $transaction = $this->createCapturedTransaction([
+            'trackid' => 'REF-EVT-ERR-001',
+            'amt' => '10.000',
+        ]);
+
+        KnetApiMock::fakeRefundError('IPAY0100263', 'Transaction not found.');
+
+        $this->refundService->refundPayment($transaction);
+
+        Event::assertDispatched(KnetRefundFailed::class, function ($event) use ($transaction) {
+            return $event->transaction->id === $transaction->id
+                && str_contains($event->reason, 'ERROR');
+        });
+    }
+
+    public function test_exception_dispatches_refund_failed_event()
+    {
+        $transaction = $this->createCapturedTransaction([
+            'trackid' => 'REF-EVT-EXC-001',
+            'amt' => '10.000',
+        ]);
+
+        KnetApiMock::fakeServerError();
+
+        try {
+            $this->refundService->refundPayment($transaction);
+        } catch (\RuntimeException) {
+            // expected
+        }
+
+        Event::assertDispatched(KnetRefundFailed::class, function ($event) use ($transaction) {
+            return $event->transaction->id === $transaction->id;
+        });
     }
 }

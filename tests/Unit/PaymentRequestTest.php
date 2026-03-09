@@ -56,14 +56,14 @@ class PaymentRequestTest extends TestCase
             amount: 10.000,
             trackId: 'track-456',
             udf1: 'value1',
-            udf3: 'value3',
+            udf3: '12345678',
         );
 
         $array = $request->toArray();
 
         $this->assertEquals('track-456', $array['trackid']);
         $this->assertEquals('value1', $array['udf1']);
-        $this->assertEquals('value3', $array['udf3']);
+        $this->assertEquals('12345678', $array['udf3']);
         $this->assertArrayNotHasKey('udf2', $array);
         $this->assertArrayNotHasKey('udf4', $array);
         $this->assertArrayNotHasKey('udf5', $array);
@@ -89,7 +89,7 @@ class PaymentRequestTest extends TestCase
             trackId: 'tid',
             udf1: 'a',
             udf2: 'b',
-            udf3: 'c',
+            udf3: '00000001',
             udf4: 'd',
             udf5: 'e',
         );

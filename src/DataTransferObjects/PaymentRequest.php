@@ -25,6 +25,10 @@ class PaymentRequest
         if ($this->amount <= 0) {
             throw new KnetException('Payment amount must be greater than zero');
         }
+
+        if ($this->udf3 !== null && ! preg_match('/^\d{8}$/', $this->udf3)) {
+            throw new KnetException('KFAST token (udf3) must be exactly 8 numeric digits.');
+        }
     }
 
     public function toArray(): array

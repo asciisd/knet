@@ -141,7 +141,7 @@ class KnetPaymentInitiationTest extends TestCase
         $transaction = $this->paymentService->createPayment($user, 1.000, [
             'udf1' => 'val1',
             'udf2' => 'val2',
-            'udf3' => 'val3',
+            'udf3' => '99887766',
             'udf4' => 'val4',
             'udf5' => 'val5',
         ]);
@@ -157,7 +157,7 @@ class KnetPaymentInitiationTest extends TestCase
 
         $this->assertEquals('val1', $params['udf1']);
         $this->assertEquals('val2', $params['udf2']);
-        $this->assertEquals('val3', $params['udf3']);
+        $this->assertEquals('99887766', $params['udf3']);
         $this->assertEquals('val4', $params['udf4']);
         $this->assertEquals('val5', $params['udf5']);
     }
