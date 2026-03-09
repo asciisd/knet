@@ -64,11 +64,6 @@ enum PaymentStatus: string
         return $this->isPending();
     }
 
-    public function slug(): string
-    {
-        return strtolower(str_replace('_', '-', $this->name));
-    }
-
     public function displayName(): string
     {
         return match ($this) {
@@ -120,10 +115,10 @@ enum PaymentStatus: string
 
     public static function successStates(): array
     {
-        return array_map(
-            fn (self $s) => $s->slug(),
-            [self::SUCCESS, self::CAPTURED],
-        );
+        return array_column([
+            self::SUCCESS,
+            self::CAPTURED,
+        ], 'name');
     }
 
     public static function successStatesValues(): array
@@ -136,18 +131,16 @@ enum PaymentStatus: string
 
     public static function failedStates(): array
     {
-        return array_map(
-            fn (self $s) => $s->slug(),
-            [self::ABANDONED, self::CANCELLED, self::FAILED, self::DECLINED,
-             self::RESTRICTED, self::VOID, self::TIMEDOUT, self::NOT_CAPTURED],
-        );
+        return array_column([
+            self::ABANDONED, self::CANCELLED, self::FAILED, self::DECLINED,
+            self::RESTRICTED, self::VOID, self::TIMEDOUT, self::NOT_CAPTURED,
+        ], 'name');
     }
 
     public static function loadingStates(): array
     {
-        return array_map(
-            fn (self $s) => $s->slug(),
-            [self::INITIATED, self::UNKNOWN, self::PENDING],
-        );
+        return array_column([
+            self::INITIATED, self::UNKNOWN, self::PENDING,
+        ], 'name');
     }
 }

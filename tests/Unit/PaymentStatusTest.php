@@ -129,21 +129,12 @@ class PaymentStatusTest extends TestCase
         $this->assertEquals('dangerBG', PaymentStatus::FAILED->bgColor());
     }
 
-    public function test_slug_returns_kebab_case()
-    {
-        $this->assertEquals('success', PaymentStatus::SUCCESS->slug());
-        $this->assertEquals('captured', PaymentStatus::CAPTURED->slug());
-        $this->assertEquals('not-captured', PaymentStatus::NOT_CAPTURED->slug());
-        $this->assertEquals('timedout', PaymentStatus::TIMEDOUT->slug());
-        $this->assertEquals('initiated', PaymentStatus::INITIATED->slug());
-    }
-
-    public function test_success_states_returns_slugs()
+    public function test_success_states_returns_enum_names()
     {
         $states = PaymentStatus::successStates();
 
-        $this->assertContains('success', $states);
-        $this->assertContains('captured', $states);
+        $this->assertContains('SUCCESS', $states);
+        $this->assertContains('CAPTURED', $states);
         $this->assertCount(2, $states);
     }
 
@@ -156,28 +147,28 @@ class PaymentStatusTest extends TestCase
         $this->assertCount(2, $values);
     }
 
-    public function test_failed_states_returns_slugs()
+    public function test_failed_states_returns_failure_names()
     {
         $states = PaymentStatus::failedStates();
 
-        $this->assertContains('abandoned', $states);
-        $this->assertContains('cancelled', $states);
-        $this->assertContains('failed', $states);
-        $this->assertContains('declined', $states);
-        $this->assertContains('restricted', $states);
-        $this->assertContains('void', $states);
-        $this->assertContains('timedout', $states);
-        $this->assertContains('not-captured', $states);
+        $this->assertContains('ABANDONED', $states);
+        $this->assertContains('CANCELLED', $states);
+        $this->assertContains('FAILED', $states);
+        $this->assertContains('DECLINED', $states);
+        $this->assertContains('RESTRICTED', $states);
+        $this->assertContains('VOID', $states);
+        $this->assertContains('TIMEDOUT', $states);
+        $this->assertContains('NOT_CAPTURED', $states);
         $this->assertCount(8, $states);
     }
 
-    public function test_loading_states_returns_slugs()
+    public function test_loading_states_returns_pending_names()
     {
         $states = PaymentStatus::loadingStates();
 
-        $this->assertContains('initiated', $states);
-        $this->assertContains('unknown', $states);
-        $this->assertContains('pending', $states);
+        $this->assertContains('INITIATED', $states);
+        $this->assertContains('UNKNOWN', $states);
+        $this->assertContains('PENDING', $states);
         $this->assertCount(3, $states);
     }
 
@@ -185,7 +176,7 @@ class PaymentStatusTest extends TestCase
     {
         $data = PaymentStatus::CAPTURED->toFullArray();
 
-        $this->assertEquals('captured', $data['id']);
+        $this->assertEquals('CAPTURED', $data['id']);
         $this->assertEquals('Captured', $data['name']);
         $this->assertEquals('success-status', $data['style']);
         $this->assertEquals('successText', $data['text_color']);
