@@ -2,10 +2,11 @@
 
 namespace Asciisd\Knet\Repositories;
 
-use Asciisd\Knet\KnetTransaction;
+use Asciisd\Knet\Contracts\TransactionRepository;
 use Asciisd\Knet\Exceptions\KnetException;
+use Asciisd\Knet\KnetTransaction;
 
-class KnetTransactionRepository
+class KnetTransactionRepository implements TransactionRepository
 {
     public function create(array $data): KnetTransaction
     {
@@ -24,6 +25,7 @@ class KnetTransactionRepository
     public function update(KnetTransaction $transaction, array $data): KnetTransaction
     {
         $transaction->update($data);
+
         return $transaction->fresh();
     }
 
@@ -34,4 +36,4 @@ class KnetTransactionRepository
             ->get()
             ->toArray();
     }
-} 
+}

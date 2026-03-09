@@ -3,13 +3,14 @@
 namespace Asciisd\Knet\Services;
 
 use Asciisd\Knet\Config\KnetConfig;
+use Asciisd\Knet\Contracts\CreatesPayments;
+use Asciisd\Knet\Contracts\EncryptsPayload;
 use Asciisd\Knet\Factories\PaymentFactory;
 use Asciisd\Knet\KnetTransaction;
-use Asciisd\Knet\KPayClient;
 use Asciisd\Knet\Repositories\KnetTransactionRepository;
 use Illuminate\Database\Eloquent\Model;
 
-class KnetPaymentInitiationService extends AbstractKnetService
+class KnetPaymentInitiationService extends AbstractKnetService implements CreatesPayments
 {
     private array $paymentData = [
         'id' => null,
@@ -34,17 +35,18 @@ class KnetPaymentInitiationService extends AbstractKnetService
     ];
 
     private array $reqParams = ['trandata', 'tranportalId', 'responseURL', 'errorURL'];
+
     private array $paramsToEncrypt = [
         'id', 'password', 'action', 'langid', 'currencycode', 'amt', 'responseURL', 'errorURL',
         'trackid', 'udf1', 'udf2', 'udf3', 'udf4', 'udf5',
     ];
 
     public function __construct(
-        KnetConfig                              $config,
-        KnetTransactionRepository               $repository,
-        private readonly PaymentResponseHandler $responseHandler
-    )
-    {
+        KnetConfig $config,
+        KnetTransactionRepository $repository,
+        private readonly PaymentResponseHandler $responseHandler,
+        private readonly EncryptsPayload $encryptor,
+    ) {
         parent::__construct($config, $repository);
         $this->initializePaymentConfig();
     }
@@ -94,10 +96,10 @@ class KnetPaymentInitiationService extends AbstractKnetService
             'tranportalId' => $this->config->getTransportId(),
             'password' => $this->config->getTransportPassword(),
             'action' => self::ACTION_PURCHASE,
-            'langid' => config('knet.language', 'EN'),
-            'currencycode' => config('knet.currency', 414),
-            'responseURL' => url(config('knet.response_url')),
-            'errorURL' => url(config('knet.error_url')),
+            'langid' => $this->config->getLanguage(),
+            'currencycode' => $this->config->getCurrency(),
+            'responseURL' => $this->config->getResponseUrl(),
+            'errorURL' => $this->config->getErrorUrl(),
         ]);
     }
 
@@ -121,7 +123,8 @@ class KnetPaymentInitiationService extends AbstractKnetService
     private function generateEncryptedParams(): string
     {
         $params = $this->buildParamsString($this->paramsToEncrypt);
-        return KPayClient::encryptAES($params, $this->config->getResourceKey());
+
+        return $this->encryptor->encrypt($params, $this->config->getResourceKey());
     }
 
     private function buildUrlParams(): string
@@ -137,6 +140,7 @@ class KnetPaymentInitiationService extends AbstractKnetService
                 $params = $this->appendParam($params, $key, $this->paymentData[$key]);
             }
         }
+
         return $params;
     }
 

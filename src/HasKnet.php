@@ -19,11 +19,16 @@ trait HasKnet
         return App::make(KnetPaymentService::class)->createPayment($this, $amount, $options);
     }
 
+    public function knetTransactions(): mixed
+    {
+        return $this->hasMany(KnetTransaction::class);
+    }
+
     /**
-     * knet transaction that belong to this payable
+     * @deprecated Use knetTransactions() instead.
      */
     public function knet_transactions(): mixed
     {
-        return $this->hasMany(KnetTransaction::class);
+        return $this->knetTransactions();
     }
 }

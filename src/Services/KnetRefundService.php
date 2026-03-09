@@ -2,19 +2,21 @@
 
 namespace Asciisd\Knet\Services;
 
+use Asciisd\Knet\Contracts\RefundsPayments;
 use Asciisd\Knet\KnetTransaction;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
-class KnetRefundService extends AbstractKnetService
+class KnetRefundService extends AbstractKnetService implements RefundsPayments
 {
     /**
      * Process a refund for a transaction
      *
-     * @param KnetTransaction $transaction The transaction to refund
-     * @param float|null $amount The amount to refund. If null, refunds the full amount
+     * @param  KnetTransaction  $transaction  The transaction to refund
+     * @param  float|null  $amount  The amount to refund. If null, refunds the full amount
      * @return array The refund response
+     *
      * @throws RequestException If the refund request fails
      */
     public function refundPayment(KnetTransaction $transaction, ?float $amount = null): array

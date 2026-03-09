@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Asciisd\Knet\Events;
-
 
 use Asciisd\Knet\KnetTransaction;
 use Illuminate\Broadcasting\InteractsWithSockets;

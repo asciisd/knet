@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Event;
 
 class ResponseControllerTest extends TestCase
 {
-
     public function test_successful_captured_payment_updates_transaction()
     {
         Event::fake();
@@ -117,7 +116,7 @@ class ResponseControllerTest extends TestCase
             'trandata' => $trandata,
         ]);
 
-        $response->assertStatus(404);
+        $response->assertForbidden();
     }
 
     public function test_events_contain_correct_payload()

@@ -39,4 +39,4 @@ class PaymentFactory
             'amt' => '100.000',
         ];
     }
-} 
+}

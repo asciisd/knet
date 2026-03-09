@@ -14,7 +14,6 @@ class KnetReceiptSeen
     /**
      * Create a new event instance.
      *
-     * @param KnetTransaction $transaction
      * @return void
      */
     public function __construct(public KnetTransaction $transaction)

@@ -13,4 +13,4 @@ class KnetPaymentSucceeded
     public function __construct(
         public readonly KnetTransaction $transaction
     ) {}
-} 
+}

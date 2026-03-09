@@ -27,15 +27,13 @@ class PublishCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
         $this->info('Publishing Knet resources...');
 
-        $publishConfig = !$this->option('migrations');
-        $publishMigrations = !$this->option('config');
+        $publishConfig = ! $this->option('migrations');
+        $publishMigrations = ! $this->option('config');
 
         if ($publishConfig) {
             $this->publishConfiguration();
@@ -71,9 +69,9 @@ class PublishCommand extends Command
 
     private function publishResource(string $tag, string $description): void
     {
-        $this->components->task($description, function() use ($tag) {
+        $this->components->task($description, function () use ($tag) {
             $params = ['--provider' => 'Asciisd\Knet\Providers\KnetServiceProvider'];
-            
+
             if ($this->option('force')) {
                 $params['--force'] = true;
             }

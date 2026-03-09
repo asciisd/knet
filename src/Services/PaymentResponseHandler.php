@@ -13,9 +13,7 @@ class PaymentResponseHandler
 {
     public function __construct(
         private readonly KnetTransactionRepository $repository
-    )
-    {
-    }
+    ) {}
 
     public function handle(array $payload): KnetTransaction
     {
@@ -26,11 +24,6 @@ class PaymentResponseHandler
         $this->dispatchEvents($transaction, $response);
 
         return $transaction;
-    }
-
-    public function handleError(array $payload)
-    {
-        // TODO: Implement handleError() method.
     }
 
     private function updateTransaction(KnetTransaction $transaction, KnetResponse $response): void
@@ -63,20 +56,7 @@ class PaymentResponseHandler
 
     private function determineStatus(string $result): PaymentStatus
     {
-        return match (strtoupper($result)) {
-            'CAPTURED' => PaymentStatus::CAPTURED,
-            'FAILED' => PaymentStatus::FAILED,
-            'NOT CAPTURED' => PaymentStatus::NOT_CAPTURED,
-            'ABANDONED' => PaymentStatus::ABANDONED,
-            'CANCELLED' => PaymentStatus::CANCELLED,
-            'DECLINED' => PaymentStatus::DECLINED,
-            'RESTRICTED' => PaymentStatus::RESTRICTED,
-            'VOID' => PaymentStatus::VOID,
-            'TIMEDOUT' => PaymentStatus::TIMEDOUT,
-            'UNKNOWN' => PaymentStatus::UNKNOWN,
-            'INITIATED' => PaymentStatus::INITIATED,
-            default => PaymentStatus::PENDING,
-        };
+        return PaymentStatus::tryFrom(strtoupper($result)) ?? PaymentStatus::PENDING;
     }
 
     private function dispatchEvents(KnetTransaction $transaction, KnetResponse $response): void

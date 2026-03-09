@@ -9,7 +9,6 @@ use Asciisd\Knet\Tests\Mocks\KnetApiMock;
 use Asciisd\Knet\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User;
-use Illuminate\Support\Facades\Event;
 
 class KnetPaymentInitiationTest extends TestCase
 {

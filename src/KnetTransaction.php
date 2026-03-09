@@ -40,7 +40,7 @@ class KnetTransaction extends Model
     ];
 
     /**
-     * get transaction from database by its track id
+     * @deprecated Use KnetTransactionRepository::findByTrackId() instead.
      */
     public static function findByTrackId($trackId): KnetTransaction
     {
@@ -87,6 +87,6 @@ class KnetTransaction extends Model
      */
     public function isRefundable(): bool
     {
-        return $this->isCaptured() && !$this->refunded;
+        return $this->isCaptured() && ! $this->refunded;
     }
 }

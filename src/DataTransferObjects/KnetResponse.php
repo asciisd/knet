@@ -54,4 +54,4 @@ class KnetResponse
             udf10: $data['udf10'] ?? null,
         );
     }
-} 
+}

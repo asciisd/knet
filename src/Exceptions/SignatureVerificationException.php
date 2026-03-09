@@ -7,14 +7,15 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class SignatureVerificationException extends HttpException
 {
     private ?string $httpBody;
+
     private ?string $sigHeader;
 
     /**
      * Creates a new SignatureVerificationException instance.
      *
-     * @param string $message The exception message.
-     * @param string|null $httpBody The HTTP body as a string.
-     * @param string|null $sigHeader The `KNet-Signature` HTTP header.
+     * @param  string  $message  The exception message.
+     * @param  string|null  $httpBody  The HTTP body as a string.
+     * @param  string|null  $sigHeader  The `KNet-Signature` HTTP header.
      */
     public function __construct(string $message, ?string $httpBody = null, ?string $sigHeader = null)
     {

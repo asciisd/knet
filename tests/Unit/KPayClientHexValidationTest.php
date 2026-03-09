@@ -14,9 +14,9 @@ class KPayClientHexValidationTest extends TestCase
     public function test_successful_hex_conversion()
     {
         $validHex = 'abcdef123456789012345678901234567890abcdef123456789012345678901234';
-        
+
         $result = KPayClient::hex2ByteArray($validHex);
-        
+
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
         $this->assertEquals(strlen($validHex) / 2, count($result));
@@ -29,7 +29,7 @@ class KPayClientHexValidationTest extends TestCase
     {
         $this->expectException(InvalidHexDataException::class);
         $this->expectExceptionMessage('Empty or null hex data received from KNet gateway');
-        
+
         KPayClient::hex2ByteArray('');
     }
 
@@ -40,7 +40,7 @@ class KPayClientHexValidationTest extends TestCase
     {
         $this->expectException(InvalidHexDataException::class);
         $this->expectExceptionMessage('Empty or null hex data received from KNet gateway');
-        
+
         KPayClient::hex2ByteArray(null);
     }
 
@@ -51,7 +51,7 @@ class KPayClientHexValidationTest extends TestCase
     {
         $this->expectException(InvalidHexDataException::class);
         $this->expectExceptionMessage('Invalid hex string length');
-        
+
         KPayClient::hex2ByteArray('abcdef12345'); // 11 characters (odd)
     }
 
@@ -62,7 +62,7 @@ class KPayClientHexValidationTest extends TestCase
     {
         $this->expectException(InvalidHexDataException::class);
         $this->expectExceptionMessage('Invalid hexadecimal characters detected');
-        
+
         KPayClient::hex2ByteArray('abcdefg123456789012345678901234567890abcdef123456789012345678901234'); // contains 'g'
     }
 
@@ -73,7 +73,7 @@ class KPayClientHexValidationTest extends TestCase
     {
         $this->expectException(InvalidHexDataException::class);
         $this->expectExceptionMessage('Hex string too short for AES decryption');
-        
+
         KPayClient::hex2ByteArray('abcdef12'); // Only 8 characters, less than 32 minimum
     }
 
@@ -84,7 +84,7 @@ class KPayClientHexValidationTest extends TestCase
     {
         $this->expectException(InvalidHexDataException::class);
         $this->expectExceptionMessage('Invalid hexadecimal characters detected');
-        
+
         KPayClient::hex2ByteArray('abcdef123456789012345678901234567890abcdef123456789012345678901234!@#');
     }
 
@@ -94,9 +94,9 @@ class KPayClientHexValidationTest extends TestCase
     public function test_hex_string_with_whitespace_is_trimmed()
     {
         $hexWithWhitespace = "  abcdef123456789012345678901234567890abcdef123456789012345678901234  \n";
-        
+
         $result = KPayClient::hex2ByteArray($hexWithWhitespace);
-        
+
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
     }
@@ -107,16 +107,16 @@ class KPayClientHexValidationTest extends TestCase
     public function test_debug_hex_data_utility()
     {
         $hexString = 'abcdef123456789012345678901234567890abcdef123456789012345678901234';
-        
+
         $debugInfo = KPayClient::debugHexData($hexString);
-        
+
         $this->assertIsArray($debugInfo);
         $this->assertArrayHasKey('original_data', $debugInfo);
         $this->assertArrayHasKey('length', $debugInfo);
         $this->assertArrayHasKey('is_valid_hex', $debugInfo);
         $this->assertArrayHasKey('is_even_length', $debugInfo);
         $this->assertArrayHasKey('analysis', $debugInfo);
-        
+
         $this->assertEquals($hexString, $debugInfo['original_data']);
         $this->assertEquals(strlen($hexString), $debugInfo['length']);
         $this->assertTrue($debugInfo['is_valid_hex']);
@@ -129,18 +129,18 @@ class KPayClientHexValidationTest extends TestCase
     public function test_debug_info_generation_for_invalid_hex()
     {
         $invalidHex = 'invalid_hex_string_with_special_chars!@#';
-        
+
         $debugInfo = KPayClient::generateDebugInfo($invalidHex, 'Test issue');
-        
+
         $this->assertIsString($debugInfo);
-        
+
         $decoded = json_decode($debugInfo, true);
         $this->assertIsArray($decoded);
         $this->assertArrayHasKey('issue', $decoded);
         $this->assertArrayHasKey('input_length', $decoded);
         $this->assertArrayHasKey('contains_non_hex', $decoded);
         $this->assertArrayHasKey('character_analysis', $decoded);
-        
+
         $this->assertEquals('Test issue', $decoded['issue']);
         $this->assertTrue($decoded['contains_non_hex']);
     }
@@ -151,21 +151,21 @@ class KPayClientHexValidationTest extends TestCase
     public function test_exception_provides_detailed_error_information()
     {
         $invalidHex = 'invalid_hex_with_special_chars!@#$';
-        
+
         try {
             KPayClient::hex2ByteArray($invalidHex);
             $this->fail('Expected InvalidHexDataException was not thrown');
         } catch (InvalidHexDataException $e) {
             $this->assertEquals($invalidHex, $e->getHexData());
             $this->assertNotNull($e->getDebugInfo());
-            
+
             $errorDetails = $e->getErrorDetails();
             $this->assertIsArray($errorDetails);
             $this->assertArrayHasKey('error_type', $errorDetails);
             $this->assertArrayHasKey('message', $errorDetails);
             $this->assertArrayHasKey('hex_data_length', $errorDetails);
             $this->assertArrayHasKey('debug_info', $errorDetails);
-            
+
             $this->assertEquals('invalid_hex_data', $errorDetails['error_type']);
             $this->assertEquals(strlen($invalidHex), $errorDetails['hex_data_length']);
         }
@@ -178,9 +178,9 @@ class KPayClientHexValidationTest extends TestCase
     {
         // 32 characters is the minimum for AES
         $minValidHex = '12345678901234567890123456789012';
-        
+
         $result = KPayClient::hex2ByteArray($minValidHex);
-        
+
         $this->assertIsArray($result);
         $this->assertEquals(16, count($result)); // 32 hex chars = 16 bytes
     }
@@ -192,13 +192,13 @@ class KPayClientHexValidationTest extends TestCase
     {
         $upperCaseHex = 'ABCDEF123456789012345678901234567890ABCDEF123456789012345678901234';
         $mixedCaseHex = 'AbCdEf123456789012345678901234567890aBcDeF123456789012345678901234';
-        
+
         $result1 = KPayClient::hex2ByteArray($upperCaseHex);
         $result2 = KPayClient::hex2ByteArray($mixedCaseHex);
-        
+
         $this->assertIsArray($result1);
         $this->assertIsArray($result2);
         $this->assertNotEmpty($result1);
         $this->assertNotEmpty($result2);
     }
-} 
+}

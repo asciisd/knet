@@ -3,11 +3,6 @@
 namespace Asciisd\Knet\Tests\Feature;
 
 use Asciisd\Knet\Events\KnetPaymentFailed;
-use Asciisd\Knet\Events\KnetPaymentSucceeded;
-use Asciisd\Knet\Events\KnetResponseHandled;
-use Asciisd\Knet\Events\KnetResponseReceived;
-use Asciisd\Knet\Events\KnetTransactionCreated;
-use Asciisd\Knet\Events\KnetTransactionUpdated;
 use Asciisd\Knet\KnetTransaction;
 use Asciisd\Knet\Services\KnetInquiryService;
 use Asciisd\Knet\Services\KnetPaymentService;
@@ -22,7 +17,9 @@ use Illuminate\Support\Facades\Http;
 class KnetApiIntegrationTest extends TestCase
 {
     private KnetPaymentService $paymentService;
+
     private KnetInquiryService $inquiryService;
+
     private KnetRefundService $refundService;
 
     protected function setUp(): void

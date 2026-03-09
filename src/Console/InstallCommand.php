@@ -9,6 +9,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 class InstallCommand extends Command
 {
     protected $signature = 'knet:install';
+
     protected $description = 'Install Knet package resources';
 
     public function handle(): int
@@ -18,12 +19,13 @@ class InstallCommand extends Command
 
         // Publish configuration
         $this->call('knet:publish', [
-            '--force' => true
+            '--force' => true,
         ]);
 
         // Run migrations
-        $this->components->task('Running migrations', function() {
+        $this->components->task('Running migrations', function () {
             $this->call('migrate');
+
             return true;
         });
 
@@ -38,4 +40,4 @@ class InstallCommand extends Command
 
         return self::SUCCESS;
     }
-} 
+}

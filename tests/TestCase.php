@@ -14,7 +14,7 @@ abstract class TestCase extends Orchestra
         parent::setUp();
 
         // Load package migrations
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
 
     protected function getPackageProviders($app)
@@ -29,9 +29,9 @@ abstract class TestCase extends Orchestra
         // Setup default database to use sqlite :memory:
         $app['config']->set('database.default', 'testbench');
         $app['config']->set('database.connections.testbench', [
-            'driver'   => 'sqlite',
+            'driver' => 'sqlite',
             'database' => ':memory:',
-            'prefix'   => '',
+            'prefix' => '',
         ]);
 
         // KNET test credentials (loaded from phpunit.xml.dist env vars)
@@ -51,7 +51,8 @@ abstract class TestCase extends Orchestra
 
     protected function createTestUser(): \Illuminate\Foundation\Auth\User
     {
-        return new class extends \Illuminate\Foundation\Auth\User {
+        return new class extends \Illuminate\Foundation\Auth\User
+        {
             protected $fillable = ['id', 'name', 'email'];
 
             public function __construct(array $attributes = [])
@@ -107,7 +108,7 @@ abstract class TestCase extends Orchestra
     {
         $defaultData = [
             'trandata' => 'abcdef123456789012345678901234567890abcdef123456789012345678901234',
-            'other_field' => 'some_value'
+            'other_field' => 'some_value',
         ];
 
         $requestData = array_merge($defaultData, $data);
@@ -122,4 +123,4 @@ abstract class TestCase extends Orchestra
 
         return $request;
     }
-} 
+}

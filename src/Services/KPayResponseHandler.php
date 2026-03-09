@@ -9,8 +9,11 @@ use Illuminate\Support\Facades\Log;
 class KPayResponseHandler
 {
     private array $transaction;
+
     private ?string $error = null;
+
     private string $error_code = '';
+
     private ?Errors $error_enum = null;
 
     /**
@@ -100,6 +103,7 @@ class KPayResponseHandler
         if ($this->error_enum) {
             return $this->error_enum->description();
         }
+
         return $this->error;
     }
 

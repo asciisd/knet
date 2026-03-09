@@ -11,7 +11,8 @@ class PaymentRequestTest extends TestCase
 {
     private function makeUser(): User
     {
-        return new class extends User {
+        return new class extends User
+        {
             protected $fillable = ['id', 'name', 'email'];
         };
     }

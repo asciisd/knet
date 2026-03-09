@@ -2,6 +2,18 @@
 
 This package provides an expressive, fluent interface to Kuwait's KNET payment gateway for Laravel applications. It handles payment initiation, encrypted callback processing, transaction inquiry, and refunds.
 
+### Architecture
+
+The package follows SOLID principles with focused interfaces:
+
+- `CreatesPayments` — payment creation and response handling
+- `InquiresPayments` — transaction status inquiry
+- `RefundsPayments` — full and partial refunds
+- `TransactionRepository` — data access abstraction
+- `EncryptsPayload` — encryption abstraction (wraps AES-128-CBC)
+
+`KnetPaymentService` is a pure delegating facade that implements all three payment interfaces. Prefer the narrower interface when only a subset of functionality is needed.
+
 ### Installation & Setup
 
 1. Install via Composer: `composer require asciisd/knet`
@@ -15,7 +27,11 @@ This package provides an expressive, fluent interface to Kuwait's KNET payment g
 - The currency code `414` is the ISO code for Kuwaiti Dinar.
 - Track IDs must be unique per transaction and are auto-generated if not provided.
 - The package registers routes under the `/knet` prefix by default (configurable via `KNET_PATH`).
-- KNET callbacks are encrypted with AES-128-CBC; the package handles decryption automatically.
+- KNET callbacks are encrypted with AES-128-CBC; the middleware decrypts once and passes the payload via request attributes.
+- For encryption, inject `EncryptsPayload` — do not call `KPayClient` static methods directly (deprecated).
+- For data access, inject `TransactionRepository` — do not use model static methods directly.
+- Configuration access should go through the injected `KnetConfig` singleton, not bare `config()` calls.
+- Verbose logging should be gated behind `$config->isDebugMode()`; only error-level logging should be unconditional.
 
 ### Making Payments
 
@@ -37,6 +53,9 @@ $transaction = $user->pay(10.000, [
 ]);
 
 return redirect($transaction->url);
+
+// Access the user's transactions
+$transactions = $user->knetTransactions;
 </code-snippet>
 @endverbatim
 
@@ -52,6 +71,20 @@ public function checkout(KnetPaymentService $paymentService)
         'udf1' => 'invoice_456',
     ]);
 
+    return redirect($transaction->url);
+}
+</code-snippet>
+@endverbatim
+
+Or type-hint the focused interface if you only need payment creation:
+
+@verbatim
+<code-snippet name="Using the focused CreatesPayments interface" lang="php">
+use Asciisd\Knet\Contracts\CreatesPayments;
+
+public function checkout(CreatesPayments $payments)
+{
+    $transaction = $payments->createPayment(auth()->user(), 25.500);
     return redirect($transaction->url);
 }
 </code-snippet>
@@ -100,6 +133,37 @@ Use the `PaymentStatus` enum (`Asciisd\Knet\Enums\PaymentStatus`) to check trans
 - **Success:** `CAPTURED`, `SUCCESS`
 - **Failed:** `FAILED`, `NOT_CAPTURED`, `ABANDONED`, `CANCELLED`, `DECLINED`, `RESTRICTED`, `VOID`, `TIMEDOUT`
 - **Pending:** `PENDING`, `INITIATED`, `UNKNOWN`
+
+For presentation (colors, images), use the presenter:
+
+@verbatim
+<code-snippet name="Using PaymentStatusPresenter" lang="php">
+$status = PaymentStatus::from($transaction->result);
+$presenter = $status->presenter();
+
+$presenter->styleColor(); // 'success-status', 'info-status', 'danger-status'
+$presenter->textColor();  // 'successText', 'infoText', 'dangerText'
+$presenter->bgColor();    // 'successBG', 'infoBG', 'dangerBG'
+$presenter->toArray();    // Full presentation array
+</code-snippet>
+@endverbatim
+
+### Working with Transactions
+
+To find transactions, use the repository:
+
+@verbatim
+<code-snippet name="Using TransactionRepository" lang="php">
+use Asciisd\Knet\Contracts\TransactionRepository;
+
+public function show(TransactionRepository $repository, string $trackId)
+{
+    $transaction = $repository->findByTrackId($trackId);
+
+    return view('payment.show', compact('transaction'));
+}
+</code-snippet>
+@endverbatim
 
 ### Transaction Inquiry & Refunds
 

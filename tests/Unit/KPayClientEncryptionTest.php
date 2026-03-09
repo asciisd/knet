@@ -104,7 +104,7 @@ class KPayClientEncryptionTest extends TestCase
 
     public function test_byte_array_to_hex_and_back()
     {
-        $original = [0x48, 0x65, 0x6c, 0x6c, 0x6f]; // "Hello"
+        $original = [0x48, 0x65, 0x6C, 0x6C, 0x6F]; // "Hello"
         $hex = KPayClient::byteArray2Hex($original);
 
         $this->assertEquals('48656c6c6f', $hex);

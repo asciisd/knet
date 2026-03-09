@@ -31,6 +31,26 @@ class KnetConfig
         return (bool) $this->config['debug'];
     }
 
+    public function getLanguage(): string
+    {
+        return $this->config['language'] ?? 'EN';
+    }
+
+    public function getCurrency(): int
+    {
+        return (int) ($this->config['currency'] ?? 414);
+    }
+
+    public function getResponseUrl(): string
+    {
+        return url($this->config['response_url'] ?? '/knet/response');
+    }
+
+    public function getErrorUrl(): string
+    {
+        return url($this->config['error_url'] ?? '/knet/error');
+    }
+
     public function getPaymentUrl(): string
     {
         if ($this->isDebugMode() || App::environment('local')) {

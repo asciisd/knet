@@ -2,13 +2,17 @@
 
 namespace Asciisd\Knet\Providers;
 
-use Asciisd\Knet\Console\KnetCommand;
-use Asciisd\Knet\Console\PublishCommand;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\ServiceProvider;
 use Asciisd\Knet\Config\KnetConfig;
 use Asciisd\Knet\Console\InstallCommand;
+use Asciisd\Knet\Console\KnetCommand;
+use Asciisd\Knet\Console\PublishCommand;
+use Asciisd\Knet\Contracts\EncryptsPayload;
+use Asciisd\Knet\Contracts\TransactionRepository;
+use Asciisd\Knet\KPayEncryption;
+use Asciisd\Knet\Repositories\KnetTransactionRepository;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider;
 
 class KnetServiceProvider extends ServiceProvider
 {
@@ -29,10 +33,13 @@ class KnetServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../../config/knet.php', 'knet');
-        
+
         $this->app->singleton(KnetConfig::class, function () {
             return new KnetConfig(Config::get('knet'));
         });
+
+        $this->app->bind(EncryptsPayload::class, KPayEncryption::class);
+        $this->app->bind(TransactionRepository::class, KnetTransactionRepository::class);
 
         if (! class_exists('Knet')) {
             class_alias('Asciisd\Knet\Knet', 'Knet');
@@ -51,11 +58,6 @@ class KnetServiceProvider extends ServiceProvider
         ], function () {
             $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
         });
-    }
-
-    public function registerServices()
-    {
-        //
     }
 
     protected function registerMigrations()

@@ -9,15 +9,15 @@ use Illuminate\Support\Facades\Http;
 abstract class AbstractKnetService
 {
     protected const ACTION_PURCHASE = '1';
+
     protected const ACTION_REFUND = '2';
+
     protected const ACTION_INQUIRY = '8';
 
     public function __construct(
-        protected readonly KnetConfig                $config,
+        protected readonly KnetConfig $config,
         protected readonly KnetTransactionRepository $repository
-    )
-    {
-    }
+    ) {}
 
     protected function formatAmount(float $amount): string
     {
@@ -27,13 +27,13 @@ abstract class AbstractKnetService
     protected function buildInquiryXml(float|string $amount, string $trackid, string $action): string
     {
         return '<request>'
-            ."<id>".$this->config->getTransportId()."</id>"
-            ."<password>".$this->config->getTransportPassword()."</password>"
-            ."<action>".$action."</action>"
-            ."<amt>".$this->formatAmount((float)$amount)."</amt>"
-            ."<transid>".$trackid."</transid>"
-            ."<udf5>TrackID</udf5>"
-            ."<trackid>".$trackid."</trackid>"
+            .'<id>'.$this->config->getTransportId().'</id>'
+            .'<password>'.$this->config->getTransportPassword().'</password>'
+            .'<action>'.$action.'</action>'
+            .'<amt>'.$this->formatAmount((float) $amount).'</amt>'
+            .'<transid>'.$trackid.'</transid>'
+            .'<udf5>TrackID</udf5>'
+            .'<trackid>'.$trackid.'</trackid>'
             .'</request>';
     }
 
@@ -74,7 +74,7 @@ abstract class AbstractKnetService
         }
 
         // Try to parse as XML
-        $xml = "<div>".$output."</div>";
+        $xml = '<div>'.$output.'</div>';
         $xml = preg_replace("/(<\/?)(\w+):([^>]*>)/", '$1$2$3', $xml);
 
         libxml_use_internal_errors(true);
@@ -90,6 +90,7 @@ abstract class AbstractKnetService
         }
 
         $result = json_decode(json_encode($xml), true);
+
         return $this->normalizeResponse($result ?: []);
     }
 
@@ -100,6 +101,7 @@ abstract class AbstractKnetService
             if ($value === '' || $value === 'null') {
                 return null;
             }
+
             return $value;
         }, $response);
 

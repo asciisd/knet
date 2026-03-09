@@ -2,11 +2,12 @@
 
 namespace Asciisd\Knet\Services;
 
+use Asciisd\Knet\Contracts\InquiresPayments;
 use Asciisd\Knet\Events\KnetTransactionUpdated;
 use Asciisd\Knet\KnetTransaction;
 use Illuminate\Support\Facades\Event;
 
-class KnetInquiryService extends AbstractKnetService
+class KnetInquiryService extends AbstractKnetService implements InquiresPayments
 {
     /**
      * Inquire about a payment transaction and update its status

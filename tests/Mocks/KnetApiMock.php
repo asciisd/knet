@@ -244,6 +244,7 @@ class KnetApiMock
             }
             $xml .= "<{$key}>{$value}</{$key}>";
         }
+
         return $xml;
     }
 

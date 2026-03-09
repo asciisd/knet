@@ -8,6 +8,7 @@ description: Build and work with KNET payment gateway integration, including pay
 ## When to use this skill
 
 Use this skill when:
+
 - Integrating KNET payments into a Laravel application
 - Creating payment flows that redirect users to the KNET gateway
 - Handling KNET payment callbacks and response processing
@@ -19,6 +20,18 @@ Use this skill when:
 ## Package Overview
 
 `asciisd/knet` provides a fluent Laravel interface to Kuwait's KNET payment gateway. It handles AES-encrypted communication, payment initiation, callback verification, transaction inquiry, and refunds.
+
+### Architecture
+
+The package follows SOLID principles with focused interfaces:
+
+- `CreatesPayments` — payment creation and response handling
+- `InquiresPayments` — transaction status inquiry
+- `RefundsPayments` — full and partial refunds
+- `TransactionRepository` — data access abstraction
+- `EncryptsPayload` — encryption abstraction (wraps AES-128-CBC)
+
+`KnetPaymentService` is a pure delegating facade that implements all three payment interfaces. Prefer depending on the narrower interface when only a subset of functionality is needed.
 
 ## Setup
 
@@ -48,8 +61,9 @@ class User extends Authenticatable
 ```
 
 This adds:
+
 - `pay(float $amount, array $options = []): KnetTransaction` — create a payment
-- `knet_transactions(): HasMany` — relationship to all transactions
+- `knetTransactions(): HasMany` — relationship to all transactions
 
 ## Creating Payments
 
@@ -84,6 +98,20 @@ public function checkout(KnetPaymentService $paymentService)
 }
 ```
 
+### Via Focused Interface
+
+If you only need payment creation, type-hint the narrower interface:
+
+```php
+use Asciisd\Knet\Contracts\CreatesPayments;
+
+public function checkout(CreatesPayments $payments)
+{
+    $transaction = $payments->createPayment(auth()->user(), 25.500);
+    return redirect($transaction->url);
+}
+```
+
 ### Important Rules
 
 - Amounts MUST use 3 decimal places (KWD format): `10.000`, `25.500`, `0.250`
@@ -96,7 +124,7 @@ public function checkout(KnetPaymentService $paymentService)
 
 1. **Initiate:** Call `$user->pay()` or `KnetPaymentService::createPayment()` — returns a `KnetTransaction` with a `url`
 2. **Redirect:** Send the user to `$transaction->url` (the KNET payment page)
-3. **Callback:** KNET POSTs encrypted `trandata` to `/knet/response` — the package decrypts and processes it automatically
+3. **Callback:** KNET POSTs encrypted `trandata` to `/knet/response` — middleware decrypts once and passes payload via request attributes
 4. **Events:** `KnetPaymentSucceeded` or `KnetPaymentFailed` is dispatched
 5. **Redirect back:** User is redirected to `KNET_REDIRECT_URL` with the result
 
@@ -138,9 +166,6 @@ Event::listen(KnetPaymentFailed::class, function ($event) {
 ```php
 use Asciisd\Knet\KnetTransaction;
 
-// Find by track ID
-$transaction = KnetTransaction::findByTrackId('track-123');
-
 // Check status
 $transaction->isCaptured();   // true if result == 'CAPTURED'
 $transaction->hasStatus();    // true if result is not empty
@@ -152,6 +177,15 @@ $transaction->formattedAmount(); // string, e.g. "10.000"
 
 // Access relationship
 $transaction->owner; // the User (or custom model) who made the payment
+```
+
+To find by track ID, use the repository:
+
+```php
+use Asciisd\Knet\Contracts\TransactionRepository;
+
+$repository = app(TransactionRepository::class);
+$transaction = $repository->findByTrackId('track-123');
 ```
 
 ### Key Columns
@@ -181,6 +215,17 @@ $status->isSuccessful(); // CAPTURED or SUCCESS
 $status->isFailed();     // FAILED, ABANDONED, CANCELLED, DECLINED, etc.
 $status->isPending();    // INITIATED, PENDING, UNKNOWN
 $status->displayName();  // Human-readable name
+```
+
+For presentation (colors, images), use the presenter:
+
+```php
+$presenter = $status->presenter();
+$presenter->styleColor(); // 'success-status', 'info-status', 'danger-status'
+$presenter->textColor();  // 'successText', 'infoText', 'dangerText'
+$presenter->bgColor();    // 'successBG', 'infoBG', 'dangerBG'
+$presenter->imageUrl();   // URL to status image
+$presenter->toArray();    // Full presentation array
 ```
 
 ## Inquiry & Refunds
@@ -303,3 +348,14 @@ class HandleSuccessfulPayment
     }
 }
 ```
+
+## When Adding New Features
+
+- New services go in `src/Services/` and should implement the appropriate focused contract
+- For encryption, inject `EncryptsPayload` — do not use `KPayClient` static methods directly
+- For data access, inject `TransactionRepository` — do not use model static methods directly
+- Configuration access should go through the injected `KnetConfig` singleton, not bare `config()` calls
+- Verbose logging should be gated behind `$config->isDebugMode()`; only error-level logging should be unconditional
+- New events go in `src/Events/` with `Dispatchable` and `SerializesModels` traits
+- New exceptions go in `src/Exceptions/` extending `KnetException`
+- All amounts must use `number_format($amount, 3, '.', '')` for 3-decimal KWD formatting

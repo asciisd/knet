@@ -16,12 +16,12 @@ class ErrorController extends Controller
             'error_text' => $request->error_text,
         ];
 
-        //ResErrorText
+        // ResErrorText
         if ($request->has('ErrorText')) {
             $errorData['error_text'] = $request->ErrorText;
         }
 
-        //ResErrorNo
+        // ResErrorNo
         if ($request->has('Error')) {
             $errorData['error'] = $request->Error;
         }
