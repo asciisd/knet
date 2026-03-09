@@ -250,6 +250,14 @@ class KnetPaymentService implements PaymentServiceInterface
             $response['result'] = trim(str_replace(['FAILURE(', ')'], '', $response['result']));
         }
 
+        // Handle real KNET error format: !ERROR!-CODE-Message
+        if (isset($response['result']) && str_starts_with($response['result'], '!ERROR!-')) {
+            $parts = explode('-', $response['result'], 3);
+            $response['error_code'] = $parts[1] ?? null;
+            $response['error_message'] = $parts[2] ?? null;
+            $response['result'] = 'ERROR';
+        }
+
         // Ensure all expected fields are present
         $defaultFields = [
             'result' => null,

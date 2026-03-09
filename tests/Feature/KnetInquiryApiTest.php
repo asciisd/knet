@@ -74,13 +74,38 @@ class KnetInquiryApiTest extends TestCase
         $this->assertNull($result['tranid']);
     }
 
-    public function test_inquiry_handles_failure_response_and_strips_wrapper()
+    public function test_inquiry_error_transaction_not_found()
     {
-        KnetApiMock::fakeInquiryFailure('Transaction not found');
+        KnetApiMock::fakeInquiryError('IPAY0100263', 'Transaction not found.');
 
-        $result = $this->inquiryService->inquirePayment(10.000, 'INQ-FAIL-001');
+        $result = $this->inquiryService->inquirePayment(10.000, 'INQ-ERR-001');
 
-        $this->assertEquals('Transaction not found', $result['result']);
+        $this->assertEquals('ERROR', $result['result']);
+        $this->assertEquals('IPAY0100263', $result['error_code']);
+        $this->assertEquals('Transaction not found.', $result['error_message']);
+    }
+
+    public function test_inquiry_error_invalid_amount()
+    {
+        KnetApiMock::fakeInquiryError('IPAY0100062', 'Invalid Transaction Amount.');
+
+        $result = $this->inquiryService->inquirePayment(-1.000, 'INQ-ERR-002');
+
+        $this->assertEquals('ERROR', $result['result']);
+        $this->assertEquals('IPAY0100062', $result['error_code']);
+    }
+
+    public function test_inquiry_error_includes_error_code_tag_and_service_tag()
+    {
+        KnetApiMock::fakeInquiryError('IPAY0100057', 'Action not supported');
+
+        $result = $this->inquiryService->inquirePayment(10.000, 'INQ-ERR-003');
+
+        $this->assertEquals('ERROR', $result['result']);
+        $this->assertEquals('IPAY0100057', $result['error_code']);
+        $this->assertArrayHasKey('error_code_tag', $result);
+        $this->assertEquals('IPAY0100057', $result['error_code_tag']);
+        $this->assertArrayHasKey('error_service_tag', $result);
     }
 
     public function test_inquiry_sends_correct_xml_to_knet_api()

@@ -23,7 +23,8 @@ class AbstractKnetServiceTest extends TestCase
 
         $repository = $this->createMock(KnetTransactionRepository::class);
 
-        return new class($config, $repository) extends AbstractKnetService {
+        return new class($config, $repository) extends AbstractKnetService
+        {
             public function publicFormatAmount(float $amount): string
             {
                 return $this->formatAmount($amount);
@@ -179,5 +180,54 @@ class AbstractKnetServiceTest extends TestCase
         $this->assertEquals('CAPTURED', $result['result']);
         $this->assertEquals('10.000', $result['amt']);
         $this->assertEquals('preserved', $result['custom_field']);
+    }
+
+    public function test_normalize_response_parses_knet_error_format()
+    {
+        $service = $this->makeService();
+
+        $result = $service->publicNormalizeResponse([
+            'result' => '!ERROR!-IPAY0100263-Transaction not found.',
+        ]);
+
+        $this->assertEquals('ERROR', $result['result']);
+        $this->assertEquals('IPAY0100263', $result['error_code']);
+        $this->assertEquals('Transaction not found.', $result['error_message']);
+    }
+
+    public function test_normalize_response_parses_various_knet_error_codes()
+    {
+        $service = $this->makeService();
+
+        $errorCases = [
+            ['!ERROR!-IPAY0100215-Invalid Tranportal ID.', 'IPAY0100215', 'Invalid Tranportal ID.'],
+            ['!ERROR!-IPAY0100015-Invalid Tranportal Password.', 'IPAY0100015', 'Invalid Tranportal Password.'],
+            ['!ERROR!-IPAY0100057-Action not supported', 'IPAY0100057', 'Action not supported'],
+            ['!ERROR!-IPAY0100062-Invalid Transaction Amount.', 'IPAY0100062', 'Invalid Transaction Amount.'],
+        ];
+
+        foreach ($errorCases as [$input, $expectedCode, $expectedMessage]) {
+            $result = $service->publicNormalizeResponse(['result' => $input]);
+            $this->assertEquals('ERROR', $result['result'], "Failed for: {$input}");
+            $this->assertEquals($expectedCode, $result['error_code'], "Wrong code for: {$input}");
+            $this->assertEquals($expectedMessage, $result['error_message'], "Wrong message for: {$input}");
+        }
+    }
+
+    public function test_parse_response_with_real_knet_error_xml()
+    {
+        $service = $this->makeService();
+
+        $xml = '<result>!ERROR!-IPAY0100263-Transaction not found.</result>'
+            .'<error_code_tag>IPAY0100263</error_code_tag>'
+            .'<error_service_tag>null</error_service_tag>';
+
+        $result = $service->publicParseResponse($xml);
+
+        $this->assertEquals('ERROR', $result['result']);
+        $this->assertEquals('IPAY0100263', $result['error_code']);
+        $this->assertEquals('Transaction not found.', $result['error_message']);
+        $this->assertEquals('IPAY0100263', $result['error_code_tag']);
+        $this->assertNull($result['error_service_tag']);
     }
 }

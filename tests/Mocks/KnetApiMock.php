@@ -4,6 +4,21 @@ namespace Asciisd\Knet\Tests\Mocks;
 
 use Illuminate\Support\Facades\Http;
 
+/**
+ * Mocks for KNET gateway API responses based on real kpaytest.com.kw behavior.
+ *
+ * Error response format (captured from live test gateway):
+ *   <result>!ERROR!-{CODE}-{MESSAGE}</result>
+ *   <error_code_tag>{CODE}</error_code_tag>
+ *   <error_service_tag>null</error_service_tag>
+ *
+ * Known error codes:
+ *   IPAY0100263 - Transaction not found
+ *   IPAY0100215 - Invalid Tranportal ID
+ *   IPAY0100015 - Invalid Tranportal Password
+ *   IPAY0100057 - Action not supported
+ *   IPAY0100062 - Invalid Transaction Amount
+ */
 class KnetApiMock
 {
     public static function transportId(): string
@@ -109,12 +124,15 @@ class KnetApiMock
         ]);
     }
 
-    public static function fakeInquiryFailure(string $errorMessage = 'Transaction not found'): void
-    {
-        $xml = "<result>FAILURE({$errorMessage})</result>";
-
+    /**
+     * Real KNET error format: <result>!ERROR!-CODE-Message.</result><error_code_tag>CODE</error_code_tag><error_service_tag>null</error_service_tag>
+     */
+    public static function fakeInquiryError(
+        string $errorCode = 'IPAY0100263',
+        string $errorMessage = 'Transaction not found.'
+    ): void {
         Http::fake([
-            self::inquiryUrl().'*' => Http::response($xml),
+            self::inquiryUrl().'*' => Http::response(self::buildErrorResponse($errorCode, $errorMessage)),
         ]);
     }
 
@@ -144,12 +162,15 @@ class KnetApiMock
         ]);
     }
 
-    public static function fakeRefundFailure(string $errorMessage = 'Refund not allowed'): void
-    {
-        $xml = "<result>FAILURE({$errorMessage})</result>";
-
+    /**
+     * Real KNET refund error (same format as inquiry errors).
+     */
+    public static function fakeRefundError(
+        string $errorCode = 'IPAY0100263',
+        string $errorMessage = 'Transaction not found.'
+    ): void {
         Http::fake([
-            self::inquiryUrl().'*' => Http::response($xml),
+            self::inquiryUrl().'*' => Http::response(self::buildErrorResponse($errorCode, $errorMessage)),
         ]);
     }
 
@@ -176,6 +197,21 @@ class KnetApiMock
         ]);
     }
 
+    /**
+     * Fake an HTML error page (returned when body is empty or malformed).
+     */
+    public static function fakeHtmlErrorPage(): void
+    {
+        $html = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
+            .'<html><head></head><body onload="forwardToLogout()">'
+            .'<form name="removeSessionForm" action="/kpg/InvalidAccess.htm"></form>'
+            .'</body></html>';
+
+        Http::fake([
+            self::inquiryUrl().'*' => Http::response($html),
+        ]);
+    }
+
     public static function fakeJsonResponse(array $data): void
     {
         Http::fake([
@@ -196,6 +232,9 @@ class KnetApiMock
         }
     }
 
+    /**
+     * Build a success/data XML response (tags omitted when value is null).
+     */
     private static function buildXmlResponse(array $data): string
     {
         $xml = '';
@@ -206,6 +245,16 @@ class KnetApiMock
             $xml .= "<{$key}>{$value}</{$key}>";
         }
         return $xml;
+    }
+
+    /**
+     * Build the real KNET error response format as captured from kpaytest.com.kw.
+     */
+    private static function buildErrorResponse(string $errorCode, string $errorMessage): string
+    {
+        return "<result>!ERROR!-{$errorCode}-{$errorMessage}</result>"
+            ."<error_code_tag>{$errorCode}</error_code_tag>"
+            .'<error_service_tag>null</error_service_tag>';
     }
 
     public static function buildExpectedInquiryXml(string $amount, string $trackid, string $action = '8'): string

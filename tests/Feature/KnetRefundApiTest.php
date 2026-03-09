@@ -196,18 +196,20 @@ class KnetRefundApiTest extends TestCase
         $this->assertFalse($transaction->refunded);
     }
 
-    public function test_refund_failure_response_does_not_mark_as_refunded()
+    public function test_refund_error_response_does_not_mark_as_refunded()
     {
         $transaction = $this->createCapturedTransaction([
-            'trackid' => 'REF-NOTCAP-001',
+            'trackid' => 'REF-ERR-001',
             'amt' => '10.000',
         ]);
 
-        KnetApiMock::fakeRefundFailure('Refund not allowed');
+        KnetApiMock::fakeRefundError('IPAY0100263', 'Transaction not found.');
 
         $result = $this->refundService->refundPayment($transaction);
 
-        $this->assertEquals('Refund not allowed', $result['result']);
+        $this->assertEquals('ERROR', $result['result']);
+        $this->assertEquals('IPAY0100263', $result['error_code']);
+        $this->assertEquals('Transaction not found.', $result['error_message']);
 
         $transaction->refresh();
         $this->assertFalse($transaction->refunded);
