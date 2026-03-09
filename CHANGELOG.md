@@ -11,8 +11,11 @@
 - `isRefunded()` helper on `KnetTransaction`
 - Refund amount tracking on original transaction (`refund_amount`)
 - K-064 Integration Manual v1.4 documentation
+- `PaymentStatus::slug()` method returning kebab-case identifiers for frontend use (e.g. `not-captured`)
 ### Changed
 - Refund service now validates before processing and dispatches events
+- `successStates()`, `failedStates()`, `loadingStates()` now return kebab-case slugs instead of UPPER_SNAKE enum names
+- `PaymentStatusPresenter::toArray()` `id` field now uses kebab-case slug instead of raw KNET value
 
 ## [v1.1.16 (2020-2-11)](https://github.com/asciisd/knet/compare/v1.1.15...v1.1.16)
 ### Added

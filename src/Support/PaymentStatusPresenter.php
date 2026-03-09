@@ -45,7 +45,7 @@ class PaymentStatusPresenter
     public function toArray(): array
     {
         return [
-            'id' => $this->status->value,
+            'id' => $this->status->slug(),
             'name' => $this->status->displayName(),
             'style' => $this->styleColor(),
             'text_color' => $this->textColor(),
