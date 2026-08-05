@@ -7,7 +7,7 @@ class Knet
     /**
      * The Knet library version.
      */
-    const string VERSION = '7.0.0';
+    const string VERSION = '8.0.0';
 
     /**
      * The KPay API version.

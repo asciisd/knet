@@ -2,19 +2,35 @@
 
 namespace Asciisd\Knet\Tests;
 
+use Asciisd\Knet\Config\KnetConfig;
 use Asciisd\Knet\KPayClient;
 use Asciisd\Knet\Providers\KnetServiceProvider;
+use Asciisd\Knet\Services\KnetInquiryService;
+use Asciisd\Knet\Services\KnetPaymentInitiationService;
+use Asciisd\Knet\Services\KnetPaymentService;
+use Asciisd\Knet\Services\KnetRefundService;
 use Asciisd\Knet\Tests\Mocks\KnetApiMock;
+use Illuminate\Foundation\Auth\User;
+use Illuminate\Http\Request;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
 {
+    /**
+     * Whether setUp() loads the package migrations manually. Flag tests that
+     * assert on Knet::$runsMigrations behavior turn this off so the manual
+     * load doesn't mask the service provider's decision.
+     */
+    protected bool $loadsPackageMigrations = true;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         // Load package migrations
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        if ($this->loadsPackageMigrations) {
+            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        }
     }
 
     protected function getPackageProviders($app)
@@ -49,9 +65,9 @@ abstract class TestCase extends Orchestra
         $app['config']->set('knet.redirect_url', '/dashboard');
     }
 
-    protected function createTestUser(): \Illuminate\Foundation\Auth\User
+    protected function createTestUser(): User
     {
-        return new class extends \Illuminate\Foundation\Auth\User
+        return new class extends User
         {
             protected $fillable = ['id', 'name', 'email'];
 
@@ -76,9 +92,9 @@ abstract class TestCase extends Orchestra
         });
     }
 
-    protected function createDbUser(): \Illuminate\Foundation\Auth\User
+    protected function createDbUser(): User
     {
-        return \Illuminate\Foundation\Auth\User::create([
+        return User::create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
@@ -97,14 +113,14 @@ abstract class TestCase extends Orchestra
      */
     protected function refreshKnetServices(): void
     {
-        $this->app->forgetInstance(\Asciisd\Knet\Services\KnetPaymentService::class);
-        $this->app->forgetInstance(\Asciisd\Knet\Services\KnetInquiryService::class);
-        $this->app->forgetInstance(\Asciisd\Knet\Services\KnetRefundService::class);
-        $this->app->forgetInstance(\Asciisd\Knet\Services\KnetPaymentInitiationService::class);
-        $this->app->forgetInstance(\Asciisd\Knet\Config\KnetConfig::class);
+        $this->app->forgetInstance(KnetPaymentService::class);
+        $this->app->forgetInstance(KnetInquiryService::class);
+        $this->app->forgetInstance(KnetRefundService::class);
+        $this->app->forgetInstance(KnetPaymentInitiationService::class);
+        $this->app->forgetInstance(KnetConfig::class);
     }
 
-    protected function createMockKnetRequest(array $data = []): \Illuminate\Http\Request
+    protected function createMockKnetRequest(array $data = []): Request
     {
         $defaultData = [
             'trandata' => 'abcdef123456789012345678901234567890abcdef123456789012345678901234',
@@ -113,12 +129,12 @@ abstract class TestCase extends Orchestra
 
         $requestData = array_merge($defaultData, $data);
 
-        return \Illuminate\Http\Request::create('/knet/response', 'POST', $requestData);
+        return Request::create('/knet/response', 'POST', $requestData);
     }
 
-    protected function createMockKnetRequestWithContent(string $content): \Illuminate\Http\Request
+    protected function createMockKnetRequestWithContent(string $content): Request
     {
-        $request = \Illuminate\Http\Request::create('/knet/response', 'POST');
+        $request = Request::create('/knet/response', 'POST');
         $request->initialize([], [], [], [], [], ['CONTENT_TYPE' => 'application/x-www-form-urlencoded'], $content);
 
         return $request;

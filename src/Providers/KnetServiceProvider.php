@@ -2,12 +2,14 @@
 
 namespace Asciisd\Knet\Providers;
 
+use Asciisd\Knet\Cashier\KnetProcessor;
 use Asciisd\Knet\Config\KnetConfig;
 use Asciisd\Knet\Console\InstallCommand;
 use Asciisd\Knet\Console\KnetCommand;
 use Asciisd\Knet\Console\PublishCommand;
 use Asciisd\Knet\Contracts\EncryptsPayload;
 use Asciisd\Knet\Contracts\TransactionRepository;
+use Asciisd\Knet\Knet;
 use Asciisd\Knet\KPayEncryption;
 use Asciisd\Knet\Repositories\KnetTransactionRepository;
 use Illuminate\Support\Facades\Config;
@@ -34,6 +36,8 @@ class KnetServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../../config/knet.php', 'knet');
 
+        $this->registerCashierDriver();
+
         $this->app->singleton(KnetConfig::class, function () {
             return new KnetConfig(Config::get('knet'));
         });
@@ -47,10 +51,27 @@ class KnetServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the package routes.
+     * Register the `knet` driver in cashier-core's driver map so any
+     * connection declaring `driver => knet` resolves to the processor. An
+     * entry the host already mapped wins.
+     */
+    protected function registerCashierDriver(): void
+    {
+        Config::set('cashier-core.drivers', array_merge(
+            ['knet' => KnetProcessor::class],
+            (array) Config::get('cashier-core.drivers', []),
+        ));
+    }
+
+    /**
+     * Register the package routes, unless Knet::ignoreRoutes() was called.
      */
     protected function registerRoutes(): void
     {
+        if (! Knet::$registersRoutes) {
+            return;
+        }
+
         Route::group([
             'prefix' => Config::get('knet.path'),
             'namespace' => 'Asciisd\Knet\Http\Controllers',
@@ -62,7 +83,7 @@ class KnetServiceProvider extends ServiceProvider
 
     protected function registerMigrations()
     {
-        if ($this->app->runningInConsole()) {
+        if ($this->app->runningInConsole() && Knet::$runsMigrations) {
             $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         }
     }
