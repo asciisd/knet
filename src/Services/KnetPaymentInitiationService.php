@@ -48,11 +48,17 @@ class KnetPaymentInitiationService extends AbstractKnetService implements Create
         private readonly EncryptsPayload $encryptor,
     ) {
         parent::__construct($config, $repository);
-        $this->initializePaymentConfig();
     }
 
     public function createPayment(Model $user, float $amount, array $options = []): KnetTransaction
     {
+        // Seeded here rather than in the constructor: these values are the KNET
+        // credentials, and reading them validates the config. Doing it at
+        // construction meant the container could not build this service at all
+        // in an environment with no KNET setup — which is every `route:list`,
+        // asset build and CI run. See KnetConfig for the full note.
+        $this->initializePaymentConfig();
+
         $request = PaymentFactory::createRequest($user, $amount, $options);
 
         $this->setPaymentData(array_merge([
