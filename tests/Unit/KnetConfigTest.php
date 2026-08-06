@@ -37,9 +37,9 @@ class KnetConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Knet transport ID is required');
 
-        new KnetConfig($this->validConfig([
+        (new KnetConfig($this->validConfig([
             'transport' => ['id' => '', 'password' => 'test_pass'],
-        ]));
+        ])))->getTransportId();
     }
 
     public function test_missing_transport_password_throws_exception()
@@ -47,9 +47,9 @@ class KnetConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Knet transport password is required');
 
-        new KnetConfig($this->validConfig([
+        (new KnetConfig($this->validConfig([
             'transport' => ['id' => 'test_id', 'password' => ''],
-        ]));
+        ])))->getTransportPassword();
     }
 
     public function test_missing_resource_key_throws_exception()
@@ -57,7 +57,7 @@ class KnetConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Knet resource key is required');
 
-        new KnetConfig($this->validConfig(['resource_key' => '']));
+        (new KnetConfig($this->validConfig(['resource_key' => ''])))->getResourceKey();
     }
 
     public function test_missing_development_url_throws_exception()
@@ -65,7 +65,7 @@ class KnetConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Knet development URL is required');
 
-        new KnetConfig($this->validConfig(['development_url' => '']));
+        (new KnetConfig($this->validConfig(['development_url' => ''])))->getPaymentUrl();
     }
 
     public function test_missing_production_url_throws_exception()
@@ -73,7 +73,7 @@ class KnetConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Knet production URL is required');
 
-        new KnetConfig($this->validConfig(['production_url' => '']));
+        (new KnetConfig($this->validConfig(['production_url' => ''])))->getPaymentUrl();
     }
 
     public function test_debug_mode_returns_boolean()
@@ -121,5 +121,30 @@ class KnetConfigTest extends TestCase
         $config = new KnetConfig($this->validConfig(['debug' => false]));
 
         $this->assertEquals('https://kpay.com.kw/inquiry', $config->getInquiryUrl());
+    }
+
+    /*
+     * The regression this class exists to prevent: the container resolves
+     * KnetConfig as a singleton, so anything that merely resolves a KNET
+     * controller built it — `route:list`, Wayfinder's route enumeration during
+     * an asset build, a CI job with a placeholder .env. Validating in the
+     * constructor turned "no KNET credentials here" into "the application
+     * cannot boot".
+     */
+    public function test_an_unconfigured_config_can_be_constructed_and_inspected()
+    {
+        $config = new KnetConfig($this->validConfig([
+            'transport' => ['id' => '', 'password' => ''],
+            'resource_key' => '',
+        ]));
+
+        $this->assertFalse($config->isConfigured());
+        $this->assertSame('EN', $config->getLanguage());
+        $this->assertSame(414, $config->getCurrency());
+    }
+
+    public function test_is_configured_is_true_when_credentials_are_present()
+    {
+        $this->assertTrue((new KnetConfig($this->validConfig()))->isConfigured());
     }
 }
