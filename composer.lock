@@ -4,15 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "78bffb81866364822c457f0a933fffb7",
+    "content-hash": "56f7a75ed2aef1e9990f04cbc07dcf67",
     "packages": [
         {
             "name": "asciisd/cashier-core",
-            "version": "2.x-dev",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/asciisd/cashier-core.git",
+                "reference": "21058ad78f9f11680137e95dcc7c59e0f411d80f"
+            },
             "dist": {
-                "type": "path",
-                "url": "../cashier-core",
-                "reference": "67b2d1c4923d847508bc773d2aa741b7b2120d0a"
+                "type": "zip",
+                "url": "https://api.github.com/repos/asciisd/cashier-core/zipball/21058ad78f9f11680137e95dcc7c59e0f411d80f",
+                "reference": "21058ad78f9f11680137e95dcc7c59e0f411d80f",
+                "shasum": ""
             },
             "require": {
                 "illuminate/contracts": "^11.0|^12.0|^13.0",
@@ -29,13 +35,13 @@
             },
             "type": "library",
             "extra": {
-                "branch-alias": {
-                    "dev-2.x": "2.0.x-dev"
-                },
                 "laravel": {
                     "providers": [
                         "Asciisd\\CashierCore\\CashierCoreServiceProvider"
                     ]
+                },
+                "branch-alias": {
+                    "dev-2.x": "2.0.x-dev"
                 }
             },
             "autoload": {
@@ -43,19 +49,7 @@
                     "Asciisd\\CashierCore\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Asciisd\\CashierCore\\Tests\\": "tests/"
-                }
-            },
-            "scripts": {
-                "test": [
-                    "vendor/bin/pest"
-                ],
-                "test-coverage": [
-                    "vendor/bin/pest --coverage"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -74,10 +68,11 @@
                 "psp",
                 "webhooks"
             ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/asciisd/cashier-core/issues",
+                "source": "https://github.com/asciisd/cashier-core/tree/2.0.0"
+            },
+            "time": "2026-08-06T11:25:32+00:00"
         },
         {
             "name": "brick/math",
@@ -8936,7 +8931,7 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
