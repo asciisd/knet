@@ -1,9 +1,9 @@
 ---
 name: knet-development
-description: Build and work with KNET payment gateway integration, including payment initiation, callback handling, refunds, and event-driven payment flows.
+description: Build and work with KNET payment gateway integration (asciisd/knet v8), including payment initiation, callback handling, refunds, event-driven payment flows, and the cashier-core v2 KnetProcessor/KnetAdapter driver.
 ---
 
-# KNET Payment Development
+# KNET Payment Development (v8)
 
 ## When to use this skill
 
@@ -16,10 +16,21 @@ Use this skill when:
 - Querying transaction status from the KNET gateway
 - Listening to payment events to trigger business logic
 - Working with the `knet_transactions` table or `KnetTransaction` model
+- Wiring KNET into `asciisd/cashier-core` v2 as the `knet` driver
 
 ## Package Overview
 
 `asciisd/knet` provides a fluent Laravel interface to Kuwait's KNET payment gateway. It handles AES-encrypted communication, payment initiation, callback verification, transaction inquiry, and refunds.
+
+**Requires:** PHP ^8.3, Laravel ^11|^12|^13 (Laravel 10 dropped in v8), `asciisd/cashier-core ^2.0`.
+`Knet::VERSION` is `8.0.0`.
+
+### Two integration modes
+
+| Mode | Use when |
+|---|---|
+| **Standalone** (`HasKnet` trait / `KnetPaymentService`) | KNET is the only gateway, or you want KNET's own transaction table and flow. Unchanged from v7. |
+| **cashier-core driver** (`Cashier\KnetProcessor`, new in v8) | KNET is one PSP among several. Deposits share the engine's transaction table, fee snapshot, sync and admin surface. See *Cashier Core Driver* below. |
 
 ### Architecture
 

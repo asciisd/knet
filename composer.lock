@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "56f7a75ed2aef1e9990f04cbc07dcf67",
+    "content-hash": "9ce01e5f33588ed399081e4622b7a459",
     "packages": [
         {
             "name": "asciisd/cashier-core",
-            "version": "2.0.0",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/asciisd/cashier-core.git",
-                "reference": "21058ad78f9f11680137e95dcc7c59e0f411d80f"
+                "reference": "2d75b12af51194eef0ef9d6ae6b18db26feb69f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/asciisd/cashier-core/zipball/21058ad78f9f11680137e95dcc7c59e0f411d80f",
-                "reference": "21058ad78f9f11680137e95dcc7c59e0f411d80f",
+                "url": "https://api.github.com/repos/asciisd/cashier-core/zipball/2d75b12af51194eef0ef9d6ae6b18db26feb69f1",
+                "reference": "2d75b12af51194eef0ef9d6ae6b18db26feb69f1",
                 "shasum": ""
             },
             "require": {
@@ -70,9 +70,9 @@
             ],
             "support": {
                 "issues": "https://github.com/asciisd/cashier-core/issues",
-                "source": "https://github.com/asciisd/cashier-core/tree/2.0.0"
+                "source": "https://github.com/asciisd/cashier-core/tree/2.1.0"
             },
-            "time": "2026-08-06T11:25:32+00:00"
+            "time": "2026-08-06T15:45:29+00:00"
         },
         {
             "name": "brick/math",

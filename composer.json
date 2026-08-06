@@ -22,7 +22,7 @@
         "php": "^8.3",
         "ext-libxml": "*",
         "ext-simplexml": "*",
-        "asciisd/cashier-core": "^2.0",
+        "asciisd/cashier-core": "^2.1",
         "illuminate/contracts": "^11.0|^12.0|^13.0",
         "illuminate/database": "^11.0|^12.0|^13.0",
         "illuminate/http": "^11.0|^12.0|^13.0",

@@ -1,6 +1,17 @@
-## Asciisd Knet
+## Asciisd Knet — v8
 
 This package provides an expressive, fluent interface to Kuwait's KNET payment gateway for Laravel applications. It handles payment initiation, encrypted callback processing, transaction inquiry, and refunds.
+
+**Requires:** PHP ^8.3, Laravel ^11|^12|^13 (Laravel 10 dropped in v8), `asciisd/cashier-core ^2.0`.
+`Knet::VERSION` is `8.0.0`.
+
+### Two ways to use it
+
+1. **Standalone** — the `HasKnet` trait / `KnetPaymentService`, unchanged from v7. Full control over
+   the KNET flow, its own `knet_transactions` table, its own routes and events.
+2. **As a cashier-core driver** (new in v8) — `src/Cashier/{KnetProcessor,KnetAdapter}` plug KNET
+   into the `asciisd/cashier-core` v2 engine so KNET deposits share the app's transaction table,
+   fee snapshot, sync and admin surface with every other PSP. See *Cashier Core Driver* below.
 
 ### Architecture
 
@@ -32,6 +43,8 @@ The package follows SOLID principles with focused interfaces:
 - For data access, inject `TransactionRepository` — do not use model static methods directly.
 - Configuration access should go through the injected `KnetConfig` singleton, not bare `config()` calls.
 - Verbose logging should be gated behind `$config->isDebugMode()`; only error-level logging should be unconditional.
+- **KNET credentials are validated on use, not on construction.** Building `KnetPaymentService` (or resolving it as a cashier-core driver) must not read or assert credentials — a host that has KNET installed but not configured would otherwise fail to boot.
+- **A `KnetTransaction` row carries PII**: `card_number` and `ip_address` among others. Any host persisting the row (commonly on failure) must run it through the payment engine's sanitizer/redactor first, and list `ip_address` + `card_number` in `cashier-core.security.redact_keys`.
 
 ### Making Payments
 
@@ -207,10 +220,67 @@ The package registers these routes automatically (disable with `Knet::ignoreRout
 | POST | `/knet/handle` | `knet.handle` | Post-payment redirect |
 | POST/GET | `/knet/error` | `knet.error` | Error handling |
 
+### Cashier Core Driver (v8)
+
+`KnetServiceProvider` registers `knet` in `cashier-core.drivers`, so any connection declaring
+`driver => knet` resolves to `Asciisd\Knet\Cashier\KnetProcessor` through `ConnectionRegistry`.
+
+@verbatim
+<code-snippet name="KNET as a cashier-core connection" lang="php">
+// config/cashier-core.php
+'connections' => [
+    'knet' => ['driver' => 'knet'],   // credentials still come from config/knet.php
+],
+
+// Charging goes through the core engine like any other PSP
+$result = app(\Asciisd\CashierCore\Services\PaymentService::class)->processPayment(
+    customer: $user,                       // must use HasKnet AND implement CustomerContract
+    paymentData: ['amount' => 10000],      // integer minor units — see the trap below
+    connection: 'knet',
+);
+
+return redirect($result->getRedirectUrl());
+</code-snippet>
+@endverbatim
+
+`KnetProcessor` implements two cashier-core hooks:
+
+- **`PreparesChargeData`** — injects the payable Eloquent model as `paymentData['user']` (KNET's
+  payment initiation needs the model itself, not an id) and pins `currency` to `KWD`. This is why
+  the core `PaymentService` needs no KNET branch.
+- **`ProvidesWebhookTransactionId`** — the correlation id is `trackid`.
+
+Supported features: `charge`, `refund`, `inquiry`. `capture()`, `authorize()` and `void()` throw
+`BadMethodCallException`. `verifyWebhookSignature()` returns **false** by design: KNET results
+arrive on the package's own encrypted `/knet/response` callback (verified by
+`VerifyKnetResponseSignature` middleware), not through the cashier-core webhook route — so KNET
+deposits are driven by `KnetPaymentSucceeded` / `KnetPaymentFailed` listeners, not by the core's
+`WebhookProcessor` events. A host listening to both must not double-credit.
+
+> **⚠️ Amount units trap.** `KnetProcessor::charge()` treats `data['amount']` as **integer minor
+> units** and divides by 100 to get KWD, and `KnetAdapter` multiplies `amt` back by 100. Cashier-core
+> transaction amounts are decimal. Feeding a decimal KWD figure straight into `processPayment()` for
+> the `knet` connection charges 1/100th of the intended amount. Verify the unit at every call site.
+
+UDF mapping at charge time: `udf1` = user id, `udf2` = user email, `udf4` = funding account login,
+`udf5` = the description, sanitized to alphanumerics/spaces/dashes and truncated to 40 chars.
+
+Status map (`KnetAdapter::mapStatus()`):
+
+| KNET result | PaymentStatus |
+|---|---|
+| `SUCCESS`, `CAPTURED` | `Succeeded` |
+| `FAILED`, `NOT CAPTURED`, `DECLINED`, `RESTRICTED`, `VOID`, `TIMEDOUT`, `ABANDONED` | `Failed` |
+| `CANCELLED` | `Canceled` |
+| `INITIATED` | `RequiresAction` |
+| `PENDING`, `UNKNOWN`, *default* | `Pending` |
+
 ### Customization
 
 - Use `Knet::ignoreMigrations()` in a service provider to skip package migrations.
 - Use `Knet::ignoreRoutes()` to disable automatic route registration.
+- **Both flags are honored as of v8** — the provider read neither before, so calling them had no
+  effect on v7 and earlier.
 - Use `KnetTransaction::useCustomerModel(YourModel::class)` to change the billable model.
 - Use UDF fields (`udf1` through `udf5`) to pass custom data through the payment flow.
 

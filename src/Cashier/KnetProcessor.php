@@ -91,7 +91,7 @@ class KnetProcessor implements PaymentProcessorInterface, PreparesChargeData, Pr
         return $this->adapter->fromProviderResponse($knetTransaction);
     }
 
-    public function refund(string $transactionId, ?int $amount = null): RefundResult
+    public function refund(string $transactionId, ?float $amount = null): RefundResult
     {
         $knetTransaction = KnetTransaction::where('trackid', $transactionId)->firstOrFail();
 
@@ -113,7 +113,7 @@ class KnetProcessor implements PaymentProcessorInterface, PreparesChargeData, Pr
         );
     }
 
-    public function capture(string $transactionId, ?int $amount = null): PaymentResult
+    public function capture(string $transactionId, ?float $amount = null): PaymentResult
     {
         throw new \BadMethodCallException('Knet does not support capture.');
     }
