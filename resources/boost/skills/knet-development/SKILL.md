@@ -377,6 +377,95 @@ use Asciisd\Knet\Knet;
 Knet::ignoreRoutes();
 ```
 
+> **Both flags are honored as of v8.** `KnetServiceProvider` never read
+> `Knet::$registersRoutes` / `Knet::$runsMigrations` before — calling them on v7 and earlier had no
+> effect at all. Migrations additionally only load `runningInConsole()`.
+
+## Cashier Core Driver (v8)
+
+`KnetServiceProvider::registerCashierDriver()` merges `['knet' => KnetProcessor::class]` into
+`cashier-core.drivers` (a host-declared entry wins), so any connection declaring `driver => knet`
+resolves through `ConnectionRegistry`.
+
+```php
+// config/cashier-core.php — credentials still live in config/knet.php
+'connections' => [
+    'knet' => ['driver' => 'knet'],
+],
+```
+
+```php
+use Asciisd\CashierCore\Services\PaymentService;
+
+$result = app(PaymentService::class)->processPayment(
+    customer: $user,                    // uses HasKnet AND implements CustomerContract
+    paymentData: ['amount' => 10000],   // integer minor units — see the trap below
+    connection: 'knet',
+);
+
+return redirect($result->getRedirectUrl());
+```
+
+### Core hooks implemented
+
+| Hook | Behavior |
+|---|---|
+| `PreparesChargeData` | injects the payable Eloquent model as `paymentData['user']` (KNET's initiation needs the model, not an id) and pins `currency` to `KWD`. This is why the core `PaymentService` carries no KNET branch |
+| `ProvidesWebhookTransactionId` | correlation id is `trackid` |
+
+Supported features: `charge`, `refund`, `inquiry`. `capture()`, `authorize()`, `void()` throw
+`BadMethodCallException`.
+
+### ⚠️ Amount units
+
+`KnetProcessor::charge()` treats `data['amount']` as **integer minor units** and divides by 100 to
+get KWD; `KnetAdapter` multiplies `amt` back by 100 on the way out. Cashier-core transaction amounts
+are decimal, so passing a decimal KWD figure straight to `processPayment()` on the `knet` connection
+charges 1/100th of the intended amount. Verify the unit at every call site, and revisit this
+semantic if a host ever feeds decimal KWD through the deposit flow.
+
+### ⚠️ Results do not arrive through the cashier webhook route
+
+`KnetProcessor::verifyWebhookSignature()` returns **false** by design. KNET posts its encrypted
+result to the package's own `/knet/response` endpoint, verified by `VerifyKnetResponseSignature`
+middleware — not to `POST api/webhooks/knet`. So a KNET deposit is driven by
+`KnetPaymentSucceeded` / `KnetPaymentFailed` listeners, and the core's `WebhookProcessor` events
+(`DepositSucceeded`, `FundsCredited`, …) do **not** fire for it. A host listening to both must not
+double-credit.
+
+`retrieve()` is the sync path: it looks the transaction up by `trackid` and runs
+`inquireAndUpdateTransaction()`, so a generic "sync with provider" admin action works for KNET.
+
+### UDF mapping at charge time
+
+| Field | Value |
+|---|---|
+| `udf1` | `metadata.user_id` |
+| `udf2` | `metadata.user_email` |
+| `udf4` | `metadata.trading_account_login` (funding account) |
+| `udf5` | description, sanitized to `[a-zA-Z0-9 -]` and truncated to 40 chars |
+
+Empty values are filtered out. Remember UDF fields forbid `@` and `/` — the sanitizer strips them,
+which is why an email must not be routed into `udf5`.
+
+### Status map (`KnetAdapter::mapStatus()`)
+
+| KNET result | cashier-core `PaymentStatus` |
+|---|---|
+| `SUCCESS`, `CAPTURED` | `Succeeded` |
+| `FAILED`, `NOT CAPTURED`, `DECLINED`, `RESTRICTED`, `VOID`, `TIMEDOUT`, `ABANDONED` | `Failed` |
+| `CANCELLED` | `Canceled` |
+| `INITIATED` | `RequiresAction` |
+| `PENDING`, `UNKNOWN`, *default* | `Pending` |
+
+Accepts a `Asciisd\Knet\Enums\PaymentStatus` case or the raw string (uppercased).
+
+### Refunds through the driver
+
+`KnetProcessor::refund($trackId, $amountInMinorUnits)` resolves the `KnetTransaction` by `trackid`
+and delegates to `KnetPaymentService::refundPayment()`; a null amount is a full refund. Success is
+read from `status === 'success'` or `result === 'SUCCESS'` and mapped to `RefundStatus`.
+
 ## Artisan Commands
 
 | Command | Purpose |
@@ -604,3 +693,12 @@ Full error code list: see K-064 Integration Manual Section 10.
 - New events go in `src/Events/` with `Dispatchable` and `SerializesModels` traits
 - New exceptions go in `src/Exceptions/` extending `KnetException`
 - All amounts must use `number_format($amount, 3, '.', '')` for 3-decimal KWD formatting
+- **Never read or assert credentials while constructing a service.** They are validated on use, so a
+  host that installs the package without configuring KNET still boots — and so cashier-core can
+  resolve the `knet` driver in an app where KNET is declared but not live
+- Anything under `src/Cashier/` must talk only to `Asciisd\CashierCore\*` contracts and this
+  package's own classes — never to a host-namespaced class
+- Changes to `KnetProcessor::charge()`, `KnetAdapter` amount handling, or the status map must be
+  mirrored in the cashier-core driver tests; the minor-units convention is load-bearing on both sides
+- A `KnetTransaction` row carries PII (`card_number`, `ip_address`). Anything that persists the row
+  into a host's payment tables must run it through the engine's sanitizer first
